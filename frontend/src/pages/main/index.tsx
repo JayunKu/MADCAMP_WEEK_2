@@ -5,24 +5,53 @@ import {
   Sketchbook,
   SketchbookHandle,
 } from '../../components/sketchbook/Sketchbook';
-import { LargeButton } from '../../components/common/Button';
+import { LargeButton, SmallButton } from '../../components/common/Button';
 import { useTheme } from '@emotion/react';
 import mainLogo from '../../assets/images/main-logo.png';
 import gameAbstract from '../../assets/images/game-abstract.png';
 import { Spacer } from '../../components/common/Spacer';
 import { AvatarType } from '../../types/avatarType';
 import { AvatarCarousel } from '../../components/common/AvatarCarousel';
+import { PlayerProfile } from '../../components/common/PlayerProfile';
+
+const MAX_PLAYER_PER_PARTY = 8; // 최대 플레이어 수
+const DEFAULT_AVATAR_ID = 0; // 기본 아바타 ID
 
 const MainPage = () => {
   const theme = useTheme();
 
   const [showFooter, setShowFooter] = useState(true);
   const [flipping, setFlipping] = useState(false);
-  const [pageIdx, setPageIdx] = useState(0); // 0: 메인, 1: 게스트
+  const [pageIdx, setPageIdx] = useState(0);
   const [username, setUsername] = useState('');
   const [selectedAvatar, setSelectedAvatar] = useState(AvatarType.AVATAR_GREEN);
 
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const EXAMPLE_PLAYERS = [
+    {
+      id: 1,
+      isMember: true,
+      username: 'Player1',
+      totalGames: 10,
+      totalWins: 5,
+      avatarId: 0,
+    },
+    {
+      id: 2,
+      isMember: false,
+      username: 'Player2',
+      avatarId: 2,
+    },
+    {
+      id: 3,
+      isMember: true,
+      username: 'Player3',
+      totalGames: 8,
+      totalWins: 3,
+      avatarId: 3,
+    },
+  ];
 
   useEffect(() => {
     return () => {
@@ -36,7 +65,7 @@ const MainPage = () => {
     timeoutRef.current = setTimeout(() => {
       setPageIdx(targetIdx);
       setFlipping(false);
-    }, 700);
+    }, 500);
   };
 
   const onPlayAsGuestButtonHandler = () => {
@@ -96,7 +125,44 @@ const MainPage = () => {
               </LargeButton>
             </>,
             // 2: 게임 준비 페이지
-            <></>,
+            <>
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: '1fr 1fr',
+                  gap: '12px',
+                }}
+              >
+                {Array.from({ length: MAX_PLAYER_PER_PARTY }).map((_, idx) => {
+                  const player = EXAMPLE_PLAYERS[idx];
+                  if (player) {
+                    return (
+                      <PlayerProfile
+                        key={player.id}
+                        isMember={player.isMember}
+                        username={player.username}
+                        avatarId={player.avatarId}
+                        totalGames={player.totalGames}
+                        totalWins={player.totalWins}
+                      />
+                    );
+                  } else {
+                    return (
+                      <PlayerProfile
+                        key={`empty-${idx}`}
+                        isEmpty
+                        isMember={false}
+                        username=""
+                      />
+                    );
+                  }
+                })}
+              </div>
+
+              <SmallButton backgroundColor={theme.colors.lightYellow}>
+                게임 시작
+              </SmallButton>
+            </>,
           ][pageIdx]
         }
       </Sketchbook>

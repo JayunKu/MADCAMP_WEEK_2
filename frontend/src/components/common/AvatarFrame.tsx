@@ -43,7 +43,7 @@ const getImageSource = (avatarType: AvatarType) => {
   }
 };
 
-export const AvatarProfile = (props: AvatarProfileProps) => {
+export const AvatarFrame = (props: AvatarProfileProps) => {
   const imageSource = getImageSource(props.avatarType);
 
   return (

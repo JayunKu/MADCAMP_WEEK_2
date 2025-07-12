@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect } from 'react';
 import styled from '@emotion/styled';
-import { AvatarProfile } from './AvatarProfile';
+import { AvatarFrame } from './AvatarFrame';
 import { AvatarType } from '../../types/avatarType';
 
 const AVATAR_LIST: AvatarType[] = [
@@ -64,7 +64,7 @@ export const AvatarCarousel = ({
         <SlideTrack $length={AVATAR_LIST.length} $slideIdx={slideIdx}>
           {AVATAR_LIST.map((avatar, idx) => (
             <SlideItem key={avatar}>
-              <AvatarProfile size="big" avatarType={avatar} />
+              <AvatarFrame size="big" avatarType={avatar} />
             </SlideItem>
           ))}
         </SlideTrack>
