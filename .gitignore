@@ -9,6 +9,9 @@ __pycache__/
 #이미지 저장 파일
 ai_image_server/generated_images/
 
+#GCS key
+madcamp-malgreem-fd2ecdff2f9c.json
+
 # 로그 파일
 *.log
 
