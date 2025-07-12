@@ -3,6 +3,7 @@ import styled from '@emotion/styled';
 export const SketchbookContainer = styled.div`
   position: relative;
   height: 600px;
+  width: 380px;
   background-color: #ffffff;
   border-radius: ${({ theme }) => theme.borderRadius.default};
   display: flex;

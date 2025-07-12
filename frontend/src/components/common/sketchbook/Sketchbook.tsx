@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useImperativeHandle, forwardRef } from 'react';
 import {
   SketchbookContainer,
   SketchbookBinding,
@@ -7,29 +7,32 @@ import {
   SketchbookPageWrapper,
 } from './Sketchbook.styles';
 
-export const Sketchbook = (props: { children: React.ReactNode }) => {
-  const [flipping, setFlipping] = useState(false);
-
-  const handleFlip = () => {
-    setFlipping(true);
-    setTimeout(() => {
-      setFlipping(false);
-    }, 700);
-  };
-
-  const rings = Array.from({ length: 11 }, (_, i) => (
-    <SketchbookRing key={i} />
-  ));
-
-  return (
-    <SketchbookContainer>
-      <SketchbookBinding>{rings}</SketchbookBinding>
-      <SketchbookPageWrapper>
-        <SketchbookPage flipping={flipping}>{props.children}</SketchbookPage>
-      </SketchbookPageWrapper>
-      <div style={{ position: 'absolute', bottom: 20, right: 20 }}>
-        <button onClick={handleFlip}>위로 넘기기</button>
-      </div>
-    </SketchbookContainer>
-  );
+export type SketchbookHandle = {
+  flip: () => void;
 };
+
+interface SketchbookProps {
+  children: React.ReactNode;
+  flipping: boolean;
+}
+
+export const Sketchbook = forwardRef<SketchbookHandle, SketchbookProps>(
+  ({ children, flipping }, ref) => {
+    useImperativeHandle(ref, () => ({
+      flip: () => {}, // flip 동작은 부모에서 flipping 상태로 관리
+    }));
+
+    const rings = Array.from({ length: 11 }, (_, i) => (
+      <SketchbookRing key={i} />
+    ));
+
+    return (
+      <SketchbookContainer>
+        <SketchbookBinding>{rings}</SketchbookBinding>
+        <SketchbookPageWrapper>
+          <SketchbookPage flipping={flipping}>{children}</SketchbookPage>
+        </SketchbookPageWrapper>
+      </SketchbookContainer>
+    );
+  }
+);
