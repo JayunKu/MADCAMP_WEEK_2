@@ -18,20 +18,11 @@ const MainPage = () => {
 
   const [showFooter, setShowFooter] = useState(true);
   const [flipping, setFlipping] = useState(false);
-  const [guestMode, setGuestMode] = useState(false);
+  const [pageIdx, setPageIdx] = useState(0); // 0: 메인, 1: 게스트
   const [username, setUsername] = useState('');
   const [selectedAvatar, setSelectedAvatar] = useState(AvatarType.AVATAR_GREEN);
 
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-
-  const handleGuestGame = () => {
-    setFlipping(true);
-    if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    timeoutRef.current = setTimeout(() => {
-      setGuestMode(true);
-      setFlipping(false);
-    }, 700);
-  };
 
   useEffect(() => {
     return () => {
@@ -39,46 +30,75 @@ const MainPage = () => {
     };
   }, []);
 
+  const flipToPage = (targetIdx: number) => {
+    setFlipping(true);
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    timeoutRef.current = setTimeout(() => {
+      setPageIdx(targetIdx);
+      setFlipping(false);
+    }, 700);
+  };
+
+  const onPlayAsGuestButtonHandler = () => {
+    flipToPage(1);
+  };
+
+  const onEnterPartyButtonHandler = () => {
+    flipToPage(2);
+  };
+
   return (
     <MainContainer>
       <Sketchbook flipping={flipping}>
-        {!guestMode ? (
-          <>
-            <img src={mainLogo} alt="MalGreem" style={{ width: '80%' }} />
-            <img
-              src={gameAbstract}
-              alt="Game Abstract"
-              style={{ width: '90%', marginTop: '20px', marginBottom: '30px' }}
-            />
-            <LargeButton backgroundColor={theme.colors.lightYellow}>
-              Google로 로그인
-            </LargeButton>
-            <GameAsNonMemberButton onClick={handleGuestGame}>
-              비회원으로 게임하기
-            </GameAsNonMemberButton>
-          </>
-        ) : (
-          <>
-            <AvatarCarousel
-              value={selectedAvatar}
-              onChange={setSelectedAvatar}
-            />
-            <UsernameInput
-              type="text"
-              placeholder="닉네임을 입력하세요"
-              value={username}
-              onChange={e => setUsername(e.target.value)}
-              maxLength={12}
-            />
-            <LargeButton backgroundColor={theme.colors.lightYellow}>
-              방 만들기
-            </LargeButton>
-            <Spacer y={10} />
-            <LargeButton backgroundColor={theme.colors.lighterYellow}>
-              방 들어가기
-            </LargeButton>
-          </>
-        )}
+        {
+          [
+            // 0: 로비 페이지
+            <>
+              <img src={mainLogo} alt="MalGreem" style={{ width: '80%' }} />
+              <img
+                src={gameAbstract}
+                alt="Game Abstract"
+                style={{
+                  width: '90%',
+                  marginTop: '20px',
+                  marginBottom: '30px',
+                }}
+              />
+              <LargeButton backgroundColor={theme.colors.lightYellow}>
+                Google로 로그인
+              </LargeButton>
+              <PlayAsGuestButton onClick={onPlayAsGuestButtonHandler}>
+                비회원으로 게임하기
+              </PlayAsGuestButton>
+            </>,
+            // 1: 방 생성 및 입장 페이지
+            <>
+              <AvatarCarousel
+                value={selectedAvatar}
+                onChange={setSelectedAvatar}
+              />
+              <UsernameInput
+                type="text"
+                placeholder="닉네임을 입력하세요"
+                value={username}
+                onChange={e => setUsername(e.target.value)}
+                maxLength={12}
+              />
+              <LargeButton backgroundColor={theme.colors.lightYellow}>
+                방 만들기
+              </LargeButton>
+              <Spacer y={10} />
+              <LargeButton
+                backgroundColor={theme.colors.lighterYellow}
+                onClick={onEnterPartyButtonHandler}
+              >
+                방 들어가기
+              </LargeButton>
+            </>,
+            // 2: 게임 준비 페이지
+            <></>,
+          ][pageIdx]
+        }
       </Sketchbook>
       <Footer show={showFooter} />
     </MainContainer>
@@ -97,7 +117,7 @@ const MainContainer = styled.div`
   box-sizing: border-box;
 `;
 
-const GameAsNonMemberButton = styled.button`
+const PlayAsGuestButton = styled.button`
   font-size: 14px;
   cursor: pointer;
   margin-top: 10px;
