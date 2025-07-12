@@ -23,10 +23,7 @@ export const Footer = (props: { show: boolean }) => {
   );
 };
 
-const FooterContainer = styled.footer<{
-  show?: boolean;
-}>`
-  display: ${props => (props.show ? 'flex' : 'none')};
+const FooterContainer = styled.footer<{ show?: boolean }>`
   width: 75%;
   justify-content: center;
   margin-top: 20px;
@@ -36,5 +33,11 @@ const FooterContainer = styled.footer<{
   border-top: 2px solid ${({ theme }) => theme.colors.black};
   background: ${({ theme }) => theme.colors.lightYellow};
   padding: 10px;
-  shadow: ${({ theme }) => theme.shadows.defaultUp};
+  box-shadow: ${({ theme }) => theme.shadows.defaultUp};
+  display: flex;
+  opacity: ${props => (props.show ? 1 : 0)};
+  transform: translateY(${props => (props.show ? '0' : '60px')});
+  pointer-events: ${props => (props.show ? 'auto' : 'none')};
+  transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.5s cubic-bezier(0.21, -0.49, 0.83, 1.36);
 `;

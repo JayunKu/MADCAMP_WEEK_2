@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
 
-export const SketchbookContainer = styled.div`
+export const SketchbookContainer = styled.div<{ show?: boolean }>`
   position: relative;
   height: 600px;
   width: 380px;
@@ -11,6 +11,9 @@ export const SketchbookContainer = styled.div`
   margin: 20px auto;
   overflow: hidden;
   box-shadow: ${({ theme }) => theme.shadows.default};
+  opacity: ${props => (props.show === false ? 0 : 1)};
+  pointer-events: ${props => (props.show === false ? 'none' : 'auto')};
+  transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 `;
 
 export const SketchbookBinding = styled.div`

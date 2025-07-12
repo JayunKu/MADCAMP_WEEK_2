@@ -23,6 +23,8 @@ const MainPage = () => {
   const navigate = useNavigate();
 
   const [showFooter, setShowFooter] = useState(true);
+  const [showSketchbook, setShowSketchbook] = useState(true);
+
   const [flipping, setFlipping] = useState(false);
   const [pageIdx, setPageIdx] = useState(0);
   const [username, setUsername] = useState('');
@@ -78,9 +80,18 @@ const MainPage = () => {
     flipToPage(2);
   };
 
+  const onGameStartButtonHandler = () => {
+    setShowFooter(false);
+    setShowSketchbook(false);
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    timeoutRef.current = setTimeout(() => {
+      navigate('/game');
+    }, 500);
+  };
+
   return (
     <>
-      <Sketchbook flipping={flipping}>
+      <Sketchbook show={showSketchbook} flipping={flipping}>
         {
           [
             // 0: 로비 페이지
@@ -169,7 +180,7 @@ const MainPage = () => {
 
               <SmallButton
                 backgroundColor={theme.colors.lightYellow}
-                onClick={() => navigate('/game')}
+                onClick={onGameStartButtonHandler}
               >
                 게임 시작
               </SmallButton>
