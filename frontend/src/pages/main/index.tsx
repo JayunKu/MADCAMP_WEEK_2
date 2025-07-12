@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Footer } from '../../components/footer/Footer';
+import { Footer } from '../../components/Footer';
 import styled from '@emotion/styled';
 import {
   Sketchbook,
@@ -17,7 +17,6 @@ import { PartyCode } from '../../components/PartyCode';
 import { useNavigate } from 'react-router-dom';
 
 const MAX_PLAYER_PER_PARTY = 8; // 최대 플레이어 수
-const DEFAULT_AVATAR_ID = 0; // 기본 아바타 ID
 
 const MainPage = () => {
   const theme = useTheme();
@@ -80,7 +79,7 @@ const MainPage = () => {
   };
 
   return (
-    <MainContainer>
+    <>
       <Sketchbook flipping={flipping}>
         {
           [
@@ -179,21 +178,9 @@ const MainPage = () => {
         }
       </Sketchbook>
       <Footer show={showFooter} />
-    </MainContainer>
+    </>
   );
 };
-
-const MainContainer = styled.div`
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin: 0 auto;
-  padding: 0 15px;
-  width: 412px;
-  background: #ededed;
-  box-sizing: border-box;
-`;
 
 const PlayAsGuestButton = styled.button`
   font-size: 14px;
