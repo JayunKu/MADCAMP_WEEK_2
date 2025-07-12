@@ -12,8 +12,8 @@ export const theme = {
     lightGray: '#F5F5F5',
   },
   shadows: {
-    default: '0 2px 2px rgba(0, 0, 0)',
-    defaultUp: '0 -2px 2px rgba(0, 0, 0)',
+    default: '0 2px 2px rgba(0, 0, 0, 0.25)',
+    defaultUp: '0 -2px 2px rgba(0, 0, 0, 0.25)',
   },
   borderRadius: {
     default: '10px',

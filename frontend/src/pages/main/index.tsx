@@ -44,7 +44,7 @@ const MainContainer = styled.div`
   flex-direction: column;
   align-items: center;
   margin: 0 auto;
-  padding: 15px;
+  padding: 0 15px;
   width: 412px;
   background: #ededed;
   box-sizing: border-box;

@@ -2,14 +2,13 @@ import styled from '@emotion/styled';
 
 export const SketchbookContainer = styled.div`
   position: relative;
-  max-height: 600px;
+  height: 600px;
   background-color: #ffffff;
-  border: 1px solid #ccc;
   border-radius: ${({ theme }) => theme.borderRadius.default};
   display: flex;
   flex-direction: column;
   margin: 20px auto;
-  //   overflow: hidden;
+  overflow: hidden;
   box-shadow: ${({ theme }) => theme.shadows.default};
 `;
 
@@ -58,7 +57,7 @@ export const SketchbookPage = styled.div<{ flipping?: boolean }>`
   ${({ flipping }) =>
     flipping &&
     `
-      transform: rotateX(100deg);
+      transform: rotateX(180deg);
       opacity: 0;
     `}
 `;
