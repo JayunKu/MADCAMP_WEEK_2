@@ -12,5 +12,6 @@ export const FooterContainer = styled.footer<{
   border-right: 2px solid ${({ theme }) => theme.colors.black};
   border-top: 2px solid ${({ theme }) => theme.colors.black};
   background: ${({ theme }) => theme.colors.lightYellow};
+  padding: 10px;
   shadow: ${({ theme }) => theme.shadows.defaultUp};
 `;

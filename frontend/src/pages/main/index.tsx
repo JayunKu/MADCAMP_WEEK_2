@@ -5,20 +5,23 @@ import {
   Sketchbook,
   SketchbookHandle,
 } from '../../components/sketchbook/Sketchbook';
-import { LargeButton, SmallButton } from '../../components/common/Button';
+import { LargeButton, SmallButton } from '../../components/Button';
 import { useTheme } from '@emotion/react';
 import mainLogo from '../../assets/images/main-logo.png';
 import gameAbstract from '../../assets/images/game-abstract.png';
-import { Spacer } from '../../components/common/Spacer';
+import { Spacer } from '../../components/Spacer';
 import { AvatarType } from '../../types/avatarType';
-import { AvatarCarousel } from '../../components/common/AvatarCarousel';
-import { PlayerProfile } from '../../components/common/PlayerProfile';
+import { AvatarCarousel } from '../../components/AvatarCarousel';
+import { PlayerProfile } from '../../components/PlayerProfile';
+import { PartyCode } from '../../components/PartyCode';
+import { useNavigate } from 'react-router-dom';
 
 const MAX_PLAYER_PER_PARTY = 8; // 최대 플레이어 수
 const DEFAULT_AVATAR_ID = 0; // 기본 아바타 ID
 
 const MainPage = () => {
   const theme = useTheme();
+  const navigate = useNavigate();
 
   const [showFooter, setShowFooter] = useState(true);
   const [flipping, setFlipping] = useState(false);
@@ -144,6 +147,8 @@ const MainPage = () => {
                         avatarId={player.avatarId}
                         totalGames={player.totalGames}
                         totalWins={player.totalWins}
+                        onMakeHost={() => {}}
+                        onDeletePlayer={() => {}}
                       />
                     );
                   } else {
@@ -153,13 +158,20 @@ const MainPage = () => {
                         isEmpty
                         isMember={false}
                         username=""
+                        onMakeHost={() => {}}
+                        onDeletePlayer={() => {}}
                       />
                     );
                   }
                 })}
               </div>
 
-              <SmallButton backgroundColor={theme.colors.lightYellow}>
+              <PartyCode code="FDAS32D" />
+
+              <SmallButton
+                backgroundColor={theme.colors.lightYellow}
+                onClick={() => navigate('/game')}
+              >
                 게임 시작
               </SmallButton>
             </>,
