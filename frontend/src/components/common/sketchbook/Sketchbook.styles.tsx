@@ -49,7 +49,7 @@ export const SketchbookPage = styled.div<{ flipping?: boolean }>`
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  align-items: flex-start;
+  align-items: center;
   overflow-y: hidden;
   border-top: 1px dashed #eee;
   transition: transform 0.7s cubic-bezier(0.77, 0, 0.175, 1), opacity 0.7s;
