@@ -6,18 +6,21 @@ import { Spacer } from '../../components/Spacer';
 import { SmallButton } from '../../components/Button';
 import { useTheme } from '@emotion/react';
 
-interface GamePageState {
+interface RoundResultPageState {
   partyId: string;
 }
 
 export const RoundResultPage = () => {
   const theme = useTheme();
   const navigate = useNavigate();
-  const location = useLocation() as { state: GamePageState };
+  const location = useLocation() as { state: RoundResultPageState };
 
   const game_data = EXAMPLE_GAME_DATA;
 
-  console.log('asfdfas');
+  const onGetWinnerButtonHandler = () => {
+    navigate('/game/result');
+  };
+
   //   useEffect(() => {
   //     if (!location.state || !location.state.partyId) {
   //       alert('잘못된 접근입니다.');
@@ -40,7 +43,10 @@ export const RoundResultPage = () => {
 
       <Spacer y={100} />
 
-      <SmallButton backgroundColor={theme.colors.lightYellow}>
+      <SmallButton
+        backgroundColor={theme.colors.lightYellow}
+        onClick={onGetWinnerButtonHandler}
+      >
         승자는?
       </SmallButton>
     </>

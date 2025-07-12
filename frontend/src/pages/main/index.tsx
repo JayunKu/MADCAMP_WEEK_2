@@ -200,7 +200,6 @@ const MainPage = () => {
           ][pageIdx]
         }
       </Sketchbook>
-      <Spacer y={40} />
       <Footer show={showFooter} />
     </>
   );

@@ -21,18 +21,18 @@ export const SketchbookContainer = styled.div<{
 
 export const SketchbookBinding = styled.div`
   width: 100%;
-  height: 40px;
+  height: 30px;
   background-color: #e0e0e0;
   display: flex;
   flex-direction: row;
   justify-content: space-around;
-  padding: 10px 0;
+  padding: 8px 0;
   border-bottom: 1px solid #bbb;
 `;
 
 export const SketchbookRing = styled.div`
-  width: 20px;
-  height: 20px;
+  width: 14px;
+  height: 14px;
   background-color: #999;
   border-radius: 50%;
   border: 1px solid #777;

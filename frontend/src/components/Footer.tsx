@@ -24,6 +24,8 @@ export const Footer = (props: { show: boolean }) => {
 };
 
 const FooterContainer = styled.footer<{ show?: boolean }>`
+  position: absolute;
+  bottom: 0;
   width: 75%;
   justify-content: center;
   border-radius: 10px 10px 0 0;
