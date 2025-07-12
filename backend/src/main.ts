@@ -3,8 +3,17 @@ import { AppModule } from './app.module';
 import { PrismaService } from './config/prisma/prisma.service';
 import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import cookieParser from 'cookie-parser';
+import * as cookieParser from 'cookie-parser';
 import { ValidationPipe } from '@nestjs/common';
+
+function logConfig(appConfig: ConfigService) {
+  console.info('=== Configuration Settings ===');
+  console.info(`Environment: ${appConfig.get('app.env')}`);
+  console.info(`Port: ${appConfig.get('app.port')}`);
+  console.info(`Session URL: ${appConfig.get('session.url') || 'Not set'}`);
+  console.info(`Session Key: ${appConfig.get('session.key') || 'Not set'}`);
+  console.info('===============================');
+}
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -27,7 +36,7 @@ async function bootstrap() {
 
   // Env settings
   const appConfig = app.get(ConfigService);
-  console.info(`=> Running as ${appConfig.get('app.env')}`);
+  logConfig(appConfig);
 
   // Config for Prisma
   const prismaService = app.get(PrismaService);
@@ -67,7 +76,7 @@ async function bootstrap() {
   // );
 
   // Config for Swagger
-  if (appConfig.get('app.env') === 'local') {
+  if (appConfig.get('app.env') === 'development') {
     const swaggerConfig = new DocumentBuilder()
       .setTitle('MalGreem API')
       .setDescription('The API description for MalGreem')
@@ -76,6 +85,8 @@ async function bootstrap() {
     SwaggerModule.setup('api', app, document);
   }
 
-  await app.listen(process.env.PORT ?? 3000);
+  const port = appConfig.get('app.port') || 8000;
+  await app.listen(port);
+  console.info(`=> Server listening at http://localhost:${port}`);
 }
 bootstrap();

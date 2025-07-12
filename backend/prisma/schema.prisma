@@ -9,3 +9,14 @@ datasource db {
   provider = "mysql"
   url      = env("DB_URL")
 }
+
+model User {
+  id              String   @id
+  name            String   @db.VarChar(255)
+  google_oauth_id String   @unique @db.VarChar(255)
+  avartar_id      Int      @default(0)
+  total_games     Int      @default(0)
+  total_wins      Int      @default(0)
+  created_at      DateTime @default(now())
+  updatedAt       DateTime @default(now()) @updatedAt
+}

@@ -25,7 +25,7 @@ export class AuthController {
   @HttpCode(201)
   @ApiOperation({ summary: '로그인' })
   async login(@Req() req: Request, @Body() loginRequestDto: LoginRequestDto) {
-    await this.authService.login(req, loginRequestDto);
+    // await this.authService.login(req, loginRequestDto);
 
     return new CommonResponseDto();
   }
@@ -34,7 +34,7 @@ export class AuthController {
   @UseGuards(AuthGuard)
   @ApiOperation({ summary: '로그아웃' })
   async logout(@Req() req: Request) {
-    this.authService.logout(req);
+    // this.authService.logout(req);
 
     return new CommonResponseDto();
   }

@@ -1,3 +1,4 @@
+import { User } from '@prisma/client';
 import { SessionPayload } from './session/session.payload';
 
 // express-session 모듈의 SessionData를 override

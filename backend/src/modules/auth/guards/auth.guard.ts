@@ -15,30 +15,20 @@ export class AuthGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const req: Request = context.switchToHttp().getRequest();
 
-    if (req.query.key) {
-      const validKey = await this.prismaService.key.findUnique({
-        where: {
-          key: req.query.key.toString(),
-        },
-      });
-
-      if (!validKey) {
-        throw new HttpException('유효하지 않은 키입니다', 401);
-      }
-      req.keyAuth = true;
-
-      return true;
-    }
-
     if (!req.session.auth) {
       throw new HttpException('로그인이 필요한 서비스입니다', 401);
     }
 
-    const user: User = await this.prismaService.user.findUnique({
+    const user: User | null = await this.prismaService.user.findUnique({
       where: {
         id: req.session.auth.uid,
       },
     });
+
+    if (!user) {
+      throw new HttpException('사용자를 찾을 수 없습니다', 401);
+    }
+
     req.user = user;
 
     return true;
