@@ -27,6 +27,7 @@ export default App;
 
 const MainContainer = styled.div`
   position: relative;
+  height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;

@@ -97,7 +97,11 @@ const MainPage = () => {
           [
             // 0: 로비 페이지
             <>
-              <img src={mainLogo} alt="MalGreem" style={{ width: '80%' }} />
+              <img
+                src={mainLogo}
+                alt="MalGreem"
+                style={{ width: '80%', marginTop: '20px' }}
+              />
               <img
                 src={gameAbstract}
                 alt="Game Abstract"
@@ -145,6 +149,7 @@ const MainPage = () => {
                   display: 'grid',
                   gridTemplateColumns: '1fr 1fr',
                   gap: '12px',
+                  marginTop: '20px',
                 }}
               >
                 {Array.from({ length: MAX_PLAYER_PER_PARTY }).map((_, idx) => {
