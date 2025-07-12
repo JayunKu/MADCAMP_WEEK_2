@@ -30,19 +30,6 @@ export class AuthController {
     return new CommonResponseDto();
   }
 
-  @Post(':id')
-  @HttpCode(201)
-  @UseGuards(AuthGuard)
-  @ApiOperation({ summary: '해당 유저로 로그인' })
-  async loginUser(
-    @Req() req: Request,
-    @Param('id', ParseIntPipe) userId: number,
-  ) {
-    await this.authService.loginUser(req, userId);
-
-    return new CommonResponseDto();
-  }
-
   @Delete()
   @UseGuards(AuthGuard)
   @ApiOperation({ summary: '로그아웃' })
