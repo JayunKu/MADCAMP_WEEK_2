@@ -9,7 +9,7 @@ export const SketchbookContainer = styled.div`
   display: flex;
   flex-direction: column;
   margin: 20px auto;
-  overflow: hidden;
+  //   overflow: hidden;
   box-shadow: ${({ theme }) => theme.shadows.default};
 `;
 
@@ -32,7 +32,17 @@ export const SketchbookRing = styled.div`
   border: 1px solid #777;
 `;
 
-export const SketchbookPage = styled.div`
+export const SketchbookPageWrapper = styled.div`
+  width: 100%;
+  height: 100%;
+  perspective: 1200px;
+  display: flex;
+  flex: 1 1 0;
+`;
+
+export const SketchbookPage = styled.div<{ flipping?: boolean }>`
+  width: 100%;
+  height: 100%;
   background-color: ${({ theme }) => theme.colors.yellowWhite};
   padding: 20px;
   box-sizing: border-box;
@@ -43,4 +53,12 @@ export const SketchbookPage = styled.div`
   align-items: flex-start;
   overflow-y: hidden;
   border-top: 1px dashed #eee;
+  transition: transform 0.7s cubic-bezier(0.77, 0, 0.175, 1), opacity 0.7s;
+  transform-origin: top center;
+  ${({ flipping }) =>
+    flipping &&
+    `
+      transform: rotateX(100deg);
+      opacity: 0;
+    `}
 `;
