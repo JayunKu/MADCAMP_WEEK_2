@@ -4,12 +4,14 @@ import styled from '@emotion/styled';
 import {
   Sketchbook,
   SketchbookHandle,
-} from '../../components/common/sketchbook/Sketchbook';
+} from '../../components/sketchbook/Sketchbook';
 import { LargeButton } from '../../components/common/Button';
 import { useTheme } from '@emotion/react';
 import mainLogo from '../../assets/images/main-logo.png';
 import gameAbstract from '../../assets/images/game-abstract.png';
 import { Spacer } from '../../components/common/Spacer';
+import { AvatarType } from '../../types/avatarType';
+import { AvatarProfile } from '../../components/common/AvatarProfile';
 
 const MainPage = () => {
   const theme = useTheme();
@@ -46,6 +48,7 @@ const MainPage = () => {
           </>
         ) : (
           <>
+            <AvatarProfile size="big" avatarType={AvatarType.AVATAR_GREEN} />
             <UsernameInput
               type="text"
               placeholder="닉네임을 입력하세요"
