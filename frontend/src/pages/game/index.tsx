@@ -8,77 +8,11 @@ import { UserInput } from '../../components/UserInput';
 import { GenerateButton } from '../../components/GenerateButton';
 import { SmallButton } from '../../components/Button';
 import spinnerImage from '../../assets/images/spinner.svg';
+import { EXAMPLE_GAME_DATA, EXAMPLE_PLAYER_INFOS } from '../../types/mockData';
 
 interface GamePageState {
   partyId: string;
 }
-
-const EXAMPLE_PLAYER_INFOS = [
-  {
-    id: 1,
-    username: '애벌레 1',
-    avatarId: 0,
-    isMember: true,
-    totalGames: 10,
-    totalWins: 5,
-  },
-  {
-    id: 2,
-    username: '애벌레 2',
-    avatarId: 1,
-    isMember: true,
-    totalGames: 8,
-    totalWins: 3,
-  },
-  {
-    id: 3,
-    username: '애벌레 3',
-    avatarId: 2,
-    isMember: true,
-    totalGames: 12,
-    totalWins: 6,
-  },
-  {
-    id: 4,
-    username: '애벌레 4',
-    avatarId: 3,
-    isMember: true,
-    totalGames: 5,
-    totalWins: 2,
-  },
-];
-
-const EXAMPLE_GAME_DATA = {
-  game_mode: GAME_MODE.BASIC,
-  round_number: 1,
-  game_status: GAME_STATUS.PLAYING,
-  round_answer: '커피',
-  player_keeper_ids: [1, 2, 3, 4],
-  player_faker_ids: [5, 6],
-  player_responses: [
-    {
-      id: '1',
-      input: '귀여운 강아지',
-      file_id: '../../assets/images/larva-0.png',
-    },
-    {
-      id: '2',
-      input: '귀여운 애벌레',
-      file_id: '../../assets/images/larva-1.png',
-    },
-    {
-      id: '3',
-      input: null,
-      file_id: null,
-    },
-    {
-      id: '4',
-      input: null,
-      file_id: null,
-    },
-  ],
-  round_turn_player_id: 1,
-};
 
 const LOADING_QUOTES = ['사막에 커피 한 잔만 가져갈 수 있다면?'];
 
@@ -110,7 +44,6 @@ export const GamePage = () => {
   const [imageGenRemain, setImageGenRemain] = useState(IMAGE_GEN_MAX_TRIES);
 
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-
   useEffect(() => {
     return () => {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
@@ -165,6 +98,8 @@ export const GamePage = () => {
   const onConfirmImageButtonHandler = () => {
     if (!generatedImageId) return;
     // Handle image confirmation logic here
+
+    navigate('/game/round_result');
   };
 
   return (
@@ -178,7 +113,13 @@ export const GamePage = () => {
         )}
       </p>
 
-      <Sketchbook show={true} flipping={upFlipping} height="260px">
+      <Sketchbook
+        show={true}
+        flipping={upFlipping}
+        height="260px"
+        width="380px"
+        ringCount={11}
+      >
         {isMyTurn ? (
           (() => {
             const previousResponse =
@@ -265,7 +206,13 @@ export const GamePage = () => {
         />
       </div>
 
-      <Sketchbook show={isMyTurn} flipping={downFlipping} height="290px">
+      <Sketchbook
+        show={isMyTurn}
+        flipping={downFlipping}
+        height="290px"
+        width="380px"
+        ringCount={11}
+      >
         {isImageGenerating ? (
           <div
             style={{

@@ -3,10 +3,11 @@ import styled from '@emotion/styled';
 export const SketchbookContainer = styled.div<{
   show?: boolean;
   height?: string;
+  width?: string;
 }>`
   position: relative;
-  width: 380px;
   height: ${props => props.height || 'initial'};
+  width: ${props => props.width || 'initial'};
   background-color: #ffffff;
   border-radius: ${({ theme }) => theme.borderRadius.default};
   display: flex;

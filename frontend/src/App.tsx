@@ -5,6 +5,8 @@ import MainPage from './pages/main';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { GamePage } from './pages/game';
 import styled from '@emotion/styled';
+import { RoundResultPage } from './pages/game/RoundResult';
+import { GameResultPage } from './pages/game/GameResult';
 
 function App() {
   return (
@@ -15,6 +17,20 @@ function App() {
             <Routes>
               <Route path="/" element={<MainPage />} />
               <Route path="/game" element={<GamePage />} />
+              <Route path="/game/result" element={<GameResultPage />} />
+              <Route path="/game/round_result" element={<RoundResultPage />} />
+
+              <Route
+                path="*"
+                element={
+                  <div>
+                    <h1 style={{ textAlign: 'center' }}>404 Not Found</h1>
+                    <p style={{ textAlign: 'center' }}>
+                      페이지를 찾을 수 없습니다.
+                    </p>
+                  </div>
+                }
+              />
             </Routes>
           </MainContainer>
         </BrowserRouter>
@@ -36,4 +52,5 @@ const MainContainer = styled.div`
   width: 412px;
   background: #ededed;
   box-sizing: border-box;
+  overflow: hidden;
 `;

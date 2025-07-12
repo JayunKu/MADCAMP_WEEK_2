@@ -92,7 +92,13 @@ const MainPage = () => {
   return (
     <>
       <Spacer y={40} />
-      <Sketchbook show={showSketchbook} flipping={flipping} height="600px">
+      <Sketchbook
+        show={showSketchbook}
+        flipping={flipping}
+        height="600px"
+        width="380px"
+        ringCount={11}
+      >
         {
           [
             // 0: 로비 페이지
