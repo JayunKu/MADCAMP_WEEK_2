@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Footer } from '../../components/footer/Footer';
 import styled from '@emotion/styled';
 import {
@@ -11,22 +11,33 @@ import mainLogo from '../../assets/images/main-logo.png';
 import gameAbstract from '../../assets/images/game-abstract.png';
 import { Spacer } from '../../components/common/Spacer';
 import { AvatarType } from '../../types/avatarType';
-import { AvatarProfile } from '../../components/common/AvatarProfile';
+import { AvatarCarousel } from '../../components/common/AvatarCarousel';
 
 const MainPage = () => {
   const theme = useTheme();
+
   const [showFooter, setShowFooter] = useState(true);
   const [flipping, setFlipping] = useState(false);
   const [guestMode, setGuestMode] = useState(false);
   const [username, setUsername] = useState('');
+  const [selectedAvatar, setSelectedAvatar] = useState(AvatarType.AVATAR_GREEN);
+
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleGuestGame = () => {
     setFlipping(true);
-    setTimeout(() => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    timeoutRef.current = setTimeout(() => {
       setGuestMode(true);
       setFlipping(false);
     }, 700);
   };
+
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
+  }, []);
 
   return (
     <MainContainer>
@@ -48,7 +59,10 @@ const MainPage = () => {
           </>
         ) : (
           <>
-            <AvatarProfile size="big" avatarType={AvatarType.AVATAR_GREEN} />
+            <AvatarCarousel
+              value={selectedAvatar}
+              onChange={setSelectedAvatar}
+            />
             <UsernameInput
               type="text"
               placeholder="닉네임을 입력하세요"
