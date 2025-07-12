@@ -1,0 +1,26 @@
+# Python 가상환경
+venv/
+
+# Python 캐시 파일
+__pycache__/
+*.py[cod]
+*.so
+
+# 로그 파일
+*.log
+
+# 환경 변수 파일
+.env
+
+# Jupyter notebook 체크포인트
+.ipynb_checkpoints/
+
+# macOS
+.DS_Store
+
+# VSCode 설정 (선택)
+.vscode/
+
+# 기타 임시 파일
+*.swp
+*.bak

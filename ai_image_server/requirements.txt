@@ -1,0 +1,8 @@
+flask
+diffusers
+transformers
+torch
+accelerate
+pillow
+google-cloud-storage
+python-dotenv
