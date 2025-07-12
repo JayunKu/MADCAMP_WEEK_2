@@ -6,6 +6,9 @@ __pycache__/
 *.py[cod]
 *.so
 
+#이미지 저장 파일
+ai_image_server/generated_images/
+
 # 로그 파일
 *.log
 
