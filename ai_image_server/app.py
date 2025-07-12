@@ -26,8 +26,11 @@ def generate_image():
         # 이미지 생성 및 GCS 업로드, key 또는 URL 반환
         image_key = generate_image_and_upload_to_gcs(prompt)
 
-        # 성공 응답
-        return jsonify({"image_key": image_key}), 200
+        # model.py에서 반환하는게 filename일 경우 성공 응답
+        # return jsonify({"image_key": image_key}), 200
+
+        # model.py에서 반환하는게 공개 URL일 경우 성공 응답
+        return jsonify({"image_url": image_key}), 200
     except Exception as e:
         # 에러 발생 시 500 응답
         return jsonify({"message": str(e)}), 500
