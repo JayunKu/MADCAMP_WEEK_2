@@ -1,17 +1,18 @@
 import React from 'react';
 import styled from '@emotion/styled';
 
-const DefaultButton = styled.button`
+export const DefaultButton = styled.button`
   border-radius: ${({ theme }) => theme.borderRadius.default};
   box-shadow: ${({ theme }) => theme.shadows.default};
+  border: 2px solid ${({ theme }) => theme.colors.black};
 
-  &:active {
+  &:active:not(:disabled) {
     box-shadow: none;
     transform: translateY(2px);
   }
   &:disabled {
     cursor: not-allowed;
-    opacity: 0.5;
+    background-color: ${({ theme }) => theme.colors.gray};
   }
 `;
 
@@ -42,7 +43,6 @@ const LargeButtonContainer = styled(DefaultButton)<{
 }>`
   width: 180px;
   height: 45px;
-  border-radius: ${({ theme }) => theme.borderRadius.default};
   background-color: ${props => props.backgroundColor};
   font-size: 17px;
   border: 3px solid ${({ theme }) => theme.colors.black};
@@ -70,8 +70,6 @@ const SmallButtonContainer = styled(DefaultButton)<{
 }>`
   width: 130px;
   height: 40px;
-  border-radius: ${({ theme }) => theme.borderRadius.default};
   background-color: ${props => props.backgroundColor};
   font-size: 17px;
-  border: 2px solid ${({ theme }) => theme.colors.black};
 `;

@@ -1,14 +1,16 @@
 import styled from '@emotion/styled';
 
-export const SketchbookContainer = styled.div<{ show?: boolean }>`
+export const SketchbookContainer = styled.div<{
+  show?: boolean;
+  height?: string;
+}>`
   position: relative;
-  height: 600px;
   width: 380px;
+  height: ${props => props.height || 'initial'};
   background-color: #ffffff;
   border-radius: ${({ theme }) => theme.borderRadius.default};
   display: flex;
   flex-direction: column;
-  margin: 20px auto;
   overflow: hidden;
   box-shadow: ${({ theme }) => theme.shadows.default};
   opacity: ${props => (props.show === false ? 0 : 1)};
@@ -18,7 +20,7 @@ export const SketchbookContainer = styled.div<{ show?: boolean }>`
 
 export const SketchbookBinding = styled.div`
   width: 100%;
-  height: 50px;
+  height: 40px;
   background-color: #e0e0e0;
   display: flex;
   flex-direction: row;

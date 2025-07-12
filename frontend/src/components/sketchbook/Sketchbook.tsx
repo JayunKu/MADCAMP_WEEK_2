@@ -15,10 +15,11 @@ interface SketchbookProps {
   children: React.ReactNode;
   flipping: boolean;
   show: boolean;
+  height?: string;
 }
 
 export const Sketchbook = forwardRef<SketchbookHandle, SketchbookProps>(
-  ({ children, flipping, show }, ref) => {
+  ({ children, flipping, show, height }, ref) => {
     useImperativeHandle(ref, () => ({
       flip: () => {}, // flip 동작은 부모에서 flipping 상태로 관리
     }));
@@ -28,7 +29,7 @@ export const Sketchbook = forwardRef<SketchbookHandle, SketchbookProps>(
     ));
 
     return (
-      <SketchbookContainer show={show}>
+      <SketchbookContainer show={show} height={height}>
         <SketchbookBinding>{rings}</SketchbookBinding>
         <SketchbookPageWrapper>
           <SketchbookPage flipping={flipping}>{children}</SketchbookPage>

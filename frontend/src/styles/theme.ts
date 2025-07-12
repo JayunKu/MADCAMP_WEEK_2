@@ -7,7 +7,7 @@ export const theme = {
     lighterYellow: '#FFF5B5',
     orange: '#FFC349',
     black: '#000000',
-    gray: 'B3B3B3',
+    gray: '#B3B3B3',
     darkGray: '#666666',
     lightGray: '#F5F5F5',
   },

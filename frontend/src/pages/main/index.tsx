@@ -85,13 +85,14 @@ const MainPage = () => {
     setShowSketchbook(false);
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
     timeoutRef.current = setTimeout(() => {
-      navigate('/game');
+      navigate('/game', { state: { partyId: 'FDAS32D' } });
     }, 500);
   };
 
   return (
     <>
-      <Sketchbook show={showSketchbook} flipping={flipping}>
+      <Spacer y={40} />
+      <Sketchbook show={showSketchbook} flipping={flipping} height="600px">
         {
           [
             // 0: 로비 페이지
@@ -188,6 +189,7 @@ const MainPage = () => {
           ][pageIdx]
         }
       </Sketchbook>
+      <Spacer y={40} />
       <Footer show={showFooter} />
     </>
   );
