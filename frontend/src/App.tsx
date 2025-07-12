@@ -1,12 +1,15 @@
 import './App.css';
 import { AuthContext } from './context/AuthContext';
+import { AppThemeProvider } from './styles/ThemeProvider';
 import MainPage from './pages/main';
 
 function App() {
   return (
-    <AuthContext.Provider value={null}>
-      <MainPage />
-    </AuthContext.Provider>
+    <AppThemeProvider>
+      <AuthContext.Provider value={null}>
+        <MainPage />
+      </AuthContext.Provider>
+    </AppThemeProvider>
   );
 }
 
