@@ -19,16 +19,20 @@ import { AuthGuard } from '../auth/guards/auth.guard';
 import { User } from '@prisma/client';
 import { UpdateUserRequestDto } from '../auth/dtos/update-user-request.dto';
 import { CreateUserGameRequestDto } from '../auth/dtos/create-user-game-request.dto';
+import { CommonService } from '../common/common.service';
 
 @ApiTags('user')
 @Controller('user')
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly userService: UserService,
+    private readonly commonService: CommonService,
+  ) {}
 
   @Get(':id')
   @ApiOperation({ summary: '회원 정보 조회' })
   async getUser(@Param('id') id: string) {
-    const user = await this.userService.findById(id);
+    const user = await this.commonService.getUserById(id);
 
     if (!user) {
       throw new HttpException('User not found', 404);
@@ -96,6 +100,6 @@ export class UserController {
 
     await this.userService.deleteUser(user.id);
 
-    return new CommonResponseDto({ message: 'User deleted successfully' });
+    return new CommonResponseDto();
   }
 }

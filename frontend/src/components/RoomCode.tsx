@@ -2,11 +2,11 @@ import { useTheme } from '@emotion/react';
 import styled from '@emotion/styled';
 import copyIcon from '../assets/images/copy.svg';
 
-export const PartyCode = (props: { code: string }) => {
+export const RoomCode = (props: { code: string }) => {
   const theme = useTheme();
 
   return (
-    <PartyCodeContainer>
+    <RoomCodeContainer>
       <p
         style={{
           width: '100%',
@@ -39,11 +39,11 @@ export const PartyCode = (props: { code: string }) => {
           }}
         />
       </p>
-    </PartyCodeContainer>
+    </RoomCodeContainer>
   );
 };
 
-const PartyCodeContainer = styled.div`
+const RoomCodeContainer = styled.div`
   background-color: ${({ theme }) => theme.colors.lightGray};
   border-radius: 6px;
   box-shadow: ${({ theme }) => theme.shadows.default};

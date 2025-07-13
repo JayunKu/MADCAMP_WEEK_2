@@ -11,7 +11,7 @@ import spinnerImage from '../../assets/images/spinner.svg';
 import { EXAMPLE_GAME_DATA, EXAMPLE_PLAYER_INFOS } from '../../types/mockData';
 
 interface GamePageState {
-  partyId: string;
+  roomId: string;
 }
 
 const LOADING_QUOTES = ['사막에 커피 한 잔만 가져갈 수 있다면?'];
@@ -70,13 +70,13 @@ export const GamePage = () => {
   };
 
   useEffect(() => {
-    if (!location.state || !location.state.partyId) {
+    if (!location.state || !location.state.roomId) {
       alert('잘못된 접근입니다.');
       navigate('/');
     }
   }, [location, navigate]);
 
-  console.log('GamePage mounted with partyId:', location.state?.partyId);
+  console.log('GamePage mounted with roomId:', location.state?.roomId);
 
   const game_data = EXAMPLE_GAME_DATA; // Replace with actual data fetching logic
 
@@ -123,7 +123,7 @@ export const GamePage = () => {
         {isMyTurn ? (
           (() => {
             const previousResponse =
-              game_data.player_responses[game_data.round_turn_player_id - 1];
+              game_data.responses[game_data.round_turn_player_id - 1];
             const previousPlayer = EXAMPLE_PLAYER_INFOS.find(
               player => player.id === game_data.round_turn_player_id
             );
@@ -140,9 +140,8 @@ export const GamePage = () => {
                 <p>{previousPlayer?.username}이 그린 그림</p>
                 <img
                   src={
-                    game_data.player_responses[
-                      game_data.round_turn_player_id - 1
-                    ].file_id || ''
+                    game_data.responses[game_data.round_turn_player_id - 1]
+                      .file_id || ''
                   }
                   alt="Previous Generated Image"
                   style={{

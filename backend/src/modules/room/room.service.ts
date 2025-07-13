@@ -1,0 +1,136 @@
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from 'src/config/prisma/prisma.service';
+import { RoomRedisService } from './services/room-redis.service';
+import { UserRedisService } from './services/user-redis.service';
+import {
+  Room,
+  User,
+  GameMode,
+  GameStatus,
+  FakerModeTeamType,
+} from 'src/config/redis/model';
+
+@Injectable()
+export class RoomService {
+  constructor(
+    private readonly prismaService: PrismaService,
+    private readonly roomRedisService: RoomRedisService,
+    private readonly userRedisService: UserRedisService,
+  ) {}
+
+  async createRoom(
+    hostUserId: string,
+    gameMode: GameMode = GameMode.BASIC,
+  ): Promise<Room> {
+    return await this.roomRedisService.createRoom(hostUserId, gameMode);
+  }
+
+  async getRoomById(roomId: string): Promise<Room | null> {
+    return await this.roomRedisService.getRoomById(roomId);
+  }
+
+  async updateRoom(
+    roomId: string,
+    updates: Partial<Room>,
+  ): Promise<Room | null> {
+    return await this.roomRedisService.updateRoom(roomId, updates);
+  }
+
+  async deleteRoom(roomId: string): Promise<boolean> {
+    return await this.roomRedisService.deleteRoom(roomId);
+  }
+
+  async getAllRooms(): Promise<Room[]> {
+    return await this.roomRedisService.getAllRooms();
+  }
+
+  //   async startGame(roomId: string): Promise<Room | null> {
+  //     return await this.roomRedisService.updateRoom(roomId, {
+  //       gameStatus: GameStatus.STARTED,
+  //       roundNumber: 1,
+  //     });
+  //   }
+
+  //   async endGame(roomId: string): Promise<Room | null> {
+  //     return await this.roomRedisService.updateRoom(roomId, {
+  //       gameStatus: GameStatus.ENDED,
+  //       turn_player_id: null,
+  //     });
+  //   }
+
+  //   async addResponse(
+  //     roomId: string,
+  //     userId: string,
+  //     input?: string,
+  //     fileId?: string,
+  //   ): Promise<Room | null> {
+  //     return await this.roomRedisService.addResponse(
+  //       roomId,
+  //       userId,
+  //       input,
+  //       fileId,
+  //     );
+  //   }
+
+  //   async addRoundResult(
+  //     roomId: string,
+  //     winner: FakerModeTeamType,
+  //   ): Promise<Room | null> {
+  //     return await this.roomRedisService.addRoundResult(roomId, winner);
+  //   }
+
+  //   async setTurnPlayer(roomId: string, playerId: string): Promise<Room | null> {
+  //     return await this.roomRedisService.updateRoom(roomId, {
+  //       turn_player_id: playerId,
+  //     });
+  //   }
+
+  //   async nextRound(roomId: string): Promise<Room | null> {
+  //     const room = await this.roomRedisService.getRoomById(roomId);
+  //     if (!room) return null;
+
+  //     const nextRoundNumber = (room.roundNumber || 0) + 1;
+  //     return await this.roomRedisService.updateRoom(roomId, {
+  //       roundNumber: nextRoundNumber,
+  //       responses: [] as any, // 새 라운드에서는 응답 초기화
+  //     });
+  //   }
+
+  //   // User 관련 함수들
+  //   async createUser(userId: string, roomId?: string): Promise<User> {
+  //     return await this.userRedisService.createUser(userId, roomId);
+  //   }
+
+  //   async getUserById(userId: string): Promise<User | null> {
+  //     return await this.userRedisService.getUserById(userId);
+  //   }
+
+  //   async updateUser(
+  //     userId: string,
+  //     updates: Partial<User>,
+  //   ): Promise<User | null> {
+  //     return await this.userRedisService.updateUser(userId, updates);
+  //   }
+
+  //   async deleteUser(userId: string): Promise<boolean> {
+  //     return await this.userRedisService.deleteUser(userId);
+  //   }
+
+  //   async joinRoom(userId: string, roomId: string): Promise<User | null> {
+  //     return await this.userRedisService.updateUser(userId, {
+  //       room_id: roomId,
+  //       is_member: true,
+  //     });
+  //   }
+
+  //   async leaveRoom(userId: string): Promise<User | null> {
+  //     return await this.userRedisService.updateUser(userId, {
+  //       room_id: null,
+  //       is_member: false,
+  //     });
+  //   }
+
+  //   async getRoomMembers(roomId: string): Promise<User[]> {
+  //     return await this.userRedisService.getUsersByRoomId(roomId);
+  //   }
+}

@@ -5,9 +5,18 @@ import { HealthzModule } from './modules/healthz/healthz.module';
 import { UserModule } from './modules/user/user.module';
 import { UserController } from './modules/user/user.controller';
 import { UserService } from './modules/user/user.service';
+import { RoomModule } from './modules/room/room.module';
+import { CommonModule } from './modules/common/common.module';
 
 @Module({
-  imports: [AppConfigModule, AuthModule, HealthzModule, UserModule],
+  imports: [
+    AppConfigModule,
+    AuthModule,
+    HealthzModule,
+    UserModule,
+    RoomModule,
+    CommonModule,
+  ],
   controllers: [UserController],
   providers: [UserService],
 })

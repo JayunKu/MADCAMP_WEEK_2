@@ -3,15 +3,15 @@ import { User } from '@prisma/client';
 export class CommonUserResponseDto {
   id: string;
   name: string;
-  avatarId: number;
-  totalGames: number;
-  totalWins: number;
+  avatar_id: number;
+  total_games: number;
+  total_wins: number;
 
   constructor(user: User) {
     this.id = user.id;
     this.name = user.name;
-    this.avatarId = user.avartar_id;
-    this.totalGames = user.total_games;
-    this.totalWins = user.total_wins;
+    this.avatar_id = user.avartar_id;
+    this.total_games = user.total_games;
+    this.total_wins = user.total_wins;
   }
 }

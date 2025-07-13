@@ -7,12 +7,6 @@ import { UpdateUserRequestDto } from '../auth/dtos/update-user-request.dto';
 export class UserService {
   constructor(private readonly prismaService: PrismaService) {}
 
-  async findById(id: string): Promise<User | null> {
-    return this.prismaService.user.findUnique({
-      where: { id },
-    });
-  }
-
   async updateUser(
     id: string,
     updateUserRequestDto: UpdateUserRequestDto,

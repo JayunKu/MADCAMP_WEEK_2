@@ -3,8 +3,8 @@ export default () => ({
     env: process.env.APP_ENV,
     port: process.env.APP_PORT,
   },
-  in_memory_db: {
-    url: process.env.IN_MEMORY_DB_URL,
+  redis: {
+    url: process.env.INMEMORY_DB_URL,
   },
   session: {
     url: process.env.SESSION_DB_URL,

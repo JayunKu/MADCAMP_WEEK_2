@@ -38,9 +38,9 @@ export const EXAMPLE_GAME_DATA = {
   round_number: 1,
   game_status: GameStatus.PLAYING,
   round_answer: '커피',
-  player_keeper_ids: [1, 2, 4],
-  player_faker_ids: [3],
-  player_responses: [
+  keeper_user_ids: [1, 2, 4],
+  faker_user_ids: [3],
+  responses: [
     {
       id: '1',
       input: '귀여운 강아지',

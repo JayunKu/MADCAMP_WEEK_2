@@ -9,7 +9,6 @@ import { Spacer } from '../../components/Spacer';
 import { AvatarType, getAvartarTypeFromId } from '../../types/avatar';
 import { AvatarCarousel } from '../../components/AvatarCarousel';
 import { PlayerProfile } from '../../components/PlayerProfile';
-import { PartyCode } from '../../components/PartyCode';
 import { useNavigate } from 'react-router-dom';
 import modeAbstract from '../../assets/images/mode-abstract.png';
 import {
@@ -23,8 +22,9 @@ import { useGoogleLogin } from '@react-oauth/google';
 import { axiosInstance } from '../../hooks/useAxios';
 import { useAuth } from '../../context/AuthContext';
 import { EXAMPLE_PLAYER_INFOS } from '../../types/mockData';
+import { RoomCode } from '../../components/RoomCode';
 
-const MAX_PLAYER_PER_PARTY = 8; // 최대 플레이어 수
+const MAX_PLAYER_PER_ROOM = 8; // 최대 플레이어 수
 
 const MainPage = () => {
   const theme = useTheme();
@@ -104,7 +104,7 @@ const MainPage = () => {
     flipToPage(1);
   };
 
-  const onEnterPartyButtonHandler = () => {
+  const onEnterRoomButtonHandler = () => {
     flipToPage(2);
   };
 
@@ -113,7 +113,7 @@ const MainPage = () => {
     setShowSketchbook(false);
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
     timeoutRef.current = setTimeout(() => {
-      navigate('/game', { state: { partyId: 'FDAS32D' } });
+      navigate('/game', { state: { roomId: 'FDAS32D' } });
     }, 500);
   };
 
@@ -193,7 +193,7 @@ const MainPage = () => {
               <Spacer y={10} />
               <LargeButton
                 backgroundColor={theme.colors.lighterYellow}
-                onClick={onEnterPartyButtonHandler}
+                onClick={onEnterRoomButtonHandler}
               >
                 방 들어가기
               </LargeButton>
@@ -208,7 +208,7 @@ const MainPage = () => {
                   marginTop: '20px',
                 }}
               >
-                {Array.from({ length: MAX_PLAYER_PER_PARTY }).map((_, idx) => {
+                {Array.from({ length: MAX_PLAYER_PER_ROOM }).map((_, idx) => {
                   const player = EXAMPLE_PLAYER_INFOS[idx];
                   if (player) {
                     return (
@@ -238,7 +238,7 @@ const MainPage = () => {
                 })}
               </div>
 
-              <PartyCode code="FDAS32D" />
+              <RoomCode code="FDAS32D" />
 
               <GameSettings>
                 <p style={{ width: '100%' }}>모드 선택</p>
