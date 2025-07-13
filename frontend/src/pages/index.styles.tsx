@@ -1,4 +1,20 @@
 import styled from '@emotion/styled';
+import { GoogleLogin } from '@react-oauth/google';
+
+export const GoogleLoginButton = styled(GoogleLogin)`
+  // border-radius: ${({ theme }) => theme.borderRadius.default};
+  // box-shadow: ${({ theme }) => theme.shadows.default};
+  // border: 2px solid ${({ theme }) => theme.colors.black};
+
+  // &:active:not(:disabled) {
+  //   box-shadow: none;
+  //   transform: translateY(2px);
+  // }
+  // &:disabled {
+  //   cursor: not-allowed;
+  //   background-color: ${({ theme }) => theme.colors.gray};
+  // }
+`;
 
 export const PlayAsGuestButton = styled.button`
   font-size: 14px;

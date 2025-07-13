@@ -15,6 +15,7 @@ import {
 import { LoginRequestDto } from './dtos/login-request.dto';
 import { Request } from 'express';
 import { CommonResponseDto } from 'src/common/dtos/common-response.dto';
+import { CommonUserResponseDto } from 'src/common/dtos/common-user-response.dto';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -23,11 +24,13 @@ export class AuthController {
 
   @Post()
   @HttpCode(201)
-  @ApiOperation({ summary: '로그인' })
+  @ApiOperation({ summary: '구글 계정으로 로그인' })
   async login(@Req() req: Request, @Body() loginRequestDto: LoginRequestDto) {
-    // await this.authService.login(req, loginRequestDto);
+    const { accessToken } = loginRequestDto;
 
-    return new CommonResponseDto();
+    const user = await this.authService.login(req, accessToken);
+
+    return new CommonResponseDto(new CommonUserResponseDto(user));
   }
 
   @Delete()

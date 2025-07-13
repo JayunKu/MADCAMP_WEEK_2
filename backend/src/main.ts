@@ -4,6 +4,9 @@ import { PrismaService } from './config/prisma/prisma.service';
 import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as cookieParser from 'cookie-parser';
+import * as session from 'express-session';
+import * as Redis from 'redis';
+import { RedisStore } from 'connect-redis';
 import { ValidationPipe } from '@nestjs/common';
 
 function logConfig(appConfig: ConfigService) {
@@ -46,34 +49,33 @@ async function bootstrap() {
   app.use(cookieParser(appConfig.get('session.key')));
 
   // Config for RedisClient
-  // const redisClient = Redis.createClient({
-  //   url: appConfig.get('session.url'),
-  //   legacyMode: true,
-  // });
-  // redisClient.on('connect', () => {
-  //   console.info('=> Redis connected');
-  // });
-  // redisClient.on('error', (err) => {
-  //   console.error('=> Redis Client Error', err);
-  // });
-  // await redisClient.connect();
+  const redisClient = Redis.createClient({
+    url: appConfig.get('session.url'),
+  });
+  redisClient.on('connect', () => {
+    console.info('=> Redis connected');
+  });
+  redisClient.on('error', (err) => {
+    console.error('=> Redis Client Error', err);
+  });
+  await redisClient.connect();
 
   // Session settings
-  // app.use(
-  //   session({
-  //     resave: false,
-  //     saveUninitialized: true,
-  //     secret: appConfig.get('session.key'),
-  //     cookie: {
-  //       httpOnly: true,
-  //       secure: false,
-  //     },
-  //     store: new (RedisStore(session))({
-  //       client: redisClient,
-  //       prefix: 'session:',
-  //     }),
-  //   }),
-  // );
+  app.use(
+    session({
+      store: new RedisStore({
+        client: redisClient,
+        prefix: 'session:',
+      }),
+      resave: false,
+      saveUninitialized: true,
+      secret: appConfig.get<string>('session.key') || 'default_secret',
+      cookie: {
+        httpOnly: true,
+        secure: false,
+      },
+    }),
+  );
 
   // Config for Swagger
   if (appConfig.get('app.env') === 'development') {

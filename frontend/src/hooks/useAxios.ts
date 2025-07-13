@@ -3,7 +3,7 @@ import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 
 // 기본 axios 인스턴스
 export const axiosInstance = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:8000',
+  baseURL: process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000',
   withCredentials: true,
 });
 

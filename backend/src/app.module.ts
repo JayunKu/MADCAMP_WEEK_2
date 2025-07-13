@@ -4,11 +4,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { HealthzModule } from './modules/healthz/healthz.module';
 
 @Module({
-  imports: [
-    AppConfigModule,
-    // AuthModule,
-    HealthzModule,
-  ],
+  imports: [AppConfigModule, AuthModule, HealthzModule],
   controllers: [],
   providers: [],
 })

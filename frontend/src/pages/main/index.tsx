@@ -19,10 +19,13 @@ import modeAbstract from '../../assets/images/mode-abstract.png';
 import {
   GameModeButton,
   GameSettings,
+  GoogleLoginButton,
   PlayAsGuestButton,
   UsernameInput,
 } from '../index.styles';
 import { GameMode } from '../../types/gameType';
+import { useGoogleLogin } from '@react-oauth/google';
+import { axiosInstance } from '../../hooks/useAxios';
 
 const MAX_PLAYER_PER_PARTY = 8; // 최대 플레이어 수
 
@@ -39,8 +42,28 @@ const MainPage = () => {
   const [selectedAvatar, setSelectedAvatar] = useState(AvatarType.AVATAR_GREEN);
 
   const [selectedGameMode, setSelectedGameMode] = useState(GameMode.BASIC);
-
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const googleLogin = useGoogleLogin({
+    onSuccess: async response => {
+      console.log('Google login successful:', response);
+
+      try {
+        const authResponse = await axiosInstance.post('/auth', {
+          accessToken: response.access_token,
+        });
+
+        console.log('Auth successful:', authResponse.data);
+
+        flipToPage(1);
+      } catch (error) {
+        console.error('Auth failed:', error);
+      }
+    },
+    onError: error => {
+      console.error('Google login failed:', error);
+    },
+  });
 
   const EXAMPLE_PLAYERS = [
     {
@@ -127,7 +150,10 @@ const MainPage = () => {
                   marginBottom: '30px',
                 }}
               />
-              <LargeButton backgroundColor={theme.colors.lightYellow}>
+              <LargeButton
+                backgroundColor={theme.colors.lightYellow}
+                onClick={googleLogin}
+              >
                 Google로 로그인
               </LargeButton>
               <PlayAsGuestButton onClick={onPlayAsGuestButtonHandler}>
