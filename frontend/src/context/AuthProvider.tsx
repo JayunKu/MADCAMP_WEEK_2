@@ -43,11 +43,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     localStorage.setItem(PLAYER_ID_KEY, userData.playerId);
   };
 
-  const logout = () => {
+  const logout = async () => {
     setUser(null);
 
     localStorage.removeItem(USER_ID_KEY);
     localStorage.removeItem(PLAYER_ID_KEY);
+
+    // playerId 다시 받아오기
+    await initializePlayerId();
   };
 
   const isAuthenticated = user !== null;
