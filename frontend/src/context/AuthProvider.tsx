@@ -14,28 +14,27 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [player, setPlayer] = useState<Player | null>(null);
 
   // playerId를 서버에서 받아오거나, 이미 있으면 로드
-  const initializePlayerId = async () => {
+  const initializePlayer = async () => {
     const savedPlayer = localStorage.getItem(PLAYER_ID_KEY);
     if (savedPlayer) {
       const parsedPlayer = JSON.parse(savedPlayer);
-      setPlayer(parsedPlayer);
 
       // Redis에 playerId 등록하기 위함
       await axiosInstance.post('/players', {
         player_id: parsedPlayer.id,
       });
 
-      return parsedPlayer.id;
+      return parsedPlayer;
     } else {
       try {
         const newPlayer = (await axiosInstance.post('/players')).data;
+
         localStorage.setItem(PLAYER_ID_KEY, JSON.stringify(newPlayer));
-        setPlayer(newPlayer);
-        return newPlayer.id;
+
+        return newPlayer;
       } catch (e) {
         console.error('Failed to get playerId from server:', e);
       }
-      return null;
     }
   };
 
@@ -54,7 +53,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     localStorage.removeItem(PLAYER_ID_KEY);
 
     // playerId 다시 받아오기
-    await initializePlayerId();
+    const newPlayer = await initializePlayer();
+    setPlayer(newPlayer);
   };
 
   const isAuthenticated = user !== null;
@@ -85,10 +85,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       // 2. playerId 초기화 (로그인 정보에 없으면 서버에서 받아옴, 있으면 로드)
       if (!restoredPlayerId) {
-        const currentPlayerId = await initializePlayerId();
-        console.log('Player ID initialized:', currentPlayerId);
-      } else {
-        console.log('Player ID restored from user info:', restoredPlayerId);
+        const currentPlayer = await initializePlayer();
+        setPlayer(currentPlayer);
       }
     })();
   }, []);
