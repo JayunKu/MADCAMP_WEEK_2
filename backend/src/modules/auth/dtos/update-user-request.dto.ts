@@ -10,5 +10,5 @@ export class UpdateUserRequestDto {
   @ApiProperty({ required: false })
   @IsNumber()
   @IsOptional()
-  avatarId?: number;
+  avatar_id?: number;
 }

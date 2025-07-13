@@ -38,18 +38,14 @@ interface UseGameSocketReturn {
   // Room related
   joinRoom: (roomCode: string) => void;
   leaveRoom: () => void;
-  createRoom: (gameMode: number) => void;
   startGame: () => void;
   // Game related
   submitAnswer: (answer: string) => void;
   submitImage: (imageId: string) => void;
-  // Player related
-  updatePlayerReady: (isReady: boolean) => void;
-  updatePlayerInfo: (username: string, avatarId: number) => void;
 }
 
 export const useGameSocket = (): UseGameSocketReturn => {
-  const { user } = useAuth();
+  const { player } = useAuth();
   const { socket, isConnected, emit, on, off } = useSocket({
     autoConnect: true,
   });
@@ -64,51 +60,27 @@ export const useGameSocket = (): UseGameSocketReturn => {
   // Room related functions
   const joinRoom = useCallback(
     (roomCode: string) => {
-      if (!user) {
-        console.error('User must be authenticated to join a room');
+      if (!player) {
+        console.error('Player must be authenticated to join a room');
         return;
       }
 
       emit('join_room', {
         roomCode,
         player: {
-          id: user.id.toString(),
-          username: user.name,
-          avatarId: 0, // Default avatar
+          id: player.id.toString(),
+          username: player.name,
+          avatarId: player.avatarId,
           isMember: true,
-          totalGames: user.totalGames || 0,
-          totalWins: user.totalWins || 0,
         },
       });
     },
-    [emit, user]
+    [emit, player]
   );
 
   const leaveRoom = useCallback(() => {
     emit('leave_room');
   }, [emit]);
-
-  const createRoom = useCallback(
-    (gameMode: number) => {
-      if (!user) {
-        console.error('User must be authenticated to create a room');
-        return;
-      }
-
-      emit('create_room', {
-        gameMode,
-        player: {
-          id: user.id.toString(),
-          username: user.name,
-          avatarId: 0,
-          isMember: true,
-          totalGames: user.totalGames || 0,
-          totalWins: user.totalWins || 0,
-        },
-      });
-    },
-    [emit, user]
-  );
 
   const startGame = useCallback(() => {
     emit('start_game');
@@ -130,13 +102,6 @@ export const useGameSocket = (): UseGameSocketReturn => {
   );
 
   // Player related functions
-  const updatePlayerReady = useCallback(
-    (isReady: boolean) => {
-      emit('update_player_ready', { isReady });
-    },
-    [emit]
-  );
-
   const updatePlayerInfo = useCallback(
     (username: string, avatarId: number) => {
       emit('update_player_info', { username, avatarId });
@@ -194,21 +159,6 @@ export const useGameSocket = (): UseGameSocketReturn => {
       }));
     };
 
-    const handlePlayerUpdated = (data: { player: GamePlayer }) => {
-      console.log('Player updated:', data);
-      setGameState(prev => ({
-        ...prev,
-        room: prev.room
-          ? {
-              ...prev.room,
-              players: prev.room.players.map(p =>
-                p.id === data.player.id ? data.player : p
-              ),
-            }
-          : null,
-      }));
-    };
-
     // Game events
     const handleGameStarted = (data: { room: GameRoom }) => {
       console.log('Game started:', data);
@@ -223,7 +173,7 @@ export const useGameSocket = (): UseGameSocketReturn => {
       console.log('Turn changed:', data);
       setGameState(prev => ({
         ...prev,
-        isMyTurn: data.currentPlayerId === user?.id.toString(),
+        isMyTurn: data.currentPlayerId === player?.id.toString(),
       }));
     };
 
@@ -247,7 +197,6 @@ export const useGameSocket = (): UseGameSocketReturn => {
     on('room_updated', handleRoomUpdated);
     on('player_joined', handlePlayerJoined);
     on('player_left', handlePlayerLeft);
-    on('player_updated', handlePlayerUpdated);
     on('game_started', handleGameStarted);
     on('turn_changed', handleTurnChanged);
     on('game_finished', handleGameFinished);
@@ -259,24 +208,20 @@ export const useGameSocket = (): UseGameSocketReturn => {
       off('room_updated', handleRoomUpdated);
       off('player_joined', handlePlayerJoined);
       off('player_left', handlePlayerLeft);
-      off('player_updated', handlePlayerUpdated);
       off('game_started', handleGameStarted);
       off('turn_changed', handleTurnChanged);
       off('game_finished', handleGameFinished);
       off('error', handleError);
     };
-  }, [socket, on, off, user]);
+  }, [socket, on, off, player]);
 
   return {
     gameState,
     isConnected,
     joinRoom,
     leaveRoom,
-    createRoom,
     startGame,
     submitAnswer,
     submitImage,
-    updatePlayerReady,
-    updatePlayerInfo,
   };
 };

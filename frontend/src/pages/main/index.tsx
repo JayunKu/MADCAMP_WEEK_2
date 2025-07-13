@@ -6,7 +6,11 @@ import { useTheme } from '@emotion/react';
 import mainLogo from '../../assets/images/main-logo.png';
 import gameAbstract from '../../assets/images/game-abstract.png';
 import { Spacer } from '../../components/Spacer';
-import { AvatarType, getAvatarTypeFromId } from '../../types/avatar';
+import {
+  AvatarType,
+  getAvatarIdFromType,
+  getAvatarTypeFromId,
+} from '../../types/avatar';
 import { AvatarCarousel } from '../../components/AvatarCarousel';
 import { PlayerProfile } from '../../components/PlayerProfile';
 import { useNavigate } from 'react-router-dom';
@@ -20,9 +24,10 @@ import {
 import { GameMode } from '../../types/game';
 import { useGoogleLogin } from '@react-oauth/google';
 import { axiosInstance } from '../../hooks/useAxios';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth, User } from '../../context/AuthContext';
 import { EXAMPLE_PLAYER_INFOS } from '../../types/mockData';
 import { RoomCode } from '../../components/RoomCode';
+import { useGameSocket } from '../../hooks/useGameSocket';
 
 const MAX_PLAYER_PER_ROOM = 8; // 최대 플레이어 수
 
@@ -38,6 +43,8 @@ const MainPage = () => {
   const [pageIdx, setPageIdx] = useState(0);
   const [username, setUsername] = useState('');
   const [selectedAvatar, setSelectedAvatar] = useState(AvatarType.AVATAR_GREEN);
+
+  // const { joinRoom, startGame, leaveRoom, gameState } = useGameSocket();
 
   const [selectedGameMode, setSelectedGameMode] = useState(GameMode.BASIC);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -65,8 +72,9 @@ const MainPage = () => {
 
         login(userData);
         flipToPage(1);
-      } catch (error) {
-        console.error('Auth failed:', error);
+      } catch (err) {
+        console.error('Failed to authenticate with server:', err);
+        alert('Failed to connect API server. Please try again later.');
       }
     },
     onError: error => {
@@ -104,8 +112,54 @@ const MainPage = () => {
     googleLogin();
   };
 
+  const onUserProfileSaveHandler = async () => {
+    if (!username || username.length < 2) {
+      alert('닉네임은 2글자 이상이어야 합니다.');
+      return;
+    }
+    // 사용자 정보 업데이트
+    const updatedUser = {
+      ...(user as User),
+      name: username,
+      avatarId: getAvatarIdFromType(selectedAvatar),
+    };
+
+    login(updatedUser);
+
+    // 서버에 사용자 정보 저장
+    try {
+      await axiosInstance.put('/users/me', {
+        name: updatedUser.name,
+        avatar_id: updatedUser.avatarId,
+      });
+      alert('저장되었습니다.');
+    } catch (err) {
+      console.error('Failed to update user profile:', err);
+      alert('Failed to update user profile. Please try again later.');
+    }
+  };
+
   const onPlayAsGuestButtonHandler = () => {
     flipToPage(1);
+  };
+
+  const createRoomButtonHandler = async () => {
+    // try {
+    //   const response = await axiosInstance.post('/rooms', {
+    //     host: {
+    //       id: updatedUser.playerId,
+    //       username: updatedUser.name,
+    //       avatarId: updatedUser.avatarId,
+    //       isMember: true,
+    //     },
+    //     gameMode: selectedGameMode,
+    //   });
+    //   console.log('Room created:', response.data);
+    //   flipToPage(2);
+    // } catch (err) {
+    //   console.error('Failed to create room:', err);
+    //   alert('Failed to create room. Please try again later.');
+    // }
   };
 
   const onEnterRoomButtonHandler = () => {
@@ -183,6 +237,7 @@ const MainPage = () => {
               <AvatarCarousel
                 value={selectedAvatar}
                 onChange={setSelectedAvatar}
+                showButtons={isAuthenticated}
               />
               <UsernameInput
                 type="text"
@@ -191,10 +246,26 @@ const MainPage = () => {
                 onChange={e => setUsername(e.target.value)}
                 maxLength={12}
               />
-              <LargeButton backgroundColor={theme.colors.lightYellow}>
+              {isAuthenticated && (
+                <SmallButton
+                  backgroundColor={theme.colors.lightYellow}
+                  onClick={onUserProfileSaveHandler}
+                >
+                  저장하기
+                </SmallButton>
+              )}
+
+              <Spacer y={40} />
+
+              <LargeButton
+                backgroundColor={theme.colors.lightYellow}
+                onClick={createRoomButtonHandler}
+              >
                 방 만들기
               </LargeButton>
+
               <Spacer y={10} />
+
               <LargeButton
                 backgroundColor={theme.colors.lighterYellow}
                 onClick={onEnterRoomButtonHandler}

@@ -23,7 +23,7 @@ import { CreateUserGameRequestDto } from '../auth/dtos/create-user-game-request.
 import { CommonService } from '../common/common.service';
 
 @ApiTags('user')
-@Controller('user')
+@Controller('users')
 export class UserController {
   constructor(
     private readonly userService: UserService,
@@ -80,13 +80,13 @@ export class UserController {
     @CurrentUser() user: User,
     @Body() createUserGameRequestDto: CreateUserGameRequestDto,
   ) {
-    const { isWin } = createUserGameRequestDto;
+    const { is_win } = createUserGameRequestDto;
 
     if (!user) {
       throw new HttpException('User not authenticated', 401);
     }
 
-    const updatedUser = await this.userService.createUserGame(user.id, isWin);
+    const updatedUser = await this.userService.createUserGame(user.id, is_win);
 
     return new CommonResponseDto(new CommonUserResponseDto(updatedUser));
   }

@@ -23,6 +23,33 @@ export enum AvatarType {
   AVATAR_FAKER_YELLOW = 'AVATAR_FAKER_YELLOW',
 }
 
+export const getAvatarIdFromType = (avatarType: AvatarType): number => {
+  switch (avatarType) {
+    case AvatarType.AVATAR_GREEN:
+      return 1;
+    case AvatarType.AVATAR_RED:
+      return 2;
+    case AvatarType.AVATAR_BROWN:
+      return 3;
+    case AvatarType.AVATAR_GRAY:
+      return 0;
+    case AvatarType.AVATAR_YELLOW:
+      return 4;
+    case AvatarType.AVATAR_FAKER_GREEN:
+      return 1;
+    case AvatarType.AVATAR_FAKER_RED:
+      return 2;
+    case AvatarType.AVATAR_FAKER_BROWN:
+      return 3;
+    case AvatarType.AVATAR_FAKER_GRAY:
+      return 0;
+    case AvatarType.AVATAR_FAKER_YELLOW:
+      return 4;
+    default:
+      return 0;
+  }
+};
+
 export const getAvatarImage = (avatarType: AvatarType) => {
   switch (avatarType) {
     case AvatarType.AVATAR_GREEN:

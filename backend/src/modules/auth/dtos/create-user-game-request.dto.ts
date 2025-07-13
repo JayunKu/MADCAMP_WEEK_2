@@ -7,5 +7,5 @@ export class CreateUserGameRequestDto {
   @IsNotEmpty()
   @Type(() => Boolean)
   @IsBoolean()
-  isWin: boolean;
+  is_win: boolean;
 }

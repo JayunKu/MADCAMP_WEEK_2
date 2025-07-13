@@ -14,9 +14,11 @@ const AVATAR_LIST: AvatarType[] = [
 export const AvatarCarousel = ({
   value,
   onChange,
+  showButtons = true,
 }: {
   value: AvatarType;
   onChange: (type: AvatarType) => void;
+  showButtons?: boolean;
 }) => {
   const currentIdx = AVATAR_LIST.indexOf(value);
 
@@ -59,7 +61,7 @@ export const AvatarCarousel = ({
 
   return (
     <CarouselWrapper>
-      <ArrowButton onClick={handlePrev}>&lt;</ArrowButton>
+      {showButtons && <ArrowButton onClick={handlePrev}>&lt;</ArrowButton>}
       <SlideWindow>
         <SlideTrack $length={AVATAR_LIST.length} $slideIdx={slideIdx}>
           {AVATAR_LIST.map((avatar, idx) => (
@@ -69,7 +71,7 @@ export const AvatarCarousel = ({
           ))}
         </SlideTrack>
       </SlideWindow>
-      <ArrowButton onClick={handleNext}>&gt;</ArrowButton>
+      {showButtons && <ArrowButton onClick={handleNext}>&gt;</ArrowButton>}
     </CarouselWrapper>
   );
 };

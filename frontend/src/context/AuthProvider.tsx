@@ -20,9 +20,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const parsedPlayer = JSON.parse(savedPlayer);
 
       // Redis에 playerId 등록하기 위함
-      await axiosInstance.post('/players', {
-        player_id: parsedPlayer.id,
-      });
+      try {
+        await axiosInstance.post('/players', {
+          player_id: parsedPlayer.id,
+        });
+      } catch (err) {
+        console.error('Failed to get playerId from server:', err);
+        alert('Failed to connect API server. Please try again later.');
+      }
 
       return parsedPlayer;
     } else {
@@ -32,8 +37,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         localStorage.setItem(PLAYER_ID_KEY, JSON.stringify(newPlayer));
 
         return newPlayer;
-      } catch (e) {
-        console.error('Failed to get playerId from server:', e);
+      } catch (err) {
+        console.error('Failed to get playerId from server:', err);
+        alert('Failed to connect API server. Please try again later.');
       }
     }
   };

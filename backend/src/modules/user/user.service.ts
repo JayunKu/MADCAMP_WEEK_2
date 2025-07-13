@@ -11,11 +11,11 @@ export class UserService {
     id: number,
     updateUserRequestDto: UpdateUserRequestDto,
   ): Promise<User> {
-    const { name, avatarId } = updateUserRequestDto;
+    const { name, avatar_id } = updateUserRequestDto;
 
     const updateData = {
       ...(name !== null && { name }),
-      ...(avatarId !== null && { avatar_id: avatarId }),
+      ...(avatar_id !== null && { avatar_id: avatar_id }),
     };
 
     return this.prismaService.user.update({
