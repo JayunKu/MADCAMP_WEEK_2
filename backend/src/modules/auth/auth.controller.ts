@@ -44,7 +44,7 @@ export class AuthController {
   @UseGuards(AuthGuard)
   @ApiOperation({ summary: '로그아웃' })
   async logout(@Req() req: Request) {
-    // this.authService.logout(req);
+    this.authService.logout(req);
 
     return new CommonResponseDto();
   }

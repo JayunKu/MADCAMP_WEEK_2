@@ -16,7 +16,7 @@ export enum FakerModeTeamType {
 
 export interface Room {
   id: string;
-  host_user_id: string;
+  host_player_id: string;
 
   game_mode: GameMode;
   game_status: GameStatus;
@@ -24,12 +24,12 @@ export interface Room {
   round_number: number | null;
   round_winners: FakerModeTeamType[];
 
-  keeper_user_ids: string[];
-  fakers_user_ids: string[];
+  keeper_player_ids: string[];
+  fakers_player_ids: string[];
 
-  response_user_ids: string[];
-  response_user_inputs: string[];
-  response_user_file_ids: string[];
+  response_player_ids: string[];
+  response_player_inputs: string[];
+  response_player_file_ids: string[];
 
   turn_player_id: string | null;
 }

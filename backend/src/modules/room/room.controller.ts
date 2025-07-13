@@ -4,6 +4,8 @@ import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CreateRoomRequestDto } from './dtos/create-room-request.dto';
 import { Room } from 'src/config/redis/model';
 import { CommonService } from '../common/common.service';
+import { CommonResponseDto } from 'src/common/dtos/common-response.dto';
+import { CreateRoomResponseDto } from './dtos/create-room-response.dto';
 
 @ApiTags('room')
 @Controller('room')
@@ -21,9 +23,7 @@ export class RoomController {
 
   @Post()
   @ApiOperation({ summary: '파티 생성' })
-  async createRoom(
-    @Body() createRoomRequestDto: CreateRoomRequestDto,
-  ): Promise<Room> {
+  async createRoom(@Body() createRoomRequestDto: CreateRoomRequestDto) {
     const { host_player_id } = createRoomRequestDto;
 
     // Check if the player exists
@@ -32,6 +32,8 @@ export class RoomController {
       throw new Error(`Player with ID ${host_player_id} does not exist.`);
     }
 
-    return this.roomService.createRoom(host_player_id);
+    const room = await this.roomService.createRoom(host_player_id);
+
+    return new CommonResponseDto(new CreateRoomResponseDto(room));
   }
 }

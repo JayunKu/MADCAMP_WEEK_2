@@ -18,6 +18,10 @@ export class RoomService {
     private readonly userRedisService: UserRedisService,
   ) {}
 
+  async getAllRooms(): Promise<Room[]> {
+    return await this.roomRedisService.getAllRooms();
+  }
+
   async createRoom(
     hostUserId: string,
     gameMode: GameMode = GameMode.BASIC,
@@ -38,10 +42,6 @@ export class RoomService {
 
   async deleteRoom(roomId: string): Promise<boolean> {
     return await this.roomRedisService.deleteRoom(roomId);
-  }
-
-  async getAllRooms(): Promise<Room[]> {
-    return await this.roomRedisService.getAllRooms();
   }
 
   //   async startGame(roomId: string): Promise<Room | null> {

@@ -62,4 +62,12 @@ export class AuthService {
 
     return user;
   }
+
+  logout(req: Request) {
+    req.session.destroy((err) => {
+      if (err) {
+        throw new HttpException('로그아웃에 문제가 발생하였습니다', 500);
+      }
+    });
+  }
 }
