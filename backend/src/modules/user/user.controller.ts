@@ -3,13 +3,14 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
   HttpException,
   Param,
   Post,
   Put,
   UseGuards,
 } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { UserService } from './user.service';
 import { CommonResponseDto } from 'src/common/dtos/common-response.dto';
 import { CommonUserResponseDto } from 'src/common/dtos/common-user-response.dto';
@@ -25,6 +26,7 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get(':id')
+  @ApiOperation({ summary: '회원 정보 조회' })
   async getUser(@Param('id') id: string) {
     const user = await this.userService.findById(id);
 
@@ -37,6 +39,7 @@ export class UserController {
 
   @Get('me')
   @UseGuards(AuthGuard)
+  @ApiOperation({ summary: '나의 정보 조회' })
   async getMe(@CurrentUser() user: User) {
     if (!user) {
       throw new HttpException('User not authenticated', 401);
@@ -47,6 +50,7 @@ export class UserController {
 
   @Put('me')
   @UseGuards(AuthGuard)
+  @ApiOperation({ summary: '나의 정보 업데이트' })
   async updateMe(
     @CurrentUser() user: User,
     @Body() updateUserRequestDto: UpdateUserRequestDto,
@@ -64,7 +68,9 @@ export class UserController {
   }
 
   @Post('me/games')
+  @HttpCode(201)
   @UseGuards(AuthGuard)
+  @ApiOperation({ summary: '게임 횟수 갱신' })
   async createUserGame(
     @CurrentUser() user: User,
     @Body() createUserGameRequestDto: CreateUserGameRequestDto,
@@ -82,6 +88,7 @@ export class UserController {
 
   @Delete('me')
   @UseGuards(AuthGuard)
+  @ApiOperation({ summary: '나의 회원 탈퇴' })
   async deleteMe(@CurrentUser() user: User) {
     if (!user) {
       throw new HttpException('User not authenticated', 401);
