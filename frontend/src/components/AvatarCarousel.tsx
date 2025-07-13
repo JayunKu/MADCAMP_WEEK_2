@@ -1,7 +1,7 @@
 import { useRef, useState, useEffect } from 'react';
 import styled from '@emotion/styled';
 import { AvatarFrame } from './AvatarFrame';
-import { AvatarType } from '../types/avatarType';
+import { AvatarType } from '../types/avatar';
 
 const AVATAR_LIST: AvatarType[] = [
   AvatarType.AVATAR_GREEN,

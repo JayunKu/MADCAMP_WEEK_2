@@ -69,7 +69,7 @@ async function bootstrap() {
       }),
       resave: false,
       saveUninitialized: true,
-      secret: appConfig.get<string>('session.key') || 'default_secret',
+      secret: appConfig.get<string>('session.key') || 'default_secret_key',
       cookie: {
         httpOnly: true,
         secure: false,

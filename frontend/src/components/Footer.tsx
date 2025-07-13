@@ -6,7 +6,11 @@ export const Footer = (props: { show: boolean }) => {
     <FooterContainer show={props.show}>
       <p style={{ fontSize: '12px' }}>
         Developed by 몰입캠프 &nbsp;
-        <a href="https://github.com/JayunKu/MADCAMP_WEEK_2">
+        <a
+          href="https://github.com/JayunKu/MADCAMP_WEEK_2"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
           <img
             src={githubLogo}
             alt="GitHub"

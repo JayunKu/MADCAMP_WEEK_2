@@ -1,4 +1,4 @@
-import { GameMode, GameStatus } from './gameType';
+import { GameMode, GameStatus } from './game';
 
 export const EXAMPLE_PLAYER_INFOS = [
   {

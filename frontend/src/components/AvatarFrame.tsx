@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { AvatarType, getAvatarImage } from '../types/avatarType';
+import { AvatarType, getAvatarImage } from '../types/avatar';
 
 interface AvatarProfileProps {
   size: 'big' | 'small';

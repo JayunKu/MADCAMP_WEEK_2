@@ -1,5 +1,5 @@
 import './App.css';
-import { AuthContext } from './context/AuthContext';
+import { AuthProvider } from './context/AuthProvider';
 import { AppThemeProvider } from './styles/ThemeProvider';
 import MainPage from './pages/main';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
@@ -24,7 +24,7 @@ function App() {
   return (
     <AppThemeProvider>
       <GoogleOAuthProvider clientId={clientId}>
-        <AuthContext.Provider value={null}>
+        <AuthProvider>
           <BrowserRouter>
             <MainContainer>
               <Routes>
@@ -50,7 +50,7 @@ function App() {
               </Routes>
             </MainContainer>
           </BrowserRouter>
-        </AuthContext.Provider>
+        </AuthProvider>
       </GoogleOAuthProvider>
     </AppThemeProvider>
   );

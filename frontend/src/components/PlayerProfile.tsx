@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
 import { AvatarFrame } from './AvatarFrame';
-import { AvatarType } from '../types/avatarType';
+import { AvatarType } from '../types/avatar';
 import { useTheme } from '@emotion/react';
 import hostIcon from '../assets/images/host.svg';
 import trashIcon from '../assets/images/trash.svg';

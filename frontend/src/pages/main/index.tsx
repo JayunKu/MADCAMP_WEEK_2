@@ -1,16 +1,12 @@
 import { useState, useRef, useEffect } from 'react';
 import { Footer } from '../../components/Footer';
-import styled from '@emotion/styled';
-import {
-  Sketchbook,
-  SketchbookHandle,
-} from '../../components/sketchbook/Sketchbook';
+import { Sketchbook } from '../../components/sketchbook/Sketchbook';
 import { LargeButton, SmallButton } from '../../components/Button';
 import { useTheme } from '@emotion/react';
 import mainLogo from '../../assets/images/main-logo.png';
 import gameAbstract from '../../assets/images/game-abstract.png';
 import { Spacer } from '../../components/Spacer';
-import { AvatarType } from '../../types/avatarType';
+import { AvatarType, getAvartarTypeFromId } from '../../types/avatar';
 import { AvatarCarousel } from '../../components/AvatarCarousel';
 import { PlayerProfile } from '../../components/PlayerProfile';
 import { PartyCode } from '../../components/PartyCode';
@@ -19,19 +15,21 @@ import modeAbstract from '../../assets/images/mode-abstract.png';
 import {
   GameModeButton,
   GameSettings,
-  GoogleLoginButton,
   PlayAsGuestButton,
   UsernameInput,
 } from '../index.styles';
-import { GameMode } from '../../types/gameType';
+import { GameMode } from '../../types/game';
 import { useGoogleLogin } from '@react-oauth/google';
 import { axiosInstance } from '../../hooks/useAxios';
+import { useAuth } from '../../context/AuthContext';
+import { EXAMPLE_PLAYER_INFOS } from '../../types/mockData';
 
 const MAX_PLAYER_PER_PARTY = 8; // 최대 플레이어 수
 
 const MainPage = () => {
   const theme = useTheme();
   const navigate = useNavigate();
+  const { login, logout, user, isAuthenticated } = useAuth();
 
   const [showFooter, setShowFooter] = useState(true);
   const [showSketchbook, setShowSketchbook] = useState(true);
@@ -55,6 +53,16 @@ const MainPage = () => {
 
         console.log('Auth successful:', authResponse.data);
 
+        // 사용자 정보를 AuthContext에 저장
+        const userData = {
+          id: authResponse.data.id || authResponse.data.sub,
+          name: authResponse.data.name,
+          avatarId: authResponse.data.avatarId,
+          totalGames: authResponse.data.totalGames || 0,
+          totalWins: authResponse.data.totalWins || 0,
+        };
+
+        login(userData);
         flipToPage(1);
       } catch (error) {
         console.error('Auth failed:', error);
@@ -65,36 +73,19 @@ const MainPage = () => {
     },
   });
 
-  const EXAMPLE_PLAYERS = [
-    {
-      id: 1,
-      isMember: true,
-      username: 'Player1',
-      totalGames: 10,
-      totalWins: 5,
-      avatarId: 0,
-    },
-    {
-      id: 2,
-      isMember: false,
-      username: 'Player2',
-      avatarId: 2,
-    },
-    {
-      id: 3,
-      isMember: true,
-      username: 'Player3',
-      totalGames: 8,
-      totalWins: 3,
-      avatarId: 3,
-    },
-  ];
-
   useEffect(() => {
     return () => {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };
   }, []);
+
+  // 로그인된 사용자 정보가 있으면 username 자동 설정
+  useEffect(() => {
+    if (user) {
+      setUsername(user.name);
+      setSelectedAvatar(getAvartarTypeFromId(user.avatarId));
+    }
+  }, [user]);
 
   const flipToPage = (targetIdx: number) => {
     setFlipping(true);
@@ -103,6 +94,10 @@ const MainPage = () => {
       setPageIdx(targetIdx);
       setFlipping(false);
     }, 500);
+  };
+
+  const onGoogleLoginButtonHandler = () => {
+    googleLogin();
   };
 
   const onPlayAsGuestButtonHandler = () => {
@@ -152,12 +147,22 @@ const MainPage = () => {
               />
               <LargeButton
                 backgroundColor={theme.colors.lightYellow}
-                onClick={googleLogin}
+                onClick={() => {
+                  if (!isAuthenticated) onGoogleLoginButtonHandler();
+                  else flipToPage(1);
+                }}
               >
-                Google로 로그인
+                {isAuthenticated
+                  ? `${user?.name}으로 플레이`
+                  : 'Google로 로그인'}
               </LargeButton>
-              <PlayAsGuestButton onClick={onPlayAsGuestButtonHandler}>
-                비회원으로 게임하기
+              <PlayAsGuestButton
+                onClick={() => {
+                  if (!isAuthenticated) onPlayAsGuestButtonHandler();
+                  else logout();
+                }}
+              >
+                {isAuthenticated ? `로그아웃` : '비회원으로 게임하기'}
               </PlayAsGuestButton>
             </>,
             // 1: 방 생성 및 입장 페이지
@@ -204,7 +209,7 @@ const MainPage = () => {
                 }}
               >
                 {Array.from({ length: MAX_PLAYER_PER_PARTY }).map((_, idx) => {
-                  const player = EXAMPLE_PLAYERS[idx];
+                  const player = EXAMPLE_PLAYER_INFOS[idx];
                   if (player) {
                     return (
                       <PlayerProfile

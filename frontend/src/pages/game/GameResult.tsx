@@ -4,7 +4,7 @@ import { Footer } from '../../components/Footer';
 import { Sketchbook } from '../../components/sketchbook/Sketchbook';
 import { Spacer } from '../../components/Spacer';
 import { theme } from '../../styles/theme';
-import { getAvartarTypeFromId, getAvatarImage } from '../../types/avatarType';
+import { getAvartarTypeFromId, getAvatarImage } from '../../types/avatar';
 import { EXAMPLE_GAME_DATA, EXAMPLE_PLAYER_INFOS } from '../../types/mockData';
 
 interface GameResultPageState {}

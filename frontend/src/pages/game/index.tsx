@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Sketchbook } from '../../components/sketchbook/Sketchbook';
 import { Spacer } from '../../components/Spacer';
-import { GameMode, GameStatus } from '../../types/gameType';
+import { GameMode, GameStatus } from '../../types/game';
 import { useTheme } from '@emotion/react';
 import { UserInput } from '../../components/UserInput';
 import { GenerateButton } from '../../components/GenerateButton';
