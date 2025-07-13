@@ -6,7 +6,7 @@ import { useTheme } from '@emotion/react';
 import mainLogo from '../../assets/images/main-logo.png';
 import gameAbstract from '../../assets/images/game-abstract.png';
 import { Spacer } from '../../components/Spacer';
-import { AvatarType, getAvartarTypeFromId } from '../../types/avatar';
+import { AvatarType, getAvatarTypeFromId } from '../../types/avatar';
 import { AvatarCarousel } from '../../components/AvatarCarousel';
 import { PlayerProfile } from '../../components/PlayerProfile';
 import { useNavigate } from 'react-router-dom';
@@ -84,7 +84,7 @@ const MainPage = () => {
   useEffect(() => {
     if (user) {
       setUsername(user.name);
-      setSelectedAvatar(getAvartarTypeFromId(user.avatarId));
+      setSelectedAvatar(getAvatarTypeFromId(user.avatarId));
     }
   }, [user]);
 

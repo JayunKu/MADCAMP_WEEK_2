@@ -50,7 +50,7 @@ export class AuthService {
           player_id: v1(),
           name: googleUserInfo.name,
           google_user_id: googleUserInfo.sub,
-          avartar_id: 0,
+          avatar_id: 0,
           total_games: 0,
           total_wins: 0,
         },

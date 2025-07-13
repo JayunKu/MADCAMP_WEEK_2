@@ -15,7 +15,7 @@ export class UserService {
 
     const updateData = {
       ...(name !== null && { name }),
-      ...(avatarId !== null && { avartar_id: avatarId }),
+      ...(avatarId !== null && { avatar_id: avatarId }),
     };
 
     return this.prismaService.user.update({

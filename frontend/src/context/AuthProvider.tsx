@@ -18,6 +18,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const savedPlayerId = localStorage.getItem(PLAYER_ID_KEY);
     if (savedPlayerId) {
       setPlayerId(savedPlayerId);
+
+      // Redis에 playerId 등록하기 위함
+      await axiosInstance.post('/players', {
+        player_id: savedPlayerId,
+      });
+
       return savedPlayerId;
     } else {
       try {

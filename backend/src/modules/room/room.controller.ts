@@ -1,18 +1,20 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
 import { RoomService } from './room.service';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CreateRoomRequestDto } from './dtos/create-room-request.dto';
-import { Room } from 'src/config/redis/model';
-import { CommonService } from '../common/common.service';
+import { Player, Room } from 'src/config/redis/model';
 import { CommonResponseDto } from 'src/common/dtos/common-response.dto';
 import { CreateRoomResponseDto } from './dtos/create-room-response.dto';
+import { PlayerGuard } from '../auth/guards/player.guard';
+import { CurrentPlayer } from 'src/common/decorators/current-player.decorator';
+import { PlayerRedisService } from '../../config/redis/player-redis.service';
 
 @ApiTags('room')
 @Controller('room')
 export class RoomController {
   constructor(
     private readonly roomService: RoomService,
-    private readonly commonService: CommonService,
+    private readonly playerRedisService: PlayerRedisService,
   ) {}
 
   @Get()
@@ -26,12 +28,17 @@ export class RoomController {
   }
 
   @Post()
+  @UseGuards(PlayerGuard)
   @ApiOperation({ summary: '파티 생성' })
-  async createRoom(@Body() createRoomRequestDto: CreateRoomRequestDto) {
+  async createRoom(
+    @CurrentPlayer() currentPlayer: Player,
+    @Body() createRoomRequestDto: CreateRoomRequestDto,
+  ) {
     const { host_player_id } = createRoomRequestDto;
+    console.log(`currentPlayer: ${JSON.stringify(currentPlayer)}`);
 
     // Check if the player exists
-    const player = await this.commonService.getPlayerById(host_player_id);
+    const player = await this.playerRedisService.getPlayerById(host_player_id);
     if (!player) {
       throw new Error(`Player with ID ${host_player_id} does not exist.`);
     }

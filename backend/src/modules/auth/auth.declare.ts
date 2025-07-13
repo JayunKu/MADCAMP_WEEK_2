@@ -1,6 +1,6 @@
 import { User } from '@prisma/client';
 import { SessionPayload } from './session/session.payload';
-import { Player } from 'src/common/types/player';
+import { Player } from 'src/config/redis/model';
 
 // express-session 모듈의 SessionData를 override
 declare module 'express-session' {

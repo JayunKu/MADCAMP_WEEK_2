@@ -50,7 +50,7 @@ export const getAvatarImage = (avatarType: AvatarType) => {
   }
 };
 
-export const getAvartarTypeFromId = (
+export const getAvatarTypeFromId = (
   id: number,
   isFaker: boolean = false
 ): AvatarType => {

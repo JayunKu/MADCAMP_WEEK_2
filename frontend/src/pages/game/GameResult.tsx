@@ -4,7 +4,7 @@ import { Footer } from '../../components/Footer';
 import { Sketchbook } from '../../components/sketchbook/Sketchbook';
 import { Spacer } from '../../components/Spacer';
 import { theme } from '../../styles/theme';
-import { getAvartarTypeFromId, getAvatarImage } from '../../types/avatar';
+import { getAvatarTypeFromId, getAvatarImage } from '../../types/avatar';
 import { EXAMPLE_GAME_DATA, EXAMPLE_PLAYER_INFOS } from '../../types/mockData';
 
 interface GameResultPageState {}
@@ -48,7 +48,7 @@ export const GameResultPage = () => {
           }}
         >
           <img
-            src={getAvatarImage(getAvartarTypeFromId(winners[0].avatarId))}
+            src={getAvatarImage(getAvatarTypeFromId(winners[0].avatarId))}
             alt="Winner Avatar 1"
             style={{
               width: '160px',
@@ -57,7 +57,7 @@ export const GameResultPage = () => {
             }}
           />
           <img
-            src={getAvatarImage(getAvartarTypeFromId(winners[1].avatarId))}
+            src={getAvatarImage(getAvatarTypeFromId(winners[1].avatarId))}
             alt="Winner Avatar 2"
             style={{
               width: '160px',
@@ -68,7 +68,7 @@ export const GameResultPage = () => {
             }}
           />
           <img
-            src={getAvatarImage(getAvartarTypeFromId(winners[2].avatarId))}
+            src={getAvatarImage(getAvatarTypeFromId(winners[2].avatarId))}
             alt="Winner Avatar 3"
             style={{
               width: '160px',

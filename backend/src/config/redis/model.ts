@@ -34,8 +34,10 @@ export interface Room {
   turn_player_id: string | null;
 }
 
-export interface User {
+export interface Player {
+  id: string;
+  name: string;
+  avatar_id: number;
   is_member: boolean;
   room_id: string | null;
-  id: string;
 }
