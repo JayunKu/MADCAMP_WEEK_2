@@ -85,6 +85,9 @@ const MainPage = () => {
     if (user) {
       setUsername(user.name);
       setSelectedAvatar(getAvatarTypeFromId(user.avatarId));
+    } else {
+      setUsername('');
+      setSelectedAvatar(AvatarType.AVATAR_GRAY);
     }
   }, [user]);
 

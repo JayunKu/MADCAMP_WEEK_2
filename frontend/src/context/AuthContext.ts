@@ -8,9 +8,17 @@ export interface User {
   totalWins: number;
 }
 
+export interface Player {
+  id: string;
+  name: string;
+  avatarId: number;
+  isMember: boolean;
+  roomId?: string;
+}
+
 export interface AuthContextType {
   user: User | null;
-  playerId: string | null;
+  player: Player | null;
   login: (user: User) => void;
   logout: () => void;
   isAuthenticated: boolean;

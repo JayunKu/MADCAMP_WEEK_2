@@ -1,5 +1,5 @@
 import React, { useState, ReactNode, useEffect } from 'react';
-import { AuthContext, User, AuthContextType } from './AuthContext';
+import { AuthContext, User, AuthContextType, Player } from './AuthContext';
 import { axiosInstance } from '../hooks/useAxios';
 
 const PLAYER_ID_KEY = 'malgreem_pid';
@@ -11,29 +11,27 @@ interface AuthProviderProps {
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [playerId, setPlayerId] = useState<string | null>(null);
+  const [player, setPlayer] = useState<Player | null>(null);
 
   // playerId를 서버에서 받아오거나, 이미 있으면 로드
   const initializePlayerId = async () => {
-    const savedPlayerId = localStorage.getItem(PLAYER_ID_KEY);
-    if (savedPlayerId) {
-      setPlayerId(savedPlayerId);
+    const savedPlayer = localStorage.getItem(PLAYER_ID_KEY);
+    if (savedPlayer) {
+      const parsedPlayer = JSON.parse(savedPlayer);
+      setPlayer(parsedPlayer);
 
       // Redis에 playerId 등록하기 위함
       await axiosInstance.post('/players', {
-        player_id: savedPlayerId,
+        player_id: parsedPlayer.id,
       });
 
-      return savedPlayerId;
+      return parsedPlayer.id;
     } else {
       try {
-        const res = await axiosInstance.post('/players');
-        const newPlayerId = res.data.playerId || res.data.id;
-        if (newPlayerId) {
-          localStorage.setItem(PLAYER_ID_KEY, newPlayerId);
-          setPlayerId(newPlayerId);
-          return newPlayerId;
-        }
+        const newPlayer = (await axiosInstance.post('/players')).data;
+        localStorage.setItem(PLAYER_ID_KEY, JSON.stringify(newPlayer));
+        setPlayer(newPlayer);
+        return newPlayer.id;
       } catch (e) {
         console.error('Failed to get playerId from server:', e);
       }
@@ -72,10 +70,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         try {
           const parsedUser = JSON.parse(savedUser);
           setUser(parsedUser);
-          if (parsedUser.playerId) {
-            setPlayerId(parsedUser.playerId);
-            restoredPlayerId = parsedUser.playerId;
-          }
+          setPlayer({
+            id: parsedUser.playerId,
+            name: parsedUser.name,
+            avatarId: parsedUser.avatarId,
+            isMember: true,
+          });
+          restoredPlayerId = parsedUser.playerId;
         } catch (error) {
           console.error('Failed to parse saved user data:', error);
           localStorage.removeItem(USER_ID_KEY);
@@ -94,7 +95,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const value: AuthContextType = {
     user,
-    playerId,
+    player,
     login,
     logout,
     isAuthenticated,
