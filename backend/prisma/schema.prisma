@@ -11,7 +11,8 @@ datasource db {
 }
 
 model User {
-  id             String   @id
+  id             Int      @id @default(autoincrement())
+  player_id      String   @unique @db.VarChar(255)
   name           String   @db.VarChar(255)
   google_user_id String   @unique @db.VarChar(255)
   avartar_id     Int      @default(0)

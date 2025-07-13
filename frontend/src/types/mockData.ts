@@ -38,8 +38,8 @@ export const EXAMPLE_GAME_DATA = {
   round_number: 1,
   game_status: GameStatus.PLAYING,
   round_answer: '커피',
-  keeper_user_ids: [1, 2, 4],
-  faker_user_ids: [3],
+  keeper_player_ids: [1, 2, 4],
+  faker_player_ids: [3],
   responses: [
     {
       id: '1',

@@ -8,7 +8,7 @@ export class UserService {
   constructor(private readonly prismaService: PrismaService) {}
 
   async updateUser(
-    id: string,
+    id: number,
     updateUserRequestDto: UpdateUserRequestDto,
   ): Promise<User> {
     const { name, avatarId } = updateUserRequestDto;
@@ -24,13 +24,13 @@ export class UserService {
     });
   }
 
-  async deleteUser(id: string): Promise<void> {
+  async deleteUser(id: number): Promise<void> {
     await this.prismaService.user.delete({
       where: { id },
     });
   }
 
-  async createUserGame(userId: string, isWin: boolean): Promise<User> {
+  async createUserGame(userId: number, isWin: boolean): Promise<User> {
     const user = await this.prismaService.user.update({
       where: { id: userId },
       data: {

@@ -1,7 +1,8 @@
 import { User } from '@prisma/client';
 
 export class CommonUserResponseDto {
-  id: string;
+  id: number;
+  player_id: string;
   name: string;
   avatar_id: number;
   total_games: number;
@@ -9,6 +10,7 @@ export class CommonUserResponseDto {
 
   constructor(user: User) {
     this.id = user.id;
+    this.player_id = user.player_id;
     this.name = user.name;
     this.avatar_id = user.avartar_id;
     this.total_games = user.total_games;

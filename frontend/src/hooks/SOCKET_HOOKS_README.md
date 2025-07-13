@@ -1,15 +1,18 @@
 # Socket.IO 훅 사용 가이드
 
 ## 개요
+
 이 프로젝트는 Socket.IO를 편리하게 사용하기 위한 두 가지 커스텀 훅을 제공합니다:
 
 1. `useSocket` - 기본 Socket.IO 연결 관리
 2. `useGameSocket` - 게임 관련 Socket.IO 이벤트 처리
 
 ## 설치된 패키지
+
 - `socket.io-client` - Socket.IO 클라이언트 라이브러리
 
 ## 환경 변수 설정
+
 `.env` 파일에 다음 환경 변수를 설정하세요:
 
 ```
@@ -20,6 +23,7 @@ REACT_APP_GOOGLE_OAUTH_CLIENT_ID=your_google_oauth_client_id_here
 ## 1. useSocket 훅
 
 ### 기본 사용법
+
 ```typescript
 import { useSocket } from './hooks/useSocket';
 
@@ -28,7 +32,7 @@ const MyComponent = () => {
 
   useEffect(() => {
     // 이벤트 리스너 등록
-    on('message', (data) => {
+    on('message', data => {
       console.log('Message received:', data);
     });
 
@@ -52,6 +56,7 @@ const MyComponent = () => {
 ```
 
 ### 옵션
+
 ```typescript
 const { socket, isConnected } = useSocket({
   url: 'http://localhost:3001',
@@ -65,6 +70,7 @@ const { socket, isConnected } = useSocket({
 ## 2. useGameSocket 훅
 
 ### 기본 사용법
+
 ```typescript
 import { useGameSocket } from './hooks/useGameSocket';
 
@@ -94,11 +100,13 @@ const GameComponent = () => {
       <h3>Connection: {isConnected ? 'Connected' : 'Disconnected'}</h3>
       <h3>Game Status: {gameState.gameStatus}</h3>
       <h3>My Turn: {gameState.isMyTurn ? 'Yes' : 'No'}</h3>
-      
+
       {gameState.room && (
         <div>
           <h4>Room: {gameState.room.code}</h4>
-          <h4>Players: {gameState.room.players.length}/{gameState.room.maxPlayers}</h4>
+          <h4>
+            Players: {gameState.room.players.length}/{gameState.room.maxPlayers}
+          </h4>
         </div>
       )}
 
@@ -113,6 +121,7 @@ const GameComponent = () => {
 ## 3. 게임 상태 관리
 
 ### GameState 구조
+
 ```typescript
 interface GameState {
   room: GameRoom | null;
@@ -123,6 +132,7 @@ interface GameState {
 ```
 
 ### GameRoom 구조
+
 ```typescript
 interface GameRoom {
   id: string;
@@ -138,6 +148,7 @@ interface GameRoom {
 ```
 
 ### GamePlayer 구조
+
 ```typescript
 interface GamePlayer {
   id: string;
@@ -154,22 +165,26 @@ interface GamePlayer {
 ## 4. 주요 함수들
 
 ### 방 관련
+
 - `joinRoom(roomCode: string)` - 방 참여
 - `leaveRoom()` - 방 나가기
 - `createRoom(gameMode: number)` - 방 생성
 - `startGame()` - 게임 시작
 
 ### 게임 관련
+
 - `submitAnswer(answer: string)` - 답변 제출
 - `submitImage(imageId: string)` - 이미지 제출
 
 ### 플레이어 관련
+
 - `updatePlayerReady(isReady: boolean)` - 준비 상태 업데이트
 - `updatePlayerInfo(username: string, avatarId: number)` - 플레이어 정보 업데이트
 
 ## 5. 소켓 이벤트 목록
 
 ### 클라이언트 → 서버
+
 - `join_room` - 방 참여
 - `leave_room` - 방 나가기
 - `create_room` - 방 생성
@@ -180,6 +195,7 @@ interface GamePlayer {
 - `update_player_info` - 플레이어 정보 업데이트
 
 ### 서버 → 클라이언트
+
 - `room_joined` - 방 참여 성공
 - `room_updated` - 방 정보 업데이트
 - `player_joined` - 플레이어 참여
@@ -207,5 +223,6 @@ const { user } = useAuth();
 ## 8. 사용 예시
 
 실제 사용 예시는 다음 파일들을 참조하세요:
+
 - `src/hooks/useGameSocketExample.tsx` - 기본 사용법
 - `src/examples/SocketUsageExamples.tsx` - 게임 페이지와 메인 페이지 통합 예시

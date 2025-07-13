@@ -40,15 +40,18 @@ export const ExampleUsage = () => {
       <h3>Socket Status: {isConnected ? 'Connected' : 'Disconnected'}</h3>
       <h3>Game Status: {gameState.gameStatus}</h3>
       <h3>Is My Turn: {gameState.isMyTurn ? 'Yes' : 'No'}</h3>
-      
+
       {gameState.room && (
         <div>
           <h4>Room Code: {gameState.room.code}</h4>
-          <h4>Players: {gameState.room.players.length}/{gameState.room.maxPlayers}</h4>
+          <h4>
+            Players: {gameState.room.players.length}/{gameState.room.maxPlayers}
+          </h4>
           <ul>
             {gameState.room.players.map(player => (
               <li key={player.id}>
-                {player.username} {player.isHost && '(Host)'} {player.isReady && '(Ready)'}
+                {player.username} {player.isHost && '(Host)'}{' '}
+                {player.isReady && '(Ready)'}
               </li>
             ))}
           </ul>
@@ -58,8 +61,12 @@ export const ExampleUsage = () => {
       <button onClick={handleJoinRoom}>Join Room</button>
       <button onClick={handleCreateRoom}>Create Room</button>
       <button onClick={handleStartGame}>Start Game</button>
-      <button onClick={() => handleSubmitAnswer('test answer')}>Submit Answer</button>
-      <button onClick={() => handleSubmitImage('image123')}>Submit Image</button>
+      <button onClick={() => handleSubmitAnswer('test answer')}>
+        Submit Answer
+      </button>
+      <button onClick={() => handleSubmitImage('image123')}>
+        Submit Image
+      </button>
     </div>
   );
 };

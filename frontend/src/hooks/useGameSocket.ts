@@ -62,69 +62,87 @@ export const useGameSocket = (): UseGameSocketReturn => {
   });
 
   // Room related functions
-  const joinRoom = useCallback((roomCode: string) => {
-    if (!user) {
-      console.error('User must be authenticated to join a room');
-      return;
-    }
-    
-    emit('join_room', {
-      roomCode,
-      player: {
-        id: user.id.toString(),
-        username: user.name,
-        avatarId: 0, // Default avatar
-        isMember: true,
-        totalGames: user.totalGames || 0,
-        totalWins: user.totalWins || 0,
-      },
-    });
-  }, [emit, user]);
+  const joinRoom = useCallback(
+    (roomCode: string) => {
+      if (!user) {
+        console.error('User must be authenticated to join a room');
+        return;
+      }
+
+      emit('join_room', {
+        roomCode,
+        player: {
+          id: user.id.toString(),
+          username: user.name,
+          avatarId: 0, // Default avatar
+          isMember: true,
+          totalGames: user.totalGames || 0,
+          totalWins: user.totalWins || 0,
+        },
+      });
+    },
+    [emit, user]
+  );
 
   const leaveRoom = useCallback(() => {
     emit('leave_room');
   }, [emit]);
 
-  const createRoom = useCallback((gameMode: number) => {
-    if (!user) {
-      console.error('User must be authenticated to create a room');
-      return;
-    }
+  const createRoom = useCallback(
+    (gameMode: number) => {
+      if (!user) {
+        console.error('User must be authenticated to create a room');
+        return;
+      }
 
-    emit('create_room', {
-      gameMode,
-      player: {
-        id: user.id.toString(),
-        username: user.name,
-        avatarId: 0,
-        isMember: true,
-        totalGames: user.totalGames || 0,
-        totalWins: user.totalWins || 0,
-      },
-    });
-  }, [emit, user]);
+      emit('create_room', {
+        gameMode,
+        player: {
+          id: user.id.toString(),
+          username: user.name,
+          avatarId: 0,
+          isMember: true,
+          totalGames: user.totalGames || 0,
+          totalWins: user.totalWins || 0,
+        },
+      });
+    },
+    [emit, user]
+  );
 
   const startGame = useCallback(() => {
     emit('start_game');
   }, [emit]);
 
   // Game related functions
-  const submitAnswer = useCallback((answer: string) => {
-    emit('submit_answer', { answer });
-  }, [emit]);
+  const submitAnswer = useCallback(
+    (answer: string) => {
+      emit('submit_answer', { answer });
+    },
+    [emit]
+  );
 
-  const submitImage = useCallback((imageId: string) => {
-    emit('submit_image', { imageId });
-  }, [emit]);
+  const submitImage = useCallback(
+    (imageId: string) => {
+      emit('submit_image', { imageId });
+    },
+    [emit]
+  );
 
   // Player related functions
-  const updatePlayerReady = useCallback((isReady: boolean) => {
-    emit('update_player_ready', { isReady });
-  }, [emit]);
+  const updatePlayerReady = useCallback(
+    (isReady: boolean) => {
+      emit('update_player_ready', { isReady });
+    },
+    [emit]
+  );
 
-  const updatePlayerInfo = useCallback((username: string, avatarId: number) => {
-    emit('update_player_info', { username, avatarId });
-  }, [emit]);
+  const updatePlayerInfo = useCallback(
+    (username: string, avatarId: number) => {
+      emit('update_player_info', { username, avatarId });
+    },
+    [emit]
+  );
 
   // Socket event listeners
   useEffect(() => {
@@ -154,10 +172,12 @@ export const useGameSocket = (): UseGameSocketReturn => {
       console.log('Player joined:', data);
       setGameState(prev => ({
         ...prev,
-        room: prev.room ? {
-          ...prev.room,
-          players: [...prev.room.players, data.player],
-        } : null,
+        room: prev.room
+          ? {
+              ...prev.room,
+              players: [...prev.room.players, data.player],
+            }
+          : null,
       }));
     };
 
@@ -165,10 +185,12 @@ export const useGameSocket = (): UseGameSocketReturn => {
       console.log('Player left:', data);
       setGameState(prev => ({
         ...prev,
-        room: prev.room ? {
-          ...prev.room,
-          players: prev.room.players.filter(p => p.id !== data.playerId),
-        } : null,
+        room: prev.room
+          ? {
+              ...prev.room,
+              players: prev.room.players.filter(p => p.id !== data.playerId),
+            }
+          : null,
       }));
     };
 
@@ -176,12 +198,14 @@ export const useGameSocket = (): UseGameSocketReturn => {
       console.log('Player updated:', data);
       setGameState(prev => ({
         ...prev,
-        room: prev.room ? {
-          ...prev.room,
-          players: prev.room.players.map(p => 
-            p.id === data.player.id ? data.player : p
-          ),
-        } : null,
+        room: prev.room
+          ? {
+              ...prev.room,
+              players: prev.room.players.map(p =>
+                p.id === data.player.id ? data.player : p
+              ),
+            }
+          : null,
       }));
     };
 

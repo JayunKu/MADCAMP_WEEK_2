@@ -13,7 +13,7 @@ export const GameResultPage = () => {
   const location = useLocation() as { state: GameResultPageState };
   const game_data = EXAMPLE_GAME_DATA;
 
-  const winner_ids = game_data.player_keeper_ids.slice(0, 3);
+  const winner_ids = game_data.keeper_player_ids.slice(0, 3);
   const winners = EXAMPLE_PLAYER_INFOS.filter(response =>
     winner_ids.includes(response.id)
   );

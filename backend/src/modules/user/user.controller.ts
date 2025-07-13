@@ -6,6 +6,7 @@ import {
   HttpCode,
   HttpException,
   Param,
+  ParseIntPipe,
   Post,
   Put,
   UseGuards,
@@ -31,7 +32,7 @@ export class UserController {
 
   @Get(':id')
   @ApiOperation({ summary: '회원 정보 조회' })
-  async getUser(@Param('id') id: string) {
+  async getUser(@Param('id', ParseIntPipe) id: number) {
     const user = await this.commonService.getUserById(id);
 
     if (!user) {

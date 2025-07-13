@@ -1,6 +1,7 @@
 import { createContext, useContext } from 'react';
 export interface User {
   id: number;
+  playerId: string;
   name: string;
   avatarId: number;
   totalGames: number;
@@ -9,6 +10,7 @@ export interface User {
 
 export interface AuthContextType {
   user: User | null;
+  playerId: string | null;
   login: (user: User) => void;
   logout: () => void;
   isAuthenticated: boolean;

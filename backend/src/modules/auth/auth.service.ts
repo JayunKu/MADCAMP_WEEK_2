@@ -47,7 +47,7 @@ export class AuthService {
     if (!user) {
       user = await this.prismaService.user.create({
         data: {
-          id: v1(),
+          player_id: v1(),
           name: googleUserInfo.name,
           google_user_id: googleUserInfo.sub,
           avartar_id: 0,

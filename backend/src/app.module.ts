@@ -7,6 +7,7 @@ import { UserController } from './modules/user/user.controller';
 import { UserService } from './modules/user/user.service';
 import { RoomModule } from './modules/room/room.module';
 import { CommonModule } from './modules/common/common.module';
+import { PlayerModule } from './modules/player/player.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { CommonModule } from './modules/common/common.module';
     AuthModule,
     HealthzModule,
     UserModule,
+    PlayerModule,
     RoomModule,
     CommonModule,
   ],

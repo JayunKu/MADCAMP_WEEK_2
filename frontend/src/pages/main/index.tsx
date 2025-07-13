@@ -55,11 +55,12 @@ const MainPage = () => {
 
         // 사용자 정보를 AuthContext에 저장
         const userData = {
-          id: authResponse.data.id || authResponse.data.sub,
+          id: authResponse.data.id,
+          playerId: authResponse.data.player_id,
           name: authResponse.data.name,
-          avatarId: authResponse.data.avatarId,
-          totalGames: authResponse.data.totalGames || 0,
-          totalWins: authResponse.data.totalWins || 0,
+          avatarId: authResponse.data.avatar_id,
+          totalGames: authResponse.data.total_games,
+          totalWins: authResponse.data.total_wins,
         };
 
         login(userData);

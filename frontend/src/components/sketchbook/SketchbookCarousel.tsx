@@ -6,7 +6,7 @@ import { useTheme } from '@emotion/react';
 import { Spacer } from '../Spacer';
 
 // 각 플레이어의 응답 데이터와 플레이어 정보 매칭
-const responses = EXAMPLE_GAME_DATA.player_responses.map(resp => {
+const responses = EXAMPLE_GAME_DATA.responses.map(resp => {
   const player = EXAMPLE_PLAYER_INFOS.find(p => p.id.toString() === resp.id);
   return {
     ...resp,

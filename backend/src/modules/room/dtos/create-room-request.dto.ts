@@ -5,5 +5,5 @@ export class CreateRoomRequestDto {
   @ApiProperty()
   @IsNotEmpty()
   @IsString()
-  host_user_id: string;
+  host_player_id: string;
 }
