@@ -18,7 +18,11 @@ export class RoomController {
   @Get()
   @ApiOperation({ summary: '모든 파티 조회' })
   async getAllRooms() {
-    return this.roomService.getAllRooms();
+    const rooms = await this.roomService.getAllRooms();
+
+    return new CommonResponseDto({
+      rooms: rooms.map((room: Room) => new CreateRoomResponseDto(room)),
+    });
   }
 
   @Post()
