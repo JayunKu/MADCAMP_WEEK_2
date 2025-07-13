@@ -10,6 +10,7 @@ export const theme = {
     gray: '#B3B3B3',
     darkGray: '#666666',
     lightGray: '#F5F5F5',
+    lightRed: '#FFD9CE',
   },
   shadows: {
     default: '0 2px 2px rgba(0, 0, 0, 0.25)',

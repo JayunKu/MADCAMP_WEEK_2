@@ -50,7 +50,6 @@ export const SketchbookPage = styled.div<{ flipping?: boolean }>`
   width: 100%;
   height: 100%;
   background-color: ${({ theme }) => theme.colors.yellowWhite};
-  box-sizing: border-box;
   position: relative;
   display: flex;
   flex-direction: column;

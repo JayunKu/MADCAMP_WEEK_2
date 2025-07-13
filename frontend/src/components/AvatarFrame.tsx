@@ -29,7 +29,6 @@ export const AvatarFrame = (props: AvatarProfileProps) => {
 const AvatarProfileContainer = styled.div<{
   size: 'big' | 'small';
 }>`
-  box-sizing: border-box;
   width: ${({ size }) => (size === 'big' ? '80px' : '40px')};
   height: ${({ size }) => (size === 'big' ? '80px' : '40px')};
   background-color: #d9d9d9;

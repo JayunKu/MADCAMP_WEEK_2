@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Sketchbook } from '../../components/sketchbook/Sketchbook';
 import { Spacer } from '../../components/Spacer';
-import { GAME_MODE, GAME_STATUS } from '../../types/gameType';
+import { GameMode, GameStatus } from '../../types/gameType';
 import { useTheme } from '@emotion/react';
 import { UserInput } from '../../components/UserInput';
 import { GenerateButton } from '../../components/GenerateButton';
@@ -106,7 +106,7 @@ export const GamePage = () => {
     <>
       <p style={{ fontSize: '23px', margin: '15px' }}>
         {getGameModeName(game_data.game_mode)}
-        {game_data.game_mode === GAME_MODE.FAKER && (
+        {game_data.game_mode === GameMode.FAKER && (
           <span style={{ fontSize: '19px' }}>
             &nbsp;({game_data.round_number}라운드)
           </span>

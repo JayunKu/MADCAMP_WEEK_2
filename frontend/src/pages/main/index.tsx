@@ -15,6 +15,14 @@ import { AvatarCarousel } from '../../components/AvatarCarousel';
 import { PlayerProfile } from '../../components/PlayerProfile';
 import { PartyCode } from '../../components/PartyCode';
 import { useNavigate } from 'react-router-dom';
+import modeAbstract from '../../assets/images/mode-abstract.png';
+import {
+  GameModeButton,
+  GameSettings,
+  PlayAsGuestButton,
+  UsernameInput,
+} from '../index.styles';
+import { GameMode } from '../../types/gameType';
 
 const MAX_PLAYER_PER_PARTY = 8; // 최대 플레이어 수
 
@@ -29,6 +37,8 @@ const MainPage = () => {
   const [pageIdx, setPageIdx] = useState(0);
   const [username, setUsername] = useState('');
   const [selectedAvatar, setSelectedAvatar] = useState(AvatarType.AVATAR_GREEN);
+
+  const [selectedGameMode, setSelectedGameMode] = useState(GameMode.BASIC);
 
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -126,6 +136,15 @@ const MainPage = () => {
             </>,
             // 1: 방 생성 및 입장 페이지
             <>
+              {/* <img
+                src={modeAbstract}
+                alt="Mode Abstract"
+                style={{
+                  width: '100%',
+                  //   marginBottom: '30px',
+                }}
+              /> */}
+
               <AvatarCarousel
                 value={selectedAvatar}
                 onChange={setSelectedAvatar}
@@ -190,6 +209,40 @@ const MainPage = () => {
 
               <PartyCode code="FDAS32D" />
 
+              <GameSettings>
+                <p style={{ width: '100%' }}>모드 선택</p>
+                <div
+                  style={{
+                    display: 'flex',
+                    gap: '10px',
+                    flexDirection: 'row',
+                    marginTop: '5px',
+                  }}
+                >
+                  <GameModeButton
+                    backgroundColor={theme.colors.lighterYellow}
+                    disabled={selectedGameMode === GameMode.BASIC}
+                    onClick={() => {
+                      setSelectedGameMode(GameMode.BASIC);
+                    }}
+                  >
+                    기본 모드
+                  </GameModeButton>
+                  <GameModeButton
+                    backgroundColor={theme.colors.lightRed}
+                    disabled={selectedGameMode === GameMode.FAKER}
+                    onClick={() => {
+                      setSelectedGameMode(GameMode.FAKER);
+                    }}
+                  >
+                    페이커 모드
+                  </GameModeButton>
+                </div>
+                <p style={{ width: '100%', marginTop: '15px' }}>
+                  게임 옵션 선택
+                </p>
+              </GameSettings>
+
               <SmallButton
                 backgroundColor={theme.colors.lightYellow}
                 onClick={onGameStartButtonHandler}
@@ -204,31 +257,5 @@ const MainPage = () => {
     </>
   );
 };
-
-const PlayAsGuestButton = styled.button`
-  font-size: 14px;
-  cursor: pointer;
-  margin-top: 10px;
-  color: ${({ theme }) => theme.colors.darkGray};
-  text-decoration: underline;
-  text-underline-offset: 4px;
-`;
-
-const UsernameInput = styled.input`
-  width: 180px;
-  padding: 12px 16px;
-  margin-bottom: 18px;
-  font-size: 16px;
-  border: 2px solid ${({ theme }) => theme.colors.lightGray};
-  border-radius: ${({ theme }) => theme.borderRadius.default};
-  outline: none;
-  box-sizing: border-box;
-  background: ${({ theme }) => theme.colors.white};
-  color: ${({ theme }) => theme.colors.black};
-  transition: border 0.2s;
-  &:focus {
-    border-color: ${({ theme }) => theme.colors.darkGray};
-  }
-`;
 
 export default MainPage;

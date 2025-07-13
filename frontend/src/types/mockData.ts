@@ -1,4 +1,4 @@
-import { GAME_MODE, GAME_STATUS } from './gameType';
+import { GameMode, GameStatus } from './gameType';
 
 export const EXAMPLE_PLAYER_INFOS = [
   {
@@ -34,9 +34,9 @@ export const EXAMPLE_PLAYER_INFOS = [
 ];
 
 export const EXAMPLE_GAME_DATA = {
-  game_mode: GAME_MODE.BASIC,
+  game_mode: GameMode.BASIC,
   round_number: 1,
-  game_status: GAME_STATUS.PLAYING,
+  game_status: GameStatus.PLAYING,
   round_answer: '커피',
   player_keeper_ids: [1, 2, 4],
   player_faker_ids: [3],

@@ -51,6 +51,5 @@ const MainContainer = styled.div`
   padding: 0 15px;
   width: 412px;
   background: #ededed;
-  box-sizing: border-box;
   overflow: hidden;
 `;
