@@ -30,8 +30,8 @@ def translate_prompt(prompt: str) -> str:
 # 이미지 생성 및 GCS 업로드 함수
 def generate_image_and_upload_to_gcs(prompt: str) -> str:
 
-    negative_prompt = "creepy, dark, scary, weird, ugly, monster, horror"
-    default_prompt = "childlike cartoon style, on a pure white background, smiling face, minimalistic, no background elements"
+    negative_prompt = "creepy, dark, weird, ugly, monster"
+    default_prompt = "minimalistic, childlike cartoon style, on a pure white background, smiling face, no background elements"
     translated_prompt = translate_prompt(prompt)
     full_prompt = f"{translated_prompt}, {default_prompt}"
 
