@@ -3,6 +3,7 @@ import torch
 from diffusers import StableDiffusionPipeline
 from google.cloud import storage
 from PIL import Image
+from deep_translator import GoogleTranslator
 import os
 
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "../madcamp-malgreem-fd2ecdff2f9c.json"
@@ -20,14 +21,23 @@ pipe = StableDiffusionPipeline.from_pretrained(
     torch_dtype=torch.float16
 ).to("cuda")
 
+def translate_prompt(prompt: str) -> str:
+    translated = GoogleTranslator(source='auto', target='en').translate(prompt)
+    #print(f"[번역] 입력 프롬프트: {prompt}")
+    #print(f"[번역] 번역된 프롬프트: {translated}")
+    return translated
+
 # 이미지 생성 및 GCS 업로드 함수
 def generate_image_and_upload_to_gcs(prompt: str) -> str:
 
-    negative_prompt = "creepy, scary, weird, ugly, monster, horror, dark"
+    negative_prompt = "creepy, dark, scary, weird, ugly, monster, horror"
+    default_prompt = "childlike cartoon style, on a pure white background, smiling face, minimalistic, no background elements"
+    translated_prompt = translate_prompt(prompt)
+    full_prompt = f"{translated_prompt}, {default_prompt}"
 
     # 1. 이미지 생성
     with torch.autocast("cuda"):
-        image = pipe(prompt, negative_prompt=negative_prompt).images[0]
+        image = pipe(full_prompt, negative_prompt=negative_prompt).images[0]
 
     # 2. 로컬 저장
     os.makedirs(IMAGE_DIR, exist_ok=True)
