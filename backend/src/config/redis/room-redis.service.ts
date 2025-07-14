@@ -310,7 +310,7 @@ export class RoomRedisService {
   async addPlayerToRoom(
     roomId: string,
     playerId: string,
-  ): Promise<Room | null> {
+  ): Promise<Player[] | null> {
     const roomKey = `rooms:${roomId}`;
     const exists = await this.redisService.exists(roomKey);
     if (!exists) return null;
@@ -318,8 +318,7 @@ export class RoomRedisService {
     // 플레이어 정보 가져오기
     const playerData = await this.redisService.hGetAll(`players:${playerId}`);
 
-    if (!playerData || Object.keys(playerData).length === 0)
-      return await this.getRoomById(roomId);
+    if (!playerData) return null;
 
     // 방의 플레이어 해시에 추가
     await this.redisService.hSet(
@@ -337,7 +336,24 @@ export class RoomRedisService {
     // 플레이어의 방 ID 업데이트
     await this.redisService.hSet(`players:${playerId}`, 'room_id', roomId);
 
-    return await this.getRoomById(roomId);
+    return await this.getRoomPlayers(roomId);
+  }
+
+  async removePlayerFromRoom(
+    roomId: string,
+    playerId: string,
+  ): Promise<Player[] | null> {
+    const roomKey = `rooms:${roomId}`;
+    const exists = await this.redisService.exists(roomKey);
+    if (!exists) return null;
+
+    // 방의 플레이어 해시에서 제거
+    await this.redisService.hDel(`${roomKey}:players`, playerId);
+
+    // 플레이어의 방 ID 업데이트
+    await this.redisService.hSet(`players:${playerId}`, 'room_id', '');
+
+    return await this.getRoomPlayers(roomId);
   }
 
   // ------ 여기까지는 확인 ------
