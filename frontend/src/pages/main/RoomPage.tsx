@@ -68,6 +68,32 @@ export const RoomPage = ({
     }
   };
 
+  const onMakeHostButtonHandler = async (playerId: string) => {
+    if (!room || !player) {
+      alert('오류가 발생하였습니다. 다시 시도해주세요.');
+      return;
+    }
+    if (!isRoomHost) {
+      alert('방장만 방장를 변경할 수 있습니다.');
+      return;
+    }
+    if (playerId === player.id) {
+      alert('자신을 방장으로 만들 수 없습니다.');
+      return;
+    }
+
+    try {
+      await axiosInstance.put(`/rooms/${room.id}`, {
+        host_player_id: playerId,
+      });
+      console.log('Host changed to:', playerId);
+      setIsRoomHost(playerId === player.id);
+    } catch (err) {
+      console.error('Failed to change host:', err);
+      alert('오류가 발생하였습니다. 다시 시도해주세요.');
+    }
+  };
+
   const onGameStartButtonHandler = () => {
     if (!isRoomHost) {
       alert('방장만 게임을 시작할 수 있습니다.');
@@ -81,6 +107,8 @@ export const RoomPage = ({
   };
 
   const onExitRoomButtonHandler = async () => {
+    if (!window.confirm('정말로 방을 나갈까요?')) return;
+
     setLoading(true);
     if (!player || !player.roomId) {
       alert('오류가 발생하였습니다. 다시 시도해주세요.');
@@ -124,8 +152,9 @@ export const RoomPage = ({
                 avatarType={getAvatarTypeFromId(roomPlayer.avatarId)}
                 totalGames={10} // 임시 데이터
                 totalWins={5} // 임시 데이터
-                onMakeHost={() => {}}
-                onDeletePlayer={() => {}}
+                onMakeHost={() => {
+                  onMakeHostButtonHandler(roomPlayer.id);
+                }}
                 showTools={isRoomHost && roomPlayer.id !== player.id}
               />
             );
@@ -137,7 +166,6 @@ export const RoomPage = ({
                 isMember={false}
                 username=""
                 onMakeHost={() => {}}
-                onDeletePlayer={() => {}}
               />
             );
           }

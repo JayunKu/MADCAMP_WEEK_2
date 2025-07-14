@@ -13,7 +13,6 @@ interface UserProfileProps {
   totalGames?: number;
   totalWins?: number;
   onMakeHost: (userId?: number) => void;
-  onDeletePlayer: (userId?: number) => void;
   showTools?: boolean;
 }
 
@@ -25,7 +24,6 @@ export const PlayerProfile = ({
   totalGames,
   totalWins,
   onMakeHost,
-  onDeletePlayer,
   showTools = false,
 }: UserProfileProps) => {
   const theme = useTheme();
@@ -77,35 +75,21 @@ export const PlayerProfile = ({
         </div>
       </PlayerProfileContainer>
       {showTools && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-          <img
-            src={hostIcon}
-            alt="Host Icon"
-            style={{
-              width: '16px',
-              height: '16px',
-              cursor: 'pointer',
-            }}
-            onClick={() => {
-              if (window.confirm('호스트로 지정하시겠습니까?')) {
-                // Call the function to make this player the host
-                onMakeHost();
-              }
-            }}
-          />
-          <img
-            src={trashIcon}
-            alt="Host Icon"
-            style={{
-              width: '16px',
-              height: '16px',
-              cursor: 'pointer',
-            }}
-            onClick={() => {
-              onDeletePlayer();
-            }}
-          />
-        </div>
+        <img
+          src={hostIcon}
+          alt="Host Icon"
+          style={{
+            width: '16px',
+            height: '16px',
+            cursor: 'pointer',
+          }}
+          onClick={() => {
+            if (window.confirm('호스트로 지정하시겠습니까?')) {
+              // Call the function to make this player the host
+              onMakeHost();
+            }
+          }}
+        />
       )}
     </div>
   );
