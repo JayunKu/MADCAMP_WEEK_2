@@ -1,5 +1,6 @@
 export const theme = {
   colors: {
+    transparent: 'transparent',
     white: '#FFFFFF',
     yellowWhite: '#FFFEFA',
     yellow: '#FFC349',

@@ -1,7 +1,14 @@
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpException,
+  Param,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { RoomService } from './room.service';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CreateRoomRequestDto } from './dtos/create-room-request.dto';
 import { Player, Room } from 'src/config/redis/model';
 import { CommonResponseDto } from 'src/common/dtos/common-response.dto';
 import { CreateRoomResponseDto } from './dtos/create-room-response.dto';
@@ -27,22 +34,30 @@ export class RoomController {
     });
   }
 
+  @Get(':id')
+  @ApiOperation({ summary: '파티 정보 조회' })
+  async getRoom(@Param('id') roomId: string) {
+    const room = await this.roomService.getRoomById(roomId);
+    if (!room) {
+      throw new HttpException(`Room with ID ${roomId} does not exist.`, 404);
+    }
+
+    return new CommonResponseDto(new CreateRoomResponseDto(room));
+  }
+
   @Post()
   @UseGuards(PlayerGuard)
   @ApiOperation({ summary: '파티 생성' })
-  async createRoom(
-    @CurrentPlayer() currentPlayer: Player,
-    @Body() createRoomRequestDto: CreateRoomRequestDto,
-  ) {
-    const { host_player_id } = createRoomRequestDto;
-
+  async createRoom(@CurrentPlayer() currentPlayer: Player) {
     // Check if the player exists
-    const player = await this.playerRedisService.getPlayerById(host_player_id);
+    const player = await this.playerRedisService.getPlayerById(
+      currentPlayer.id,
+    );
     if (!player) {
-      throw new Error(`Player with ID ${host_player_id} does not exist.`);
+      throw new Error(`Player with ID ${currentPlayer.id} does not exist.`);
     }
 
-    const room = await this.roomService.createRoom(host_player_id);
+    const room = await this.roomService.createRoom(currentPlayer.id);
 
     return new CommonResponseDto(new CreateRoomResponseDto(room));
   }

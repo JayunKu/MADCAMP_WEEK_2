@@ -19,22 +19,27 @@ import {
   GameModeButton,
   GameSettings,
   PlayAsGuestButton,
+  RoomCodeInput,
   UsernameInput,
 } from '../index.styles';
-import { GameMode } from '../../types/game';
+import { GameMode, parseRoom, Room } from '../../types/game';
 import { useGoogleLogin } from '@react-oauth/google';
 import { axiosInstance } from '../../hooks/useAxios';
-import { useAuth, User } from '../../context/AuthContext';
+import { useAuth } from '../../context/AuthContext';
 import { EXAMPLE_PLAYER_INFOS } from '../../types/mockData';
 import { RoomCode } from '../../components/RoomCode';
 import { useGameSocket } from '../../hooks/useGameSocket';
+import { FullScreenPopup } from '../../components/FullScreenPopup';
+import { LoadingPopUp } from '../../components/LoadingPopUp';
+import { RoomCodeStatus } from './index.types';
+import { User } from '../../types/user';
 
 const MAX_PLAYER_PER_ROOM = 8; // 최대 플레이어 수
 
 const MainPage = () => {
   const theme = useTheme();
   const navigate = useNavigate();
-  const { login, logout, user, isAuthenticated } = useAuth();
+  const { login, logout, user, player, isAuthenticated } = useAuth();
 
   const [showFooter, setShowFooter] = useState(true);
   const [showSketchbook, setShowSketchbook] = useState(true);
@@ -48,6 +53,14 @@ const MainPage = () => {
 
   const [selectedGameMode, setSelectedGameMode] = useState(GameMode.BASIC);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const [loading, setLoading] = useState(false);
+
+  const [roomCode, setRoomCode] = useState('');
+  const [roomCodeStatus, setRoomCodeStatus] = useState(RoomCodeStatus.EMPTY);
+  const [showRoomCodePopup, setShowRoomCodePopup] = useState(false);
+
+  const [room, setRoom] = useState<Room | null>(null);
 
   const googleLogin = useGoogleLogin({
     onSuccess: async response => {
@@ -144,26 +157,45 @@ const MainPage = () => {
   };
 
   const createRoomButtonHandler = async () => {
-    // try {
-    //   const response = await axiosInstance.post('/rooms', {
-    //     host: {
-    //       id: updatedUser.playerId,
-    //       username: updatedUser.name,
-    //       avatarId: updatedUser.avatarId,
-    //       isMember: true,
-    //     },
-    //     gameMode: selectedGameMode,
-    //   });
-    //   console.log('Room created:', response.data);
-    //   flipToPage(2);
-    // } catch (err) {
-    //   console.error('Failed to create room:', err);
-    //   alert('Failed to create room. Please try again later.');
-    // }
+    setLoading(true);
+
+    try {
+      if (!player) alert('오류가 발생했습니다. 페이지를 새로고침해주세요.');
+
+      const roomData = parseRoom((await axiosInstance.post('/rooms')).data);
+      console.log('Room created:', roomData);
+
+      setLoading(false);
+      setRoom(roomData);
+      flipToPage(2);
+    } catch (err) {
+      console.error('Failed to create room:', err);
+      alert('Failed to create room. Please try again later.');
+    }
+  };
+
+  const roomCodeConfirmHandler = async () => {
+    setLoading(true);
+
+    try {
+      const roomData = parseRoom(
+        (await axiosInstance.get(`/rooms/${roomCode}`)).data
+      );
+      console.log('Room entered:', roomData);
+
+      setShowRoomCodePopup(false);
+      setRoom(roomData);
+      setLoading(false);
+      flipToPage(2);
+    } catch (err) {
+      setLoading(false);
+      console.error('Failed to fetch room data:', err);
+      alert('방을 찾을 수 없습니다. 방 코드가 올바른지 확인해주세요.');
+    }
   };
 
   const onEnterRoomButtonHandler = () => {
-    flipToPage(2);
+    setShowRoomCodePopup(true);
   };
 
   const onGameStartButtonHandler = () => {
@@ -177,6 +209,43 @@ const MainPage = () => {
 
   return (
     <>
+      <LoadingPopUp open={loading} />
+      <FullScreenPopup
+        open={showRoomCodePopup}
+        onClose={() => setShowRoomCodePopup(false)}
+      >
+        <RoomCodeInput
+          value={roomCode}
+          placeholder="방 코드를 입력하세요"
+          onChange={e => {
+            setRoomCode(e.target.value);
+            if (e.target.value.trim() === '') {
+              setRoomCodeStatus(RoomCodeStatus.EMPTY);
+            } else if (/^[A-Z0-9]{8}$/.test(e.target.value)) {
+              setRoomCodeStatus(RoomCodeStatus.VALID);
+            } else {
+              setRoomCodeStatus(RoomCodeStatus.INVALID);
+            }
+          }}
+          onKeyDown={e => {
+            if (e.key === 'Enter') roomCodeConfirmHandler();
+          }}
+        />
+        <SmallButton
+          backgroundColor={theme.colors.lightYellow}
+          disabled={roomCodeStatus !== RoomCodeStatus.VALID}
+          onClick={() => {
+            roomCodeConfirmHandler();
+          }}
+        >
+          {Object({
+            VALID: '입장하기',
+            INVALID: '잘못된 방 코드',
+            LOADING: '로딩 중',
+            EMPTY: '방 코드 입력',
+          })[roomCodeStatus] || '입장하기'}
+        </SmallButton>
+      </FullScreenPopup>
       <Spacer y={40} />
       <Sketchbook
         show={showSketchbook}

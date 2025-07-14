@@ -1,13 +1,8 @@
 import React, { useState, ReactNode, useEffect } from 'react';
-import {
-  AuthContext,
-  User,
-  AuthContextType,
-  Player,
-  parsePlayer,
-  parseUser,
-} from './AuthContext';
+import { AuthContext, AuthContextType } from './AuthContext';
 import { axiosInstance } from '../hooks/useAxios';
+import { parseUser, User } from '../types/user';
+import { parsePlayer, Player } from '../types/game';
 
 const PLAYER_ID_KEY = 'malgreem_pid';
 const USER_ID_KEY = 'malgreem_uid';

@@ -16,7 +16,7 @@ export class RoomRedisService {
     hostPlayerId: string,
     gameMode: GameMode = GameMode.BASIC,
   ): Promise<Room> {
-    const roomId = v4();
+    const roomId = v4().toUpperCase().substring(0, 8);
     const room: Room = {
       id: roomId,
       host_player_id: hostPlayerId,
@@ -24,6 +24,7 @@ export class RoomRedisService {
       game_status: GameStatus.WAITING,
       round_number: null,
       round_winners: [],
+      player_ids: [],
       keeper_player_ids: [],
       fakers_player_ids: [],
       response_player_ids: [],
@@ -45,6 +46,7 @@ export class RoomRedisService {
     await this.redisService.hSet(roomKey, 'turn_player_id', '');
 
     await this.redisService.del(`${roomKey}:round_winners`);
+    await this.redisService.del(`${roomKey}:player_ids`);
     await this.redisService.del(`${roomKey}:keeper_player_ids`);
     await this.redisService.del(`${roomKey}:fakers_player_ids`);
     await this.redisService.del(`${roomKey}:response_player_ids`);
@@ -64,6 +66,11 @@ export class RoomRedisService {
 
     const round_winners = await this.redisService.lRange(
       `${roomKey}:round_winners`,
+      0,
+      -1,
+    );
+    const player_ids = await this.redisService.lRange(
+      `${roomKey}:player_ids`,
       0,
       -1,
     );
@@ -104,6 +111,7 @@ export class RoomRedisService {
       round_winners: round_winners.map(
         (winner) => parseInt(winner) as FakerModeTeamType,
       ),
+      player_ids: player_ids,
       keeper_player_ids: keeper_player_ids,
       fakers_player_ids: fakers_player_ids,
       response_player_ids: response_player_ids,
@@ -142,6 +150,7 @@ export class RoomRedisService {
           );
           break;
         // list of strings
+        case 'player_ids':
         case 'keeper_player_ids':
         case 'fakers_player_ids':
         case 'response_player_ids':
@@ -176,19 +185,21 @@ export class RoomRedisService {
     const roomKey = `rooms:${roomId}`;
     const hashResult = await this.redisService.del(roomKey);
     const listResult1 = await this.redisService.del(`${roomKey}:round_winners`);
-    const listResult2 = await this.redisService.del(
+    const listResult2 = await this.redisService.del(`${roomKey}:player_ids`);
+
+    const listResult3 = await this.redisService.del(
       `${roomKey}:keeper_player_ids`,
     );
-    const listResult3 = await this.redisService.del(
+    const listResult4 = await this.redisService.del(
       `${roomKey}:fakers_player_ids`,
     );
-    const listResult4 = await this.redisService.del(
+    const listResult5 = await this.redisService.del(
       `${roomKey}:response_player_ids`,
     );
-    const listResult5 = await this.redisService.del(
+    const listResult6 = await this.redisService.del(
       `${roomKey}:response_player_inputs`,
     );
-    const listResult6 = await this.redisService.del(
+    const listResult7 = await this.redisService.del(
       `${roomKey}:response_player_file_ids`,
     );
     return (
@@ -198,7 +209,8 @@ export class RoomRedisService {
       listResult3 > 0 ||
       listResult4 > 0 ||
       listResult5 > 0 ||
-      listResult6 > 0
+      listResult6 > 0 ||
+      listResult7 > 0
     );
   }
 
@@ -210,6 +222,7 @@ export class RoomRedisService {
       // 리스트 키는 제외
       if (
         key.includes(':round_winners') ||
+        key.includes(':player_ids') ||
         key.includes(':keeper_player_ids') ||
         key.includes(':fakers_player_ids') ||
         key.includes(':response_player_ids') ||
@@ -224,6 +237,11 @@ export class RoomRedisService {
         // 리스트 데이터 조회
         const round_winners = await this.redisService.lRange(
           `${key}:round_winners`,
+          0,
+          -1,
+        );
+        const player_ids = await this.redisService.lRange(
+          `${key}:player_ids`,
           0,
           -1,
         );
@@ -264,6 +282,7 @@ export class RoomRedisService {
           round_winners: round_winners.map(
             (winner) => parseInt(winner) as FakerModeTeamType,
           ),
+          player_ids: player_ids,
           keeper_player_ids: keeper_player_ids,
           fakers_player_ids: fakers_player_ids,
           response_player_ids: response_player_ids,
