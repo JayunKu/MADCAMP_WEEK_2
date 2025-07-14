@@ -18,7 +18,7 @@ interface UseSocketReturn {
 }
 
 export const useSocket = ({
-  url = process.env.REACT_APP_SERVER_URL || 'http://localhost:3000',
+  url = process.env.REACT_APP_WEBSOCKET_URL || 'http://localhost:8000/ws',
   options = {},
   autoConnect = true,
 }: UseSocketOptions = {}): UseSocketReturn => {
@@ -112,14 +112,16 @@ export const useSocket = ({
   }, []);
 
   useEffect(() => {
-    if (autoConnect) {
-      connect();
-    }
+    if (!autoConnect) return;
+
+    connect();
 
     return () => {
-      disconnect();
+      if (socketRef.current?.connected) {
+        disconnect();
+      }
     };
-  }, [autoConnect, connect, disconnect]);
+  }, [autoConnect]);
 
   return {
     socket: socketRef.current,

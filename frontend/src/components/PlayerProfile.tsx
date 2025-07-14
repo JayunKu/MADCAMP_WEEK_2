@@ -14,7 +14,7 @@ interface UserProfileProps {
   totalWins?: number;
   onMakeHost: (userId?: number) => void;
   onDeletePlayer: (userId?: number) => void;
-  isRoomHost?: boolean;
+  showTools?: boolean;
 }
 
 const getAvatarTypeById = (avatarId?: number) => {
@@ -43,7 +43,7 @@ export const PlayerProfile = ({
   totalWins,
   onMakeHost,
   onDeletePlayer,
-  isRoomHost = false,
+  showTools = false,
 }: UserProfileProps) => {
   const theme = useTheme();
 
@@ -93,7 +93,7 @@ export const PlayerProfile = ({
           )}
         </div>
       </PlayerProfileContainer>
-      {isRoomHost && (
+      {showTools && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
           <img
             src={hostIcon}

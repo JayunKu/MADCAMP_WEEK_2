@@ -1,7 +1,7 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/config/prisma/prisma.service';
 import { RoomRedisService } from '../../config/redis/room-redis.service';
-import { Room, GameMode } from 'src/config/redis/model';
+import { Room, GameMode, Player } from 'src/config/redis/model';
 import { PlayerRedisService } from '../../config/redis/player-redis.service';
 import { RoomGateway } from './room.gateway';
 
@@ -38,6 +38,14 @@ export class RoomService {
 
   async deleteRoom(roomId: string): Promise<boolean> {
     return await this.roomRedisService.deleteRoom(roomId);
+  }
+
+  async joinRoom(playerId: string, roomId: string): Promise<Room | null> {
+    return await this.roomRedisService.addPlayerToRoom(playerId, roomId);
+  }
+
+  async getRoomPlayers(roomId: string): Promise<Player[]> {
+    return await this.roomRedisService.getRoomPlayers(roomId);
   }
 
   //   async startGame(roomId: string): Promise<Room | null> {

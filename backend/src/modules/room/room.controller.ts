@@ -11,10 +11,11 @@ import { RoomService } from './room.service';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Player, Room } from 'src/config/redis/model';
 import { CommonResponseDto } from 'src/common/dtos/common-response.dto';
-import { CreateRoomResponseDto } from './dtos/create-room-response.dto';
+import { CommonRoomResponseDto } from '../../common/dtos/common-room-response.dto';
 import { PlayerGuard } from '../auth/guards/player.guard';
 import { CurrentPlayer } from 'src/common/decorators/current-player.decorator';
 import { PlayerRedisService } from '../../config/redis/player-redis.service';
+import { CommonPlayerResponseDto } from 'src/common/dtos/common-player-response.dto';
 
 @ApiTags('rooms')
 @Controller('rooms')
@@ -30,7 +31,7 @@ export class RoomController {
     const rooms = await this.roomService.getAllRooms();
 
     return new CommonResponseDto({
-      rooms: rooms.map((room: Room) => new CreateRoomResponseDto(room)),
+      rooms: rooms.map((room: Room) => new CommonRoomResponseDto(room)),
     });
   }
 
@@ -42,45 +43,40 @@ export class RoomController {
       throw new HttpException(`Room with ID ${roomId} does not exist.`, 404);
     }
 
-    return new CommonResponseDto(new CreateRoomResponseDto(room));
+    return new CommonResponseDto(new CommonRoomResponseDto(room));
   }
 
   @Post()
   @UseGuards(PlayerGuard)
   @ApiOperation({ summary: '파티 생성' })
   async createRoom(@CurrentPlayer() currentPlayer: Player) {
-    // Check if the player exists
-    const player = await this.playerRedisService.getPlayerById(
-      currentPlayer.id,
-    );
-    if (!player) {
-      throw new Error(`Player with ID ${currentPlayer.id} does not exist.`);
-    }
-
     const room = await this.roomService.createRoom(currentPlayer.id);
 
-    return new CommonResponseDto(new CreateRoomResponseDto(room));
+    return new CommonResponseDto(new CommonRoomResponseDto(room));
   }
 
-  // @Post(':id')
-  // @UseGuards(PlayerGuard)
-  // @ApiOperation({ summary: '파티 참여' })
-  // async joinRoom(
-  //   @CurrentPlayer() currentPlayer: Player,
-  //   @Body('room_id') roomId: string,
-  // ) {
-  //   const room = await this.roomService.getRoomById(roomId);
-  //   if (!room) {
-  //     throw new Error(`Room with ID ${roomId} does not exist.`);
-  //   }
+  @Post(':id')
+  @UseGuards(PlayerGuard)
+  @ApiOperation({ summary: '파티 참여' })
+  async joinRoom(
+    @CurrentPlayer() currentPlayer: Player,
+    @Param('id') roomId: string,
+  ) {
+    const room = await this.roomService.getRoomById(roomId);
+    if (!room) {
+      throw new HttpException(`Room with ID ${roomId} does not exist.`, 404);
+    }
 
-  //   this.roomGateway.server.e
+    const roomData = await this.roomService.joinRoom(roomId, currentPlayer.id);
+    if (!roomData) {
+      throw new HttpException(`Failed to join room ${roomId}.`, 400);
+    }
 
-  //   // Add player to the room
-  //   const updatedRoom = await this.roomService.updateRoom(roomId, {
-  //     players: [...(room.players || []), currentPlayer.id],
-  //   });
+    const roomPlayers = await this.roomService.getRoomPlayers(roomId);
 
-  //   return new CommonResponseDto(updatedRoom);
-  // }
+    return new CommonResponseDto({
+      room: new CommonRoomResponseDto(roomData),
+      players: roomPlayers.map((player) => new CommonPlayerResponseDto(player)),
+    });
+  }
 }

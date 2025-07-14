@@ -51,6 +51,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // 컴포넌트 마운트 시 playerId 초기화 및 사용자 정보 복원
   useEffect(() => {
     (async () => {
+      let restoredPlayer = null;
+
       const savedUserId = localStorage.getItem(USER_ID_KEY);
       const savedPlayerId = localStorage.getItem(PLAYER_ID_KEY);
 
@@ -82,7 +84,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             player: parsedPlayer,
           });
 
-          setPlayer(parsedPlayer);
+          restoredPlayer = parsedPlayer;
+          localStorage.setItem(USER_ID_KEY, parsedUser.id.toString());
+          localStorage.setItem(PLAYER_ID_KEY, parsedPlayer.id);
         } catch (err) {
           localStorage.removeItem(USER_ID_KEY);
           console.error('Failed to parse saved user data:', err);
@@ -98,7 +102,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
           console.log('Restored player:', parsedPlayer);
 
-          setPlayer(parsedPlayer);
+          restoredPlayer = parsedPlayer;
         } catch (err) {
           localStorage.removeItem(PLAYER_ID_KEY);
           console.error('Failed to parse saved player data:', err);
@@ -106,15 +110,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         }
       }
 
-      if (!player) {
+      if (!restoredPlayer) {
         // playerId가 없으면 새로 생성
         const newPlayer = parsePlayer(
           (await axiosInstance.post('/players')).data
         );
 
-        setPlayer(newPlayer);
         localStorage.setItem(PLAYER_ID_KEY, newPlayer.id);
       }
+
+      setPlayer(restoredPlayer);
     })();
   }, []);
 

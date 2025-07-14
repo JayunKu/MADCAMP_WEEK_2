@@ -22,11 +22,16 @@ import {
   RoomCodeInput,
   UsernameInput,
 } from '../index.styles';
-import { GameMode, parseRoom, Room } from '../../types/game';
+import {
+  GameMode,
+  parsePlayer,
+  parseRoom,
+  Player,
+  Room,
+} from '../../types/game';
 import { useGoogleLogin } from '@react-oauth/google';
 import { axiosInstance } from '../../hooks/useAxios';
 import { useAuth } from '../../context/AuthContext';
-import { EXAMPLE_PLAYER_INFOS } from '../../types/mockData';
 import { RoomCode } from '../../components/RoomCode';
 import { useGameSocket } from '../../hooks/useGameSocket';
 import { FullScreenPopup } from '../../components/FullScreenPopup';
@@ -60,6 +65,7 @@ const MainPage = () => {
   const [showRoomCodePopup, setShowRoomCodePopup] = useState(false);
 
   const [room, setRoom] = useState<Room | null>(null);
+  const [roomPlayers, setRoomPlayers] = useState<Player[] | null>([]);
 
   const [isRoomHost, setIsRoomHost] = useState(false);
   const [selectedGameMode, setSelectedGameMode] = useState(GameMode.BASIC);
@@ -172,11 +178,13 @@ const MainPage = () => {
     try {
       if (!player) alert('오류가 발생했습니다. 페이지를 새로고침해주세요.');
 
-      const roomData = parseRoom((await axiosInstance.post('/rooms')).data);
-      console.log('Room created:', roomData);
+      const newRoom = (await axiosInstance.post('/rooms')).data;
+      const res = (await axiosInstance.post(`/rooms/${newRoom.id}`)).data;
+      console.log('Room created:', res);
 
+      setRoom(parseRoom(res.room));
+      setRoomPlayers(res.players.map((p: any) => parsePlayer(p)));
       setLoading(false);
-      setRoom(roomData);
       flipToPage(2);
     } catch (err) {
       console.error('Failed to create room:', err);
@@ -188,13 +196,13 @@ const MainPage = () => {
     setLoading(true);
 
     try {
-      const roomData = parseRoom(
-        (await axiosInstance.get(`/rooms/${roomCode}`)).data
-      );
-      console.log('Room entered:', roomData);
+      const res = (await axiosInstance.post(`/rooms/${roomCode}`)).data;
+      console.log('Room entered:', res);
 
       setShowRoomCodePopup(false);
-      setRoom(roomData);
+      setRoom(parseRoom(res.room));
+      setRoomPlayers(res.players.map((p: any) => parsePlayer(p)));
+      joinRoom(roomCode);
       setLoading(false);
       flipToPage(2);
     } catch (err) {
@@ -216,6 +224,8 @@ const MainPage = () => {
       navigate('/game', { state: { roomId: 'FDAS32D' } });
     }, 500);
   };
+
+  if (!player) return <LoadingPopUp open={true} />;
 
   return (
     <>
@@ -353,97 +363,101 @@ const MainPage = () => {
               </LargeButton>
             </>,
             // 2: 게임 준비 페이지
-            <>
-              <div
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: '1fr 1fr',
-                  gap: '12px',
-                  marginTop: '20px',
-                }}
-              >
-                {Array.from({ length: MAX_PLAYER_PER_ROOM }).map((_, idx) => {
-                  const player = EXAMPLE_PLAYER_INFOS[idx];
-                  if (player) {
-                    return (
-                      <PlayerProfile
-                        key={player.id}
-                        isMember={player.isMember}
-                        username={player.username}
-                        avatarId={player.avatarId}
-                        totalGames={player.totalGames}
-                        totalWins={player.totalWins}
-                        onMakeHost={() => {}}
-                        onDeletePlayer={() => {}}
-                        isRoomHost={isRoomHost}
-                      />
-                    );
-                  } else {
-                    return (
-                      <PlayerProfile
-                        key={`empty-${idx}`}
-                        isEmpty
-                        isMember={false}
-                        username=""
-                        onMakeHost={() => {}}
-                        onDeletePlayer={() => {}}
-                      />
-                    );
-                  }
-                })}
-              </div>
-
-              <RoomCode code={roomCode} />
-
-              <GameSettings>
-                <p style={{ width: '100%' }}>모드 선택</p>
+            !room || !roomPlayers ? (
+              <div>방 정보가 없습니다. 다시 시도해 주세요.</div>
+            ) : (
+              <>
                 <div
                   style={{
-                    display: 'flex',
-                    gap: '10px',
-                    flexDirection: 'row',
-                    marginTop: '5px',
+                    display: 'grid',
+                    gridTemplateColumns: '1fr 1fr',
+                    gap: '12px',
+                    marginTop: '20px',
                   }}
                 >
-                  <GameModeButton
-                    backgroundColor={theme.colors.lighterYellow}
-                    disabled={selectedGameMode === GameMode.BASIC}
-                    onClick={() => {
-                      if (!isRoomHost) {
-                        alert('방장만 모드를 변경할 수 있습니다.');
-                        return;
-                      }
-                      setSelectedGameMode(GameMode.BASIC);
-                    }}
-                  >
-                    기본 모드
-                  </GameModeButton>
-                  <GameModeButton
-                    backgroundColor={theme.colors.lightRed}
-                    disabled={selectedGameMode === GameMode.FAKER}
-                    onClick={() => {
-                      if (!isRoomHost) {
-                        alert('방장만 모드를 변경할 수 있습니다.');
-                        return;
-                      }
-                      setSelectedGameMode(GameMode.FAKER);
-                    }}
-                  >
-                    페이커 모드
-                  </GameModeButton>
+                  {Array.from({ length: MAX_PLAYER_PER_ROOM }).map((_, idx) => {
+                    if (idx < roomPlayers.length) {
+                      const roomPlayer = roomPlayers[idx];
+                      return (
+                        <PlayerProfile
+                          key={roomPlayer.id}
+                          isMember={roomPlayer.isMember}
+                          username={roomPlayer.name}
+                          avatarId={roomPlayer.avatarId}
+                          totalGames={10} // 임시 데이터
+                          totalWins={5} // 임시 데이터
+                          onMakeHost={() => {}}
+                          onDeletePlayer={() => {}}
+                          showTools={isRoomHost && roomPlayer.id !== player.id}
+                        />
+                      );
+                    } else {
+                      return (
+                        <PlayerProfile
+                          key={`empty-${idx}`}
+                          isEmpty
+                          isMember={false}
+                          username=""
+                          onMakeHost={() => {}}
+                          onDeletePlayer={() => {}}
+                        />
+                      );
+                    }
+                  })}
                 </div>
-                <p style={{ width: '100%', marginTop: '15px' }}>
-                  게임 옵션 선택
-                </p>
-              </GameSettings>
 
-              <SmallButton
-                backgroundColor={theme.colors.lightYellow}
-                onClick={onGameStartButtonHandler}
-              >
-                게임 시작
-              </SmallButton>
-            </>,
+                <RoomCode code={room.id} />
+
+                <GameSettings>
+                  <p style={{ width: '100%' }}>모드 선택</p>
+                  <div
+                    style={{
+                      display: 'flex',
+                      gap: '10px',
+                      flexDirection: 'row',
+                      marginTop: '5px',
+                    }}
+                  >
+                    <GameModeButton
+                      backgroundColor={theme.colors.lighterYellow}
+                      disabled={selectedGameMode === GameMode.BASIC}
+                      onClick={() => {
+                        if (!isRoomHost) {
+                          alert('방장만 모드를 변경할 수 있습니다.');
+                          return;
+                        }
+                        setSelectedGameMode(GameMode.BASIC);
+                      }}
+                    >
+                      기본 모드
+                    </GameModeButton>
+                    <GameModeButton
+                      backgroundColor={theme.colors.lightRed}
+                      disabled={selectedGameMode === GameMode.FAKER}
+                      onClick={() => {
+                        if (!isRoomHost) {
+                          alert('방장만 모드를 변경할 수 있습니다.');
+                          return;
+                        }
+                        setSelectedGameMode(GameMode.FAKER);
+                      }}
+                    >
+                      페이커 모드
+                    </GameModeButton>
+                  </div>
+                  <p style={{ width: '100%', marginTop: '15px' }}>
+                    게임 옵션 선택
+                  </p>
+                </GameSettings>
+
+                <SmallButton
+                  backgroundColor={theme.colors.lightYellow}
+                  onClick={onGameStartButtonHandler}
+                >
+                  게임 시작
+                </SmallButton>
+              </>
+            ),
           ][pageIdx]
         }
       </Sketchbook>

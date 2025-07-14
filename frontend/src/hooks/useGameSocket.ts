@@ -47,6 +47,9 @@ interface UseGameSocketReturn {
 export const useGameSocket = (): UseGameSocketReturn => {
   const { player } = useAuth();
   const { socket, isConnected, emit, on, off } = useSocket({
+    url:
+      `${process.env.REACT_APP_WEBSOCKET_URL}/rooms` ||
+      'http://localhost:8000/ws/rooms',
     autoConnect: true,
   });
 

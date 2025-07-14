@@ -5,6 +5,7 @@ import {
   GameMode,
   GameStatus,
   FakerModeTeamType,
+  Player,
 } from 'src/config/redis/model';
 import { v4 } from 'uuid';
 
@@ -296,6 +297,65 @@ export class RoomRedisService {
 
     return rooms;
   }
+
+  async getRoomPlayers(roomId: string): Promise<Player[]> {
+    const roomKey = `rooms:${roomId}`;
+    const playerHashKey = `${roomKey}:players`;
+    const playerHash = await this.redisService.hGetAll(playerHashKey);
+    const players: Player[] = [];
+
+    for (const [playerId, playerJson] of Object.entries(playerHash)) {
+      try {
+        const playerData = JSON.parse(playerJson);
+        players.push({
+          id: playerData.id,
+          name: playerData.name,
+          avatar_id: playerData.avatar_id ? Number(playerData.avatar_id) : 0,
+          is_member:
+            playerData.is_member === true || playerData.is_member === 'true',
+          room_id: playerData.room_id || null,
+        });
+      } catch (e) {
+        // skip invalid
+      }
+    }
+
+    return players;
+  }
+
+  async addPlayerToRoom(
+    roomId: string,
+    playerId: string,
+  ): Promise<Room | null> {
+    const roomKey = `rooms:${roomId}`;
+    const exists = await this.redisService.exists(roomKey);
+    if (!exists) return null;
+
+    // 플레이어 정보 가져오기
+    const playerData = await this.redisService.hGetAll(`players:${playerId}`);
+    if (!playerData || Object.keys(playerData).length === 0)
+      return await this.getRoomById(roomId);
+
+    // 방의 플레이어 해시에 추가
+    await this.redisService.hSet(
+      `${roomKey}:players`,
+      playerId,
+      JSON.stringify({
+        id: playerData.id,
+        name: playerData.name,
+        avatar_id: playerData.avatar_id ? Number(playerData.avatar_id) : 0,
+        is_member: true,
+        room_id: roomId,
+      }),
+    );
+
+    // 플레이어의 방 ID 업데이트
+    await this.redisService.hSet(`players:${playerId}`, 'room_id', roomId);
+
+    return await this.getRoomById(roomId);
+  }
+
+  // ------ 여기까지는 확인 ------
 
   async addResponse(
     roomId: string,

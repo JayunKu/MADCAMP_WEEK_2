@@ -5,7 +5,7 @@ import {
   Room,
 } from 'src/config/redis/model';
 
-export class CreateRoomResponseDto {
+export class CommonRoomResponseDto {
   id: string;
   host_player_id: string;
   game_mode: GameMode;
