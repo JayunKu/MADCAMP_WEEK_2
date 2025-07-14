@@ -8,6 +8,7 @@ import { UserService } from './modules/user/user.service';
 import { RoomModule } from './modules/room/room.module';
 import { CommonModule } from './modules/common/common.module';
 import { PlayerModule } from './modules/player/player.module';
+import { GameModule } from './modules/game/game.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { PlayerModule } from './modules/player/player.module';
     PlayerModule,
     RoomModule,
     CommonModule,
+    GameModule
   ],
   controllers: [UserController],
   providers: [UserService],
