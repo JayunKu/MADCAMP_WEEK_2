@@ -13,53 +13,31 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [player, setPlayer] = useState<Player | null>(null);
 
-  // playerId를 서버에서 받아오거나, 이미 있으면 로드
-  const initializePlayer = async () => {
-    const savedPlayer = localStorage.getItem(PLAYER_ID_KEY);
-    if (savedPlayer) {
-      const parsedPlayer = JSON.parse(savedPlayer);
-
-      // Redis에 playerId 등록하기 위함
-      try {
-        await axiosInstance.post('/players', {
-          player_id: parsedPlayer.id,
-        });
-      } catch (err) {
-        console.error('Failed to get playerId from server:', err);
-        alert('Failed to connect API server. Please try again later.');
-      }
-
-      return parsedPlayer;
-    } else {
-      try {
-        const newPlayer = (await axiosInstance.post('/players')).data;
-
-        localStorage.setItem(PLAYER_ID_KEY, JSON.stringify(newPlayer));
-
-        return newPlayer;
-      } catch (err) {
-        console.error('Failed to get playerId from server:', err);
-        alert('Failed to connect API server. Please try again later.');
-      }
-    }
-  };
-
-  const login = (userData: User) => {
+  const login = async (userData: User) => {
     setUser(userData);
 
+    // 최신 player 정보 가져오기
+    const latestPlayer = (
+      await axiosInstance.post('/players', {
+        player_id: userData.playerId,
+      })
+    ).data as Player;
+    setPlayer(latestPlayer);
+
     // 로컬 스토리지에 저장
-    localStorage.setItem(USER_ID_KEY, JSON.stringify(userData));
+    localStorage.setItem(USER_ID_KEY, userData.id.toString());
     localStorage.setItem(PLAYER_ID_KEY, userData.playerId);
   };
 
   const logout = async () => {
     setUser(null);
+    setPlayer(null);
 
     localStorage.removeItem(USER_ID_KEY);
     localStorage.removeItem(PLAYER_ID_KEY);
 
     // playerId 다시 받아오기
-    const newPlayer = await initializePlayer();
+    const newPlayer = (await axiosInstance.post('/players')).data;
     setPlayer(newPlayer);
   };
 
@@ -68,31 +46,64 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // 컴포넌트 마운트 시 playerId 초기화 및 사용자 정보 복원
   useEffect(() => {
     (async () => {
-      // 1. 로그인한 사용자 정보 복원
-      const savedUser = localStorage.getItem(USER_ID_KEY);
-      let restoredPlayerId = null;
+      const savedUserId = localStorage.getItem(USER_ID_KEY);
+      const savedPlayerId = localStorage.getItem(PLAYER_ID_KEY);
 
-      if (savedUser) {
+      console.log('Restoring user and player from localStorage:', {
+        savedUserId,
+        savedPlayerId,
+      });
+
+      if (savedUserId) {
+        // 로그인한 사용자 정보 복원
         try {
-          const parsedUser = JSON.parse(savedUser);
+          const parsedUserId = JSON.parse(savedUserId);
+          const parsedUser = (await axiosInstance.get(`/users/${parsedUserId}`))
+            .data as User;
           setUser(parsedUser);
-          setPlayer({
-            id: parsedUser.playerId,
-            name: parsedUser.name,
-            avatarId: parsedUser.avatarId,
-            isMember: true,
+
+          // 최신 player 정보 가져오기
+          const parsedPlayer = (
+            await axiosInstance.post('/players', {
+              player_id: parsedUser.playerId,
+            })
+          ).data as Player;
+
+          console.log('Restored user and player:', {
+            user: parsedUser,
+            player: parsedPlayer,
           });
-          restoredPlayerId = parsedUser.playerId;
-        } catch (error) {
-          console.error('Failed to parse saved user data:', error);
+
+          setPlayer(parsedPlayer);
+        } catch (err) {
           localStorage.removeItem(USER_ID_KEY);
+          console.error('Failed to parse saved user data:', err);
+          alert('Failed to connect API server. Please try again later.');
+        }
+      } else if (savedPlayerId) {
+        // playerId가 있지만 사용자 정보가 없는 경우
+        try {
+          const parsedPlayerId = JSON.parse(savedPlayerId);
+          const parsedPlayer = (
+            await axiosInstance.get(`/players/${parsedPlayerId}`)
+          ).data as Player;
+
+          console.log('Restored player:', parsedPlayer);
+
+          setPlayer(parsedPlayer);
+        } catch (err) {
+          localStorage.removeItem(PLAYER_ID_KEY);
+          console.error('Failed to parse saved player data:', err);
+          alert('Failed to connect API server. Please try again later.');
         }
       }
 
-      // 2. playerId 초기화 (로그인 정보에 없으면 서버에서 받아옴, 있으면 로드)
-      if (!restoredPlayerId) {
-        const currentPlayer = await initializePlayer();
-        setPlayer(currentPlayer);
+      if (!player) {
+        // playerId가 없으면 새로 생성
+        const newPlayer = (await axiosInstance.post('/players')).data;
+
+        setPlayer(newPlayer);
+        localStorage.setItem(PLAYER_ID_KEY, JSON.stringify(newPlayer.id));
       }
     })();
   }, []);

@@ -9,27 +9,24 @@ export class PlayerRedisService {
   async createPlayer(
     playerId: string,
     name: string,
-    avatarId: number | null = null,
+    avatarId: number,
+    isMember: boolean,
     roomId?: string,
   ): Promise<Player> {
     const player: Player = {
       id: playerId,
       name,
-      avatar_id: avatarId || 0,
-      is_member: false,
-      room_id: roomId || null,
+      avatar_id: avatarId,
+      is_member: isMember,
+      room_id: null,
     };
 
     const playerKey = `players:${playerId}`;
     await this.redisService.hSet(playerKey, 'id', playerId);
     await this.redisService.hSet(playerKey, 'name', name);
-    await this.redisService.hSet(
-      playerKey,
-      'avatar_id',
-      avatarId !== null ? avatarId.toString() : '',
-    );
-    await this.redisService.hSet(playerKey, 'is_member', 'false');
-    await this.redisService.hSet(playerKey, 'room_id', roomId || '');
+    await this.redisService.hSet(playerKey, 'avatar_id', avatarId.toString());
+    await this.redisService.hSet(playerKey, 'is_member', isMember.toString());
+    await this.redisService.hSet(playerKey, 'room_id', '');
 
     return player;
   }

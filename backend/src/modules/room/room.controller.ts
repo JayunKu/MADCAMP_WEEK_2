@@ -9,8 +9,8 @@ import { PlayerGuard } from '../auth/guards/player.guard';
 import { CurrentPlayer } from 'src/common/decorators/current-player.decorator';
 import { PlayerRedisService } from '../../config/redis/player-redis.service';
 
-@ApiTags('room')
-@Controller('room')
+@ApiTags('rooms')
+@Controller('rooms')
 export class RoomController {
   constructor(
     private readonly roomService: RoomService,

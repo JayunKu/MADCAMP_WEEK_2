@@ -7,12 +7,9 @@ export const ExampleUsage = () => {
     isConnected,
     joinRoom,
     leaveRoom,
-    createRoom,
     startGame,
     submitAnswer,
     submitImage,
-    updatePlayerReady,
-    updatePlayerInfo,
   } = useGameSocket();
 
   const handleJoinRoom = () => {
@@ -20,7 +17,7 @@ export const ExampleUsage = () => {
   };
 
   const handleCreateRoom = () => {
-    createRoom(0); // 기본 모드
+    // createRoom(0); // 기본 모드
   };
 
   const handleStartGame = () => {

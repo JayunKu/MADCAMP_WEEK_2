@@ -80,8 +80,7 @@ export const GamePageWithSocket = () => {
 
 // 메인 페이지에서 방 생성/참여 예시
 export const MainPageWithSocket = () => {
-  const { gameState, isConnected, joinRoom, createRoom, updatePlayerInfo } =
-    useGameSocket();
+  const { gameState, isConnected, joinRoom } = useGameSocket();
 
   const handleJoinRoom = (roomCode: string) => {
     if (isConnected) {
@@ -91,13 +90,13 @@ export const MainPageWithSocket = () => {
 
   const handleCreateRoom = (gameMode: number) => {
     if (isConnected) {
-      createRoom(gameMode);
+      // createRoom(gameMode);
     }
   };
 
   const handleUpdateProfile = (username: string, avatarId: number) => {
     if (isConnected) {
-      updatePlayerInfo(username, avatarId);
+      // updatePlayerInfo(username, avatarId);
     }
   };
 

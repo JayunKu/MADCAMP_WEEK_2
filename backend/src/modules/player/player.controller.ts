@@ -1,4 +1,13 @@
-import { Body, Controller, HttpCode, Post, Res } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpException,
+  Param,
+  Post,
+  Res,
+} from '@nestjs/common';
 import { PlayerService } from './player.service';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CommonResponseDto } from 'src/common/dtos/common-response.dto';
@@ -8,10 +17,22 @@ import { Player } from 'src/config/redis/model';
 
 export const PLAYER_COOKIE_NAME = 'malgreem_pid';
 
-@ApiTags('player')
+@ApiTags('players')
 @Controller('players')
 export class PlayerController {
   constructor(private readonly playerService: PlayerService) {}
+
+  @Get(':id')
+  @ApiOperation({ summary: '플레이어 정보 조회' })
+  async getPlayer(@Param('id') playerId: string) {
+    const player = await this.playerService.getPlayer(playerId);
+
+    if (!player) {
+      throw new HttpException('Player not found', 404);
+    }
+
+    return new CommonResponseDto(player);
+  }
 
   @Post()
   @HttpCode(201)
@@ -22,20 +43,11 @@ export class PlayerController {
   ) {
     const { player_id } = createPlayerRequestDto;
 
-    const playerId = await this.playerService.createPlayer(player_id);
-    const player = (await this.playerService.getPlayer(playerId)) as Player;
+    const player = await this.playerService.createPlayer(player_id);
 
     // 쿠키로 저장 (httpOnly 옵션 권장)
-    res.cookie(PLAYER_COOKIE_NAME, playerId, { httpOnly: true });
+    res.cookie(PLAYER_COOKIE_NAME, player.id, { httpOnly: true });
 
-    return res.json(
-      new CommonResponseDto({
-        id: player.id,
-        name: player.name,
-        avatar_id: player.avatar_id,
-        is_member: player.is_member,
-        room_id: player.room_id,
-      }),
-    );
+    return res.json(new CommonResponseDto(player));
   }
 }

@@ -13,26 +13,40 @@ export class PlayerService {
     private readonly prismaService: PrismaService,
   ) {}
 
-  async createPlayer(playerId?: string): Promise<string> {
-    let id = playerId;
-    let name = INITIAL_PLAYER_NAME;
-    let avatarId: number | null = null;
+  async createNewPlayer(): Promise<Player> {
+    return await this.playerRedisService.createPlayer(
+      v4(),
+      INITIAL_PLAYER_NAME,
+      0,
+      false,
+    );
+  }
 
-    if (!id) {
-      id = v4();
-    } else {
-      const user = await this.prismaService.user.findUnique({
-        where: { player_id: id },
-      });
-      if (user) {
-        name = user.name;
-        avatarId = user.avatar_id;
+  async createPlayer(playerId?: string): Promise<Player> {
+    if (playerId) {
+      const existingPlayer =
+        await this.playerRedisService.getPlayerById(playerId);
+
+      if (existingPlayer) {
+        return existingPlayer;
       }
+
+      const user = await this.prismaService.user.findUnique({
+        where: { player_id: playerId },
+      });
+
+      if (user) {
+        return await this.playerRedisService.createPlayer(
+          user.player_id,
+          user.name,
+          user.avatar_id,
+          true,
+        );
+      }
+
+      return await this.createNewPlayer();
     }
-
-    await this.playerRedisService.createPlayer(id, name, avatarId);
-
-    return id;
+    return await this.createNewPlayer();
   }
 
   async getPlayer(playerId: string): Promise<Player | null> {

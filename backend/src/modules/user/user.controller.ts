@@ -22,7 +22,7 @@ import { UpdateUserRequestDto } from '../auth/dtos/update-user-request.dto';
 import { CreateUserGameRequestDto } from '../auth/dtos/create-user-game-request.dto';
 import { CommonService } from '../common/common.service';
 
-@ApiTags('user')
+@ApiTags('users')
 @Controller('users')
 export class UserController {
   constructor(
