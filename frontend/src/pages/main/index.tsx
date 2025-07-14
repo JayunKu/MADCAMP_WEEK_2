@@ -68,9 +68,19 @@ const MainPage = () => {
   const [isRoomHost, setIsRoomHost] = useState(false);
   const [selectedGameMode, setSelectedGameMode] = useState(GameMode.BASIC);
 
+  const navigateToGame = () => {
+    setShowFooter(false);
+    setShowSketchbook(false);
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    timeoutRef.current = setTimeout(() => {
+      navigate('/game', { state: { roomId: 'FDAS32D' } });
+    }, 500);
+  };
+
   const { joinRoom, startGame, leaveRoom } = useGameSocket(
     setRoom,
-    setRoomPlayers
+    setRoomPlayers,
+    navigateToGame
   );
 
   const googleLogin = useGoogleLogin({
@@ -142,6 +152,31 @@ const MainPage = () => {
 
   const onGoogleLoginButtonHandler = () => {
     googleLogin();
+  };
+
+  const onGameContinueHandler = async () => {
+    if (!player || !player.roomId) {
+      alert('게임을 이어서 할 수 없습니다.');
+      return;
+    }
+    setLoading(true);
+
+    try {
+      const res = (await axiosInstance.post(`/rooms/${player.roomId}`)).data;
+      const parsedRoom = parseRoom(res.room);
+      console.log('Room entered:', parsedRoom);
+
+      setShowRoomCodePopup(false);
+      setRoom(parsedRoom);
+      setRoomPlayers(res.players.map((p: any) => parsePlayer(p)));
+      joinRoom(parsedRoom.id);
+      setLoading(false);
+      flipToPage(2);
+    } catch (err) {
+      setLoading(false);
+      console.error('Failed to fetch room data:', err);
+      alert('방을 찾을 수 없습니다. 방 코드가 올바른지 확인해주세요.');
+    }
   };
 
   const onUserProfileSaveHandler = async () => {
@@ -226,17 +261,65 @@ const MainPage = () => {
     }
   };
 
+  const onGameModeChangeHandler = async (mode: GameMode) => {
+    if (!room || !player) {
+      alert('방 정보가 없습니다. 다시 시도해주세요.');
+      return;
+    }
+    if (!isRoomHost) {
+      alert('방장만 모드를 변경할 수 있습니다.');
+      return;
+    }
+    setSelectedGameMode(mode);
+
+    try {
+      await axiosInstance.put(`/rooms/${room.id}`, {
+        game_mode: mode,
+      });
+      console.log('Game mode updated:', mode);
+    } catch (err) {
+      console.error('Failed to update game mode:', err);
+      alert('게임 모드 변경에 실패했습니다. 다시 시도해주세요.');
+    }
+  };
+
   const onEnterRoomButtonHandler = () => {
     setShowRoomCodePopup(true);
   };
 
   const onGameStartButtonHandler = () => {
+    if (!isRoomHost) {
+      alert('방장만 게임을 시작할 수 있습니다.');
+      return;
+    }
+
     setShowFooter(false);
     setShowSketchbook(false);
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
     timeoutRef.current = setTimeout(() => {
       navigate('/game', { state: { roomId: 'FDAS32D' } });
     }, 500);
+  };
+
+  const onExitRoomButtonHandler = async () => {
+    setLoading(true);
+    if (player === null || player.roomId === null) {
+      alert('현재 방에 참여하고 있지 않습니다.');
+      return;
+    }
+
+    try {
+      await axiosInstance.delete(`/rooms/${player.roomId}/me`);
+      console.log('Left room:', player.roomId);
+    } catch (err) {
+      console.error('Failed to leave room:', err);
+      alert('방을 나가는 데 실패했습니다. 다시 시도해주세요.');
+    }
+    leaveRoom();
+    setRoom(null);
+    setRoomPlayers(null);
+    setLoading(false);
+    flipToPage(0);
   };
 
   if (!player) return <LoadingPopUp open={true} />;
@@ -309,11 +392,14 @@ const MainPage = () => {
               <LargeButton
                 backgroundColor={theme.colors.lightYellow}
                 onClick={() => {
-                  if (!isAuthenticated) onGoogleLoginButtonHandler();
+                  if (player.roomId) onGameContinueHandler();
+                  else if (!isAuthenticated) onGoogleLoginButtonHandler();
                   else flipToPage(1);
                 }}
               >
-                {isAuthenticated
+                {player.roomId
+                  ? '게임 이어서 하기'
+                  : isAuthenticated
                   ? `${user?.name}으로 플레이`
                   : 'Google로 로그인'}
               </LargeButton>
@@ -378,7 +464,7 @@ const MainPage = () => {
             </>,
             // 2: 게임 준비 페이지
             !room || !roomPlayers ? (
-              <div>방 정보가 없습니다. 다시 시도해 주세요.</div>
+              <></>
             ) : (
               <>
                 <div
@@ -436,11 +522,7 @@ const MainPage = () => {
                       backgroundColor={theme.colors.lighterYellow}
                       disabled={selectedGameMode === GameMode.BASIC}
                       onClick={() => {
-                        if (!isRoomHost) {
-                          alert('방장만 모드를 변경할 수 있습니다.');
-                          return;
-                        }
-                        setSelectedGameMode(GameMode.BASIC);
+                        onGameModeChangeHandler(GameMode.BASIC);
                       }}
                     >
                       기본 모드
@@ -449,11 +531,7 @@ const MainPage = () => {
                       backgroundColor={theme.colors.lightRed}
                       disabled={selectedGameMode === GameMode.FAKER}
                       onClick={() => {
-                        if (!isRoomHost) {
-                          alert('방장만 모드를 변경할 수 있습니다.');
-                          return;
-                        }
-                        setSelectedGameMode(GameMode.FAKER);
+                        onGameModeChangeHandler(GameMode.FAKER);
                       }}
                     >
                       페이커 모드
@@ -469,6 +547,15 @@ const MainPage = () => {
                   onClick={onGameStartButtonHandler}
                 >
                   게임 시작
+                </SmallButton>
+
+                <Spacer y={10} />
+
+                <SmallButton
+                  backgroundColor={theme.colors.lightRed}
+                  onClick={onExitRoomButtonHandler}
+                >
+                  나가기
                 </SmallButton>
               </>
             ),

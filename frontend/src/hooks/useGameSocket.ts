@@ -1,7 +1,7 @@
 import { useEffect, useCallback, useState } from 'react';
 import { useSocket } from './useSocket';
 import { useAuth } from '../context/AuthContext';
-import { parsePlayer, Player, Room } from '../types/game';
+import { parsePlayer, parseRoom, Player, Room } from '../types/game';
 
 interface UseGameSocketReturn {
   isConnected: boolean;
@@ -16,7 +16,8 @@ interface UseGameSocketReturn {
 
 export const useGameSocket = (
   setRoom: (room: Room) => void,
-  setRoomPlayers: (players: Player[]) => void
+  setRoomPlayers: (players: Player[]) => void,
+  navigateToGame: () => void
 ): UseGameSocketReturn => {
   const { player } = useAuth();
   const { socket, isConnected, emit, on, off } = useSocket({
@@ -68,21 +69,27 @@ export const useGameSocket = (
 
     const handleRoomUpdated = (data: any) => {
       console.log('Room updated:', data);
+
+      const room = parseRoom(data);
+      setRoom(room);
     };
 
-    const handlePlayerJoined = (data: Player[]) => {
+    const handlePlayerJoined = (data: any) => {
       console.log('Player joined:', data);
-      const players = data.map(p => parsePlayer(p));
+      const players = data.map((p: any) => parsePlayer(p));
       setRoomPlayers(players);
     };
 
     const handlePlayerLeft = (data: any) => {
       console.log('Player left:', data);
+      const players = data.map((p: any) => parsePlayer(p));
+      setRoomPlayers(players);
     };
 
     // Game events
     const handleGameStarted = (data: any) => {
       console.log('Game started:', data);
+      navigateToGame();
     };
 
     const handleTurnChanged = (data: any) => {

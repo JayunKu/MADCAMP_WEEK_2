@@ -34,25 +34,41 @@ export class RoomService {
     roomId: string,
     updates: Partial<Room>,
   ): Promise<Room | null> {
-    return await this.roomRedisService.updateRoom(roomId, updates);
+    const room = await this.roomRedisService.updateRoom(roomId, updates);
+
+    this.roomGateway.server.to(roomId).emit('room_updated', room);
+
+    return room;
   }
 
   async deleteRoom(roomId: string): Promise<boolean> {
     return await this.roomRedisService.deleteRoom(roomId);
   }
 
-  async joinRoom(roomId: string, playerId: string): Promise<Room | null> {
-    await this.roomRedisService.addPlayerToRoom(roomId, playerId);
+  async joinRoom(roomId: string, playerId: string): Promise<Player[] | null> {
+    const players = await this.roomRedisService.addPlayerToRoom(
+      roomId,
+      playerId,
+    );
 
-    const roomPlayers = await this.getRoomPlayers(roomId);
+    this.roomGateway.server.to(roomId).emit('player_joined', players);
 
-    this.roomGateway.server.to(roomId).emit('player_joined', roomPlayers);
-
-    return await this.getRoomById(roomId);
+    return players;
   }
 
   async getRoomPlayers(roomId: string): Promise<Player[]> {
     return await this.roomRedisService.getRoomPlayers(roomId);
+  }
+
+  async leaveRoom(roomId: string, playerId: string): Promise<Player[] | null> {
+    const players = await this.roomRedisService.removePlayerFromRoom(
+      roomId,
+      playerId,
+    );
+
+    this.roomGateway.server.to(roomId).emit('player_left', players);
+
+    return players;
   }
 
   //   async startGame(roomId: string): Promise<Room | null> {
@@ -131,13 +147,6 @@ export class RoomService {
   //     return await this.userRedisService.updateUser(userId, {
   //       room_id: roomId,
   //       is_member: true,
-  //     });
-  //   }
-
-  //   async leaveRoom(userId: string): Promise<User | null> {
-  //     return await this.userRedisService.updateUser(userId, {
-  //       room_id: null,
-  //       is_member: false,
   //     });
   //   }
 
