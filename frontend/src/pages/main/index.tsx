@@ -54,8 +54,6 @@ const MainPage = () => {
   const [username, setUsername] = useState('');
   const [selectedAvatar, setSelectedAvatar] = useState(AvatarType.AVATAR_GRAY);
 
-  const { joinRoom, startGame, leaveRoom, gameState } = useGameSocket();
-
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const [loading, setLoading] = useState(false);
@@ -69,6 +67,11 @@ const MainPage = () => {
 
   const [isRoomHost, setIsRoomHost] = useState(false);
   const [selectedGameMode, setSelectedGameMode] = useState(GameMode.BASIC);
+
+  const { joinRoom, startGame, leaveRoom } = useGameSocket(
+    setRoom,
+    setRoomPlayers
+  );
 
   const googleLogin = useGoogleLogin({
     onSuccess: async response => {
@@ -173,36 +176,47 @@ const MainPage = () => {
   };
 
   const createRoomButtonHandler = async () => {
+    if (!username || username.length < 2) {
+      alert('닉네임은 2글자 이상이어야 합니다.');
+      return;
+    }
     setLoading(true);
 
     try {
       if (!player) alert('오류가 발생했습니다. 페이지를 새로고침해주세요.');
 
-      const newRoom = (await axiosInstance.post('/rooms')).data;
-      const res = (await axiosInstance.post(`/rooms/${newRoom.id}`)).data;
-      console.log('Room created:', res);
+      const res = (await axiosInstance.post('/rooms')).data;
+      const newRoom = parseRoom(res.room);
+      console.log('Room created:', newRoom);
 
-      setRoom(parseRoom(res.room));
+      setRoom(newRoom);
       setRoomPlayers(res.players.map((p: any) => parsePlayer(p)));
+      joinRoom(newRoom.id);
       setLoading(false);
       flipToPage(2);
     } catch (err) {
+      setLoading(false);
       console.error('Failed to create room:', err);
       alert('Failed to create room. Please try again later.');
     }
   };
 
   const roomCodeConfirmHandler = async () => {
+    if (!username || username.length < 2) {
+      alert('닉네임은 2글자 이상이어야 합니다.');
+      return;
+    }
     setLoading(true);
 
     try {
       const res = (await axiosInstance.post(`/rooms/${roomCode}`)).data;
-      console.log('Room entered:', res);
+      const parsedRoom = parseRoom(res.room);
+      console.log('Room entered:', parsedRoom);
 
       setShowRoomCodePopup(false);
-      setRoom(parseRoom(res.room));
+      setRoom(parsedRoom);
       setRoomPlayers(res.players.map((p: any) => parsePlayer(p)));
-      joinRoom(roomCode);
+      joinRoom(parsedRoom.id);
       setLoading(false);
       flipToPage(2);
     } catch (err) {
@@ -383,7 +397,7 @@ const MainPage = () => {
                           key={roomPlayer.id}
                           isMember={roomPlayer.isMember}
                           username={roomPlayer.name}
-                          avatarId={roomPlayer.avatarId}
+                          avatarType={getAvatarTypeFromId(roomPlayer.avatarId)}
                           totalGames={10} // 임시 데이터
                           totalWins={5} // 임시 데이터
                           onMakeHost={() => {}}

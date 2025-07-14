@@ -25,4 +25,12 @@ export class RoomGateway {
 
   @WebSocketServer()
   server: Server;
+
+  @SubscribeMessage('join_room')
+  async handleJoinRoom(
+    @MessageBody() payload: { roomCode: string },
+    @ConnectedSocket() client: Socket,
+  ) {
+    client.join(payload.roomCode);
+  }
 }

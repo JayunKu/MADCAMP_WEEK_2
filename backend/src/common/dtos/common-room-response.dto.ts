@@ -12,7 +12,6 @@ export class CommonRoomResponseDto {
   game_status: GameStatus;
   round_number: number | null;
   round_winners: FakerModeTeamType[];
-  players: string[];
   keeper_player_ids: string[];
   fakers_player_ids: string[];
   response_player_ids: string[];
@@ -27,7 +26,6 @@ export class CommonRoomResponseDto {
     this.game_status = room.game_status;
     this.round_number = room.round_number;
     this.round_winners = room.round_winners;
-    this.players = room.player_ids;
     this.keeper_player_ids = room.keeper_player_ids;
     this.fakers_player_ids = room.fakers_player_ids;
     this.response_player_ids = room.response_player_ids;

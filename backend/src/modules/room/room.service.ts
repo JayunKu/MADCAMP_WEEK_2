@@ -18,11 +18,12 @@ export class RoomService {
     return await this.roomRedisService.getAllRooms();
   }
 
-  async createRoom(
-    hostUserId: string,
-    gameMode: GameMode = GameMode.BASIC,
-  ): Promise<Room> {
-    return await this.roomRedisService.createRoom(hostUserId, gameMode);
+  async createRoom(hostUserId: string): Promise<Room> {
+    const room = await this.roomRedisService.createRoom(hostUserId);
+
+    await this.joinRoom(room.id, hostUserId);
+
+    return room;
   }
 
   async getRoomById(roomId: string): Promise<Room | null> {
@@ -40,8 +41,14 @@ export class RoomService {
     return await this.roomRedisService.deleteRoom(roomId);
   }
 
-  async joinRoom(playerId: string, roomId: string): Promise<Room | null> {
-    return await this.roomRedisService.addPlayerToRoom(playerId, roomId);
+  async joinRoom(roomId: string, playerId: string): Promise<Room | null> {
+    await this.roomRedisService.addPlayerToRoom(roomId, playerId);
+
+    const roomPlayers = await this.getRoomPlayers(roomId);
+
+    this.roomGateway.server.to(roomId).emit('player_joined', roomPlayers);
+
+    return await this.getRoomById(roomId);
   }
 
   async getRoomPlayers(roomId: string): Promise<Player[]> {

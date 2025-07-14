@@ -37,7 +37,6 @@ export interface Room {
   gameStatus: GameStatus;
   roundNumber: number | null;
   roundWinners: FakerModeTeamType[];
-  playerIds: string[];
   keeperPlayerIds: string[];
   fakersPlayerIds: string[];
   responsePlayerIds: string[];
@@ -54,7 +53,6 @@ export const parseRoom = (data: any): Room => {
     gameStatus: data.game_status,
     roundNumber: data.round_number,
     roundWinners: data.round_winners || [],
-    playerIds: data.player_ids || [],
     keeperPlayerIds: data.keeper_player_ids || [],
     fakersPlayerIds: data.fakers_player_ids || [],
     responsePlayerIds: data.response_player_ids || [],

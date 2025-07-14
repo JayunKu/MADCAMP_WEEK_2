@@ -51,8 +51,12 @@ export class RoomController {
   @ApiOperation({ summary: '파티 생성' })
   async createRoom(@CurrentPlayer() currentPlayer: Player) {
     const room = await this.roomService.createRoom(currentPlayer.id);
+    const roomPlayers = await this.roomService.getRoomPlayers(room.id);
 
-    return new CommonResponseDto(new CommonRoomResponseDto(room));
+    return new CommonResponseDto({
+      room: new CommonRoomResponseDto(room),
+      players: roomPlayers.map((player) => new CommonPlayerResponseDto(player)),
+    });
   }
 
   @Post(':id')

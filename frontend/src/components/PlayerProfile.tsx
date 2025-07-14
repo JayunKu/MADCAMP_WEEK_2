@@ -9,7 +9,7 @@ interface UserProfileProps {
   isEmpty?: boolean;
   isMember: boolean;
   username: string;
-  avatarId?: number;
+  avatarType?: AvatarType;
   totalGames?: number;
   totalWins?: number;
   onMakeHost: (userId?: number) => void;
@@ -17,28 +17,11 @@ interface UserProfileProps {
   showTools?: boolean;
 }
 
-const getAvatarTypeById = (avatarId?: number) => {
-  switch (avatarId) {
-    case 0:
-      return AvatarType.AVATAR_GRAY;
-    case 1:
-      return AvatarType.AVATAR_GREEN;
-    case 2:
-      return AvatarType.AVATAR_RED;
-    case 3:
-      return AvatarType.AVATAR_BROWN;
-    case 4:
-      return AvatarType.AVATAR_YELLOW;
-    default:
-      return AvatarType.AVATAR_GRAY;
-  }
-};
-
 export const PlayerProfile = ({
   isEmpty,
   isMember,
   username,
-  avatarId,
+  avatarType = AvatarType.AVATAR_GRAY,
   totalGames,
   totalWins,
   onMakeHost,
@@ -75,7 +58,7 @@ export const PlayerProfile = ({
       }}
     >
       <PlayerProfileContainer>
-        <AvatarFrame avatarType={getAvatarTypeById(avatarId)} size="small" />
+        <AvatarFrame avatarType={avatarType} size="small" />
         <div>
           <p style={{ fontSize: '15px' }}>{username}</p>
           {isMember && (

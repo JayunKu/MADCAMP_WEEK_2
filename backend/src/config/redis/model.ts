@@ -24,7 +24,6 @@ export interface Room {
   round_number: number | null;
   round_winners: FakerModeTeamType[];
 
-  player_ids: string[];
   keeper_player_ids: string[];
   fakers_player_ids: string[];
 
