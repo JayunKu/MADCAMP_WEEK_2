@@ -1,7 +1,9 @@
 export class SessionPayload {
-  uid: string;
+  uid: number;
+  gid: string;
 
-  constructor(uid: string) {
+  constructor(uid: number, gid: string) {
     this.uid = uid;
+    this.gid = gid;
   }
 }
