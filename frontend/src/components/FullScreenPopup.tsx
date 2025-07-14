@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import styled from '@emotion/styled';
+import { createPortal } from 'react-dom';
 
 interface FullScreenPopupProps {
   open: boolean;
@@ -15,8 +16,8 @@ const Overlay = styled.div<{ visible: boolean; backgroundColor?: string }>`
   z-index: 9998;
   top: 0;
   left: 0;
-  width: 100vw;
-  height: 100vh;
+  width: 100%;
+  height: 100%;
   background: ${({ backgroundColor }) => backgroundColor || 'rgba(0,0,0,0.5)'};
   align-items: center;
   justify-content: center;
@@ -56,7 +57,7 @@ export const FullScreenPopup: React.FC<FullScreenPopupProps> = ({
     }
   }, [open]);
 
-  return (
+  return createPortal(
     <Overlay
       visible={open || visible}
       backgroundColor={layOutColor}
@@ -70,6 +71,7 @@ export const FullScreenPopup: React.FC<FullScreenPopupProps> = ({
       >
         {children}
       </PopupContent>
-    </Overlay>
+    </Overlay>,
+    document.body
   );
 };
