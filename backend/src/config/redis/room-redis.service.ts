@@ -6,7 +6,7 @@ import {
   GameStatus,
   FakerModeTeamType,
 } from 'src/config/redis/model';
-import { v4 as uuidv4 } from 'uuid';
+import { v4 } from 'uuid';
 
 @Injectable()
 export class RoomRedisService {
@@ -16,7 +16,7 @@ export class RoomRedisService {
     hostPlayerId: string,
     gameMode: GameMode = GameMode.BASIC,
   ): Promise<Room> {
-    const roomId = uuidv4();
+    const roomId = v4();
     const room: Room = {
       id: roomId,
       host_player_id: hostPlayerId,

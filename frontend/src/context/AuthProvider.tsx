@@ -1,5 +1,12 @@
 import React, { useState, ReactNode, useEffect } from 'react';
-import { AuthContext, User, AuthContextType, Player } from './AuthContext';
+import {
+  AuthContext,
+  User,
+  AuthContextType,
+  Player,
+  parsePlayer,
+  parseUser,
+} from './AuthContext';
 import { axiosInstance } from '../hooks/useAxios';
 
 const PLAYER_ID_KEY = 'malgreem_pid';
@@ -17,11 +24,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setUser(userData);
 
     // 최신 player 정보 가져오기
-    const latestPlayer = (
-      await axiosInstance.post('/players', {
-        player_id: userData.playerId,
-      })
-    ).data as Player;
+    const latestPlayer = parsePlayer(
+      (
+        await axiosInstance.post('/players', {
+          player_id: userData.playerId,
+        })
+      ).data
+    );
     setPlayer(latestPlayer);
 
     // 로컬 스토리지에 저장
@@ -37,8 +46,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     localStorage.removeItem(PLAYER_ID_KEY);
 
     // playerId 다시 받아오기
-    const newPlayer = (await axiosInstance.post('/players')).data;
+    const newPlayer = parsePlayer((await axiosInstance.post('/players')).data);
     setPlayer(newPlayer);
+    localStorage.setItem(PLAYER_ID_KEY, newPlayer.id);
   };
 
   const isAuthenticated = user !== null;
@@ -57,17 +67,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (savedUserId) {
         // 로그인한 사용자 정보 복원
         try {
-          const parsedUserId = JSON.parse(savedUserId);
-          const parsedUser = (await axiosInstance.get(`/users/${parsedUserId}`))
-            .data as User;
+          const parsedUserId = parseInt(savedUserId);
+          const parsedUser = parseUser(
+            (await axiosInstance.get(`/users/${parsedUserId}`)).data
+          );
           setUser(parsedUser);
 
           // 최신 player 정보 가져오기
-          const parsedPlayer = (
-            await axiosInstance.post('/players', {
-              player_id: parsedUser.playerId,
-            })
-          ).data as Player;
+          const parsedPlayer = parsePlayer(
+            (
+              await axiosInstance.post('/players', {
+                player_id: parsedUser.playerId,
+              })
+            ).data
+          );
 
           console.log('Restored user and player:', {
             user: parsedUser,
@@ -83,10 +96,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       } else if (savedPlayerId) {
         // playerId가 있지만 사용자 정보가 없는 경우
         try {
-          const parsedPlayerId = JSON.parse(savedPlayerId);
-          const parsedPlayer = (
-            await axiosInstance.get(`/players/${parsedPlayerId}`)
-          ).data as Player;
+          const parsedPlayerId = savedPlayerId;
+          const parsedPlayer = parsePlayer(
+            (await axiosInstance.get(`/players/${parsedPlayerId}`)).data
+          );
 
           console.log('Restored player:', parsedPlayer);
 
@@ -100,10 +113,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       if (!player) {
         // playerId가 없으면 새로 생성
-        const newPlayer = (await axiosInstance.post('/players')).data;
+        const newPlayer = parsePlayer(
+          (await axiosInstance.post('/players')).data
+        );
 
         setPlayer(newPlayer);
-        localStorage.setItem(PLAYER_ID_KEY, JSON.stringify(newPlayer.id));
+        localStorage.setItem(PLAYER_ID_KEY, newPlayer.id);
       }
     })();
   }, []);

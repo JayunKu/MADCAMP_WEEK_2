@@ -1,8 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/config/prisma/prisma.service';
 import { RoomRedisService } from '../../config/redis/room-redis.service';
 import { Room, GameMode } from 'src/config/redis/model';
 import { PlayerRedisService } from '../../config/redis/player-redis.service';
+import { RoomGateway } from './room.gateway';
 
 @Injectable()
 export class RoomService {
@@ -10,6 +11,7 @@ export class RoomService {
     private readonly prismaService: PrismaService,
     private readonly roomRedisService: RoomRedisService,
     private readonly playerRedisService: PlayerRedisService,
+    private readonly roomGateway: RoomGateway,
   ) {}
 
   async getAllRooms(): Promise<Room[]> {

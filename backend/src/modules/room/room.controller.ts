@@ -35,7 +35,6 @@ export class RoomController {
     @Body() createRoomRequestDto: CreateRoomRequestDto,
   ) {
     const { host_player_id } = createRoomRequestDto;
-    console.log(`currentPlayer: ${JSON.stringify(currentPlayer)}`);
 
     // Check if the player exists
     const player = await this.playerRedisService.getPlayerById(host_player_id);
@@ -47,4 +46,26 @@ export class RoomController {
 
     return new CommonResponseDto(new CreateRoomResponseDto(room));
   }
+
+  // @Post(':id')
+  // @UseGuards(PlayerGuard)
+  // @ApiOperation({ summary: '파티 참여' })
+  // async joinRoom(
+  //   @CurrentPlayer() currentPlayer: Player,
+  //   @Body('room_id') roomId: string,
+  // ) {
+  //   const room = await this.roomService.getRoomById(roomId);
+  //   if (!room) {
+  //     throw new Error(`Room with ID ${roomId} does not exist.`);
+  //   }
+
+  //   this.roomGateway.server.e
+
+  //   // Add player to the room
+  //   const updatedRoom = await this.roomService.updateRoom(roomId, {
+  //     players: [...(room.players || []), currentPlayer.id],
+  //   });
+
+  //   return new CommonResponseDto(updatedRoom);
+  // }
 }

@@ -42,7 +42,7 @@ const MainPage = () => {
   const [flipping, setFlipping] = useState(false);
   const [pageIdx, setPageIdx] = useState(0);
   const [username, setUsername] = useState('');
-  const [selectedAvatar, setSelectedAvatar] = useState(AvatarType.AVATAR_GREEN);
+  const [selectedAvatar, setSelectedAvatar] = useState(AvatarType.AVATAR_GRAY);
 
   // const { joinRoom, startGame, leaveRoom, gameState } = useGameSocket();
 
