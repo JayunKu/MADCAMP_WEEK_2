@@ -14,6 +14,7 @@ interface UserProfileProps {
   totalWins?: number;
   onMakeHost: (userId?: number) => void;
   onDeletePlayer: (userId?: number) => void;
+  isRoomHost?: boolean;
 }
 
 const getAvatarTypeById = (avatarId?: number) => {
@@ -42,6 +43,7 @@ export const PlayerProfile = ({
   totalWins,
   onMakeHost,
   onDeletePlayer,
+  isRoomHost = false,
 }: UserProfileProps) => {
   const theme = useTheme();
 
@@ -91,35 +93,37 @@ export const PlayerProfile = ({
           )}
         </div>
       </PlayerProfileContainer>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-        <img
-          src={hostIcon}
-          alt="Host Icon"
-          style={{
-            width: '16px',
-            height: '16px',
-            cursor: 'pointer',
-          }}
-          onClick={() => {
-            if (window.confirm('호스트로 지정하시겠습니까?')) {
-              // Call the function to make this player the host
-              onMakeHost();
-            }
-          }}
-        />
-        <img
-          src={trashIcon}
-          alt="Host Icon"
-          style={{
-            width: '16px',
-            height: '16px',
-            cursor: 'pointer',
-          }}
-          onClick={() => {
-            onDeletePlayer();
-          }}
-        />
-      </div>
+      {isRoomHost && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+          <img
+            src={hostIcon}
+            alt="Host Icon"
+            style={{
+              width: '16px',
+              height: '16px',
+              cursor: 'pointer',
+            }}
+            onClick={() => {
+              if (window.confirm('호스트로 지정하시겠습니까?')) {
+                // Call the function to make this player the host
+                onMakeHost();
+              }
+            }}
+          />
+          <img
+            src={trashIcon}
+            alt="Host Icon"
+            style={{
+              width: '16px',
+              height: '16px',
+              cursor: 'pointer',
+            }}
+            onClick={() => {
+              onDeletePlayer();
+            }}
+          />
+        </div>
+      )}
     </div>
   );
 };

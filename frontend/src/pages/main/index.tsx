@@ -49,9 +49,8 @@ const MainPage = () => {
   const [username, setUsername] = useState('');
   const [selectedAvatar, setSelectedAvatar] = useState(AvatarType.AVATAR_GRAY);
 
-  // const { joinRoom, startGame, leaveRoom, gameState } = useGameSocket();
+  const { joinRoom, startGame, leaveRoom, gameState } = useGameSocket();
 
-  const [selectedGameMode, setSelectedGameMode] = useState(GameMode.BASIC);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const [loading, setLoading] = useState(false);
@@ -61,6 +60,9 @@ const MainPage = () => {
   const [showRoomCodePopup, setShowRoomCodePopup] = useState(false);
 
   const [room, setRoom] = useState<Room | null>(null);
+
+  const [isRoomHost, setIsRoomHost] = useState(false);
+  const [selectedGameMode, setSelectedGameMode] = useState(GameMode.BASIC);
 
   const googleLogin = useGoogleLogin({
     onSuccess: async response => {
@@ -111,6 +113,14 @@ const MainPage = () => {
       setSelectedAvatar(AvatarType.AVATAR_GRAY);
     }
   }, [user]);
+
+  useEffect(() => {
+    if (!room || !player) return;
+    console.log('Room updated:', room);
+
+    setIsRoomHost(room.hostPlayerId === player.id);
+    setSelectedGameMode(room.gameMode);
+  }, [room]);
 
   const flipToPage = (targetIdx: number) => {
     setFlipping(true);
@@ -365,6 +375,7 @@ const MainPage = () => {
                         totalWins={player.totalWins}
                         onMakeHost={() => {}}
                         onDeletePlayer={() => {}}
+                        isRoomHost={isRoomHost}
                       />
                     );
                   } else {
@@ -382,7 +393,7 @@ const MainPage = () => {
                 })}
               </div>
 
-              <RoomCode code="FDAS32D" />
+              <RoomCode code={roomCode} />
 
               <GameSettings>
                 <p style={{ width: '100%' }}>모드 선택</p>
@@ -398,6 +409,10 @@ const MainPage = () => {
                     backgroundColor={theme.colors.lighterYellow}
                     disabled={selectedGameMode === GameMode.BASIC}
                     onClick={() => {
+                      if (!isRoomHost) {
+                        alert('방장만 모드를 변경할 수 있습니다.');
+                        return;
+                      }
                       setSelectedGameMode(GameMode.BASIC);
                     }}
                   >
@@ -407,6 +422,10 @@ const MainPage = () => {
                     backgroundColor={theme.colors.lightRed}
                     disabled={selectedGameMode === GameMode.FAKER}
                     onClick={() => {
+                      if (!isRoomHost) {
+                        alert('방장만 모드를 변경할 수 있습니다.');
+                        return;
+                      }
                       setSelectedGameMode(GameMode.FAKER);
                     }}
                   >
