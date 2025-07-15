@@ -25,7 +25,8 @@ interface UserPageProps {
 
 export const UserPage = ({ flipToPage }: UserPageProps) => {
   const theme = useTheme();
-  const { login, logout, user, player, isAuthenticated } = useAuth();
+  const { login, user, player, isAuthenticated, setUser, setPlayer } =
+    useAuth();
   const { setRoomPlayers, setRoom } = useRoom();
   const { setLoading } = useUI();
 
@@ -69,6 +70,7 @@ export const UserPage = ({ flipToPage }: UserPageProps) => {
         name: updatedUser.name,
         avatar_id: updatedUser.avatarId,
       });
+      setUser(updatedUser);
       alert('저장되었습니다.');
     } catch (err) {
       console.error('Failed to update user profile:', err);
@@ -77,7 +79,10 @@ export const UserPage = ({ flipToPage }: UserPageProps) => {
   };
 
   const createRoomButtonHandler = async () => {
-    if (!player) alert('오류가 발생하였습니다. 다시 시도해주세요.');
+    if (!player) {
+      alert('오류가 발생하였습니다. 다시 시도해주세요.');
+      return;
+    }
 
     if (!username || username.length < 2) {
       alert('닉네임은 2글자 이상이어야 합니다.');
@@ -86,6 +91,16 @@ export const UserPage = ({ flipToPage }: UserPageProps) => {
     setLoading(true);
 
     try {
+      if (!player.isMember) {
+        await axiosInstance.put(`/players/${player.id}`, {
+          name: username,
+        });
+        setPlayer({
+          ...player,
+          name: username,
+        });
+      }
+
       const res = (await axiosInstance.post('/rooms')).data;
       const newRoom = parseRoom(res.room);
       console.log('Room created:', newRoom);
@@ -107,13 +122,27 @@ export const UserPage = ({ flipToPage }: UserPageProps) => {
   };
 
   const roomCodeConfirmHandler = async () => {
+    if (!player) {
+      alert('오류가 발생하였습니다. 다시 시도해주세요.');
+      return;
+    }
     if (!username || username.length < 2) {
       alert('닉네임은 2글자 이상이어야 합니다.');
       return;
     }
     setLoading(true);
-
     try {
+      if (!player.isMember) {
+        await axiosInstance.put(`/players/${player.id}`, {
+          name: username,
+        });
+        setPlayer({
+          ...player,
+          name: username,
+        });
+        console.log('Player updated:', player.id, username);
+      }
+
       const res = (await axiosInstance.post(`/rooms/${roomCode}`)).data;
       const parsedRoom = parseRoom(res.room);
       console.log('Room entered:', parsedRoom);

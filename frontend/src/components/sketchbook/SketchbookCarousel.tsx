@@ -1,19 +1,10 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import styled from '@emotion/styled';
 import { Sketchbook } from './Sketchbook';
-import { EXAMPLE_PLAYER_INFOS, EXAMPLE_GAME_DATA } from '../../types/mockData';
 import { useTheme } from '@emotion/react';
 import { Spacer } from '../Spacer';
-
-// 각 플레이어의 응답 데이터와 플레이어 정보 매칭
-const responses = EXAMPLE_GAME_DATA.responses.map(resp => {
-  const player = EXAMPLE_PLAYER_INFOS.find(p => p.id.toString() === resp.id);
-  return {
-    ...resp,
-    username: player?.username || '알 수 없음',
-    avatarId: player?.avatarId ?? 0,
-  };
-});
+import { useRoom } from '../../context/RoomContext';
+import { useUI } from '../../context/UIContext';
 
 const KOREAN_ORDINALS = [
   '첫번째',
@@ -28,20 +19,48 @@ const KOREAN_ORDINALS = [
 
 export const SketchbookCarousel = () => {
   const theme = useTheme();
+  const { setLoading } = useUI();
+  const { room, roomPlayers } = useRoom();
   const [centerIdx, setCenterIdx] = useState(0);
-  const total = responses.length;
 
-  console.log(responses);
+  useEffect(() => {
+    setLoading(!room || !roomPlayers);
+  }, [room, roomPlayers]);
 
-  // 캐러셀 인덱스 계산 (순환)
-  const getIdx = (offset: number) => (centerIdx + offset + total) % total;
+  if (!room || !roomPlayers) {
+    return <></>;
+  }
+
+  const total = room.responsePlayerIds.length;
+  const getIdx = (offset: number) => (centerIdx + offset + total) % total; // 캐러셀 인덱스 계산 (순환)
+
+  const gameResponses = room.responsePlayerIds.map((playerId, index) => {
+    const player = roomPlayers?.find(p => p.id === playerId);
+    return {
+      id: playerId,
+      username: player?.name || '알 수 없음',
+      avatarId: player?.avatarId ?? 0,
+      input: room.responsePlayerInputs[index] || '',
+      file_url: room.responsePlayerFileUrls[index] || '',
+    };
+  });
+
+  // 3개 미만인 경우 렌더링할 오프셋 계산
+  const getVisibleOffsets = () => {
+    if (total === 1) return [0];
+    if (total === 2) return [-1, 1];
+    return [-1, 0, 1];
+  };
+
+  const visibleOffsets = getVisibleOffsets();
 
   return (
     <SketchbookList>
-      {[-1, 0, 1].map(offset => {
+      {visibleOffsets.map(offset => {
         const idx = getIdx(offset);
-        const resp = responses[idx];
-        const isCenter = offset === 0;
+        const resp = gameResponses[idx];
+        const isCenter =
+          offset === 0 || total === 1 || (total === 2 && offset === -1);
         return (
           <SketchbookItem
             key={idx}
@@ -74,13 +93,13 @@ export const SketchbookCarousel = () => {
                 {resp.username}이 그린 그림
               </p>
               <img
-                src={resp.file_id || ''}
+                src={resp.file_url}
                 alt="Player Images"
                 style={{
-                  background: 'red',
                   width: '100%',
                   height: '180px',
                   padding: '0 15px',
+                  objectFit: 'contain',
                 }}
               />
               <p

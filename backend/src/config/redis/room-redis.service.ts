@@ -27,7 +27,7 @@ export class RoomRedisService {
       fakers_player_ids: [],
       response_player_ids: [],
       response_player_inputs: [],
-      response_player_file_ids: [],
+      response_player_file_urls: [],
       turn_player_index: 0,
     };
 
@@ -55,7 +55,7 @@ export class RoomRedisService {
     await this.redisService.del(`${roomKey}:fakers_player_ids`);
     await this.redisService.del(`${roomKey}:response_player_ids`);
     await this.redisService.del(`${roomKey}:response_player_inputs`);
-    await this.redisService.del(`${roomKey}:response_player_file_ids`);
+    await this.redisService.del(`${roomKey}:response_player_file_urls`);
     await this.redisService.hSet(
       roomKey,
       'turn_player_index',
@@ -99,8 +99,8 @@ export class RoomRedisService {
       0,
       -1,
     );
-    const response_player_file_ids = await this.redisService.lRange(
-      `${roomKey}:response_player_file_ids`,
+    const response_player_file_urls = await this.redisService.lRange(
+      `${roomKey}:response_player_file_urls`,
       0,
       -1,
     );
@@ -119,7 +119,7 @@ export class RoomRedisService {
       fakers_player_ids: fakers_player_ids,
       response_player_ids: response_player_ids,
       response_player_inputs: response_player_inputs,
-      response_player_file_ids: response_player_file_ids,
+      response_player_file_urls: response_player_file_urls,
       turn_player_index: parseInt(roomData.turn_player_index),
     };
   }
@@ -157,7 +157,7 @@ export class RoomRedisService {
         case 'fakers_player_ids':
         case 'response_player_ids':
         case 'response_player_inputs':
-        case 'response_player_file_ids':
+        case 'response_player_file_urls':
           // 기존 리스트 삭제 후 새로 생성
           await this.redisService.del(`${roomKey}:${key}`);
           if (Array.isArray(value) && value.length > 0) {
@@ -201,7 +201,7 @@ export class RoomRedisService {
       `${roomKey}:response_player_inputs`,
     );
     const listResult6 = await this.redisService.del(
-      `${roomKey}:response_player_file_ids`,
+      `${roomKey}:response_player_file_urls`,
     );
     return (
       hashResult > 0 ||
@@ -226,7 +226,7 @@ export class RoomRedisService {
         key.includes(':fakers_player_ids') ||
         key.includes(':response_player_ids') ||
         key.includes(':response_player_inputs') ||
-        key.includes(':response_player_file_ids')
+        key.includes(':response_player_file_urls')
       ) {
         continue;
       }
@@ -259,8 +259,8 @@ export class RoomRedisService {
           0,
           -1,
         );
-        const response_player_file_ids = await this.redisService.lRange(
-          `${key}:response_player_file_ids`,
+        const response_player_file_urls = await this.redisService.lRange(
+          `${key}:response_player_file_urls`,
           0,
           -1,
         );
@@ -279,7 +279,7 @@ export class RoomRedisService {
           fakers_player_ids: fakers_player_ids,
           response_player_ids: response_player_ids,
           response_player_inputs: response_player_inputs,
-          response_player_file_ids: response_player_file_ids,
+          response_player_file_urls: response_player_file_urls,
           turn_player_index: parseInt(roomData.turn_player_index),
         };
         rooms.push(room);
@@ -369,20 +369,17 @@ export class RoomRedisService {
     roomId: string,
     playerId: string,
     input: string,
-    fileId?: string,
+    fileUrl: string,
   ): Promise<Room | null> {
     const roomKey = `rooms:${roomId}`;
     const exists = await this.redisService.exists(roomKey);
     if (!exists) return null;
 
     // 각 응답 요소를 해당 리스트에 추가
+    await this.redisService.rPush(`${roomKey}:response_player_inputs`, input);
     await this.redisService.rPush(
-      `${roomKey}:response_player_inputs`,
-      input || '',
-    );
-    await this.redisService.rPush(
-      `${roomKey}:response_player_file_ids`,
-      fileId || '',
+      `${roomKey}:response_player_file_urls`,
+      fileUrl,
     );
 
     return await this.getRoomById(roomId);
@@ -412,7 +409,7 @@ export class RoomRedisService {
       `${roomKey}:response_player_inputs`,
     );
     const result3 = await this.redisService.del(
-      `${roomKey}:response_player_file_ids`,
+      `${roomKey}:response_player_file_urls`,
     );
     return result1 > 0 || result2 > 0 || result3 > 0;
   }
@@ -505,7 +502,7 @@ export class RoomRedisService {
       index,
     );
     const fileId = await this.redisService.lIndex(
-      `${roomKey}:response_player_file_ids`,
+      `${roomKey}:response_player_file_urls`,
       index,
     );
 

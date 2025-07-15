@@ -49,6 +49,12 @@ export class PlayerService {
     return await this.createNewPlayer();
   }
 
+  async updatePlayer(playerId: string, name: string): Promise<Player | null> {
+    return await this.playerRedisService.updatePlayer(playerId, {
+      name,
+    });
+  }
+
   async getPlayer(playerId: string): Promise<Player | null> {
     return await this.playerRedisService.getPlayerById(playerId);
   }

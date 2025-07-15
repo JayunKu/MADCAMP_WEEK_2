@@ -12,6 +12,7 @@ import { GameMode } from '../../types/game';
 import { useUI } from '../../context/UIContext';
 import { useNavigate } from 'react-router-dom';
 import { axiosInstance } from '../../hooks/useAxios';
+import { useSocketContext } from '../../context/SocketContext';
 
 const MAX_PLAYER_PER_ROOM = 8; // 최대 플레이어 수
 
@@ -21,9 +22,9 @@ interface RoomPageProps {
 }
 
 export const RoomPage = ({ flipToPage, toggleSketchbook }: RoomPageProps) => {
-  const navigate = useNavigate();
   const theme = useTheme();
-  const { setLoading, setShowFooter } = useUI();
+  const { setLoading } = useUI();
+  const { leaveRoom } = useSocketContext();
   const { player } = useAuth();
   const { room, roomPlayers, setRoomPlayers, setRoom } = useRoom();
 
@@ -120,6 +121,7 @@ export const RoomPage = ({ flipToPage, toggleSketchbook }: RoomPageProps) => {
       console.log('Left room:', player.roomId);
       setRoom(null);
       setRoomPlayers(null);
+      leaveRoom();
       setLoading(false);
       flipToPage(0);
     } catch (err) {
@@ -129,9 +131,13 @@ export const RoomPage = ({ flipToPage, toggleSketchbook }: RoomPageProps) => {
     }
   };
 
-  return !room || !roomPlayers || !player ? (
-    <></>
-  ) : (
+  useEffect(() => {
+    setLoading(!room || !roomPlayers || !player);
+  }, [room, roomPlayers, player]);
+
+  if (!room || !roomPlayers || !player) return <></>;
+
+  return (
     <>
       <div
         style={{

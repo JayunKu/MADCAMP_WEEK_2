@@ -31,7 +31,7 @@ export interface Room {
 
   response_player_ids: string[];
   response_player_inputs: string[];
-  response_player_file_ids: string[];
+  response_player_file_urls: string[];
 
   turn_player_index: number;
 }

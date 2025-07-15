@@ -16,7 +16,7 @@ export class CommonRoomResponseDto {
   fakers_player_ids: string[];
   response_player_ids: string[];
   response_player_inputs: string[];
-  response_player_file_ids: string[];
+  response_player_file_urls: string[];
   turn_player_index: number;
 
   constructor(room: Room) {
@@ -30,7 +30,7 @@ export class CommonRoomResponseDto {
     this.fakers_player_ids = room.fakers_player_ids;
     this.response_player_ids = room.response_player_ids;
     this.response_player_inputs = room.response_player_inputs;
-    this.response_player_file_ids = room.response_player_file_ids;
+    this.response_player_file_urls = room.response_player_file_urls;
     this.turn_player_index = room.turn_player_index;
   }
 }

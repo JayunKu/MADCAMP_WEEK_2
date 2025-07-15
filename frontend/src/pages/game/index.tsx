@@ -58,7 +58,6 @@ export const GamePage = () => {
   const [answerInput, setAnswerInput] = useState('');
 
   const [isImageGenerating, setIsImageGenerating] = useState(false);
-  const [generatedImageId, setGeneratedImageId] = useState<string | null>(null);
   const [generatedImageUrl, setGeneratedImageUrl] = useState<string | null>(
     null
   );
@@ -187,7 +186,6 @@ export const GamePage = () => {
     ).data;
 
     flipDownPage(() => {
-      setGeneratedImageId(res.file_id);
       setGeneratedImageUrl(res.file_url);
       setIsImageGenerating(false);
     });
@@ -198,14 +196,15 @@ export const GamePage = () => {
       alert('오류가 발생하였습니다. 다시 시도해주세요.');
       return;
     }
-    if (!isMyTurn || !generatedImageId) return;
+    if (!isMyTurn || !generatedImageUrl) return;
 
     try {
       await axiosInstance.post(`/games/${room.id}/images`, {
         input: userInput,
-        file_id: generatedImageId,
+        file_url: generatedImageUrl,
       });
       setUserInput('');
+      setGeneratedImageUrl(null);
     } catch (err) {
       console.error('Failed to confirm image:', err);
       alert('오류가 발생하였습니다. 다시 시도해주세요.');
@@ -213,12 +212,13 @@ export const GamePage = () => {
     }
   };
 
+  useEffect(() => {
+    setLoading(!room || !roomPlayers);
+  }, [room, roomPlayers]);
+
   if (!isConnected || !room || !roomPlayers || roomPlayers.length === 0) {
-    setLoading(true);
     return <></>;
   }
-
-  setLoading(false);
   return (
     <>
       <FullScreenPopup
@@ -322,25 +322,35 @@ export const GamePage = () => {
               player => player.id === room.responsePlayerIds[previousIndex]
             );
 
-            if (!previousPlayer || !room.responsePlayerFileIds[previousIndex]) {
+            if (
+              !previousPlayer ||
+              !room.responsePlayerFileUrls[previousIndex]
+            ) {
               setLoading(true);
               return <></>;
             }
             setLoading(false);
             return (
-              <BlackSketchbook>
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  padding: '10px',
+                }}
+              >
                 <p>{previousPlayer.name}이 그린 그림</p>
                 <img
-                  src={room.responsePlayerFileIds[previousIndex]}
+                  src={room.responsePlayerFileUrls[previousIndex]}
                   alt="Previous Generated Image"
                   style={{
                     width: '100%',
                     height: '150px',
-                    background: 'red',
                     margin: '10px 0',
+                    objectFit: 'contain',
                   }}
                 />
-              </BlackSketchbook>
+              </div>
             );
           } else {
             const currentPlayer = roomPlayers.find(
@@ -426,7 +436,7 @@ export const GamePage = () => {
               }}
             />
           </BlackSketchbook>
-        ) : generatedImageId && generatedImageUrl ? (
+        ) : generatedImageUrl && generatedImageUrl ? (
           <div
             style={{
               display: 'flex',
@@ -443,6 +453,7 @@ export const GamePage = () => {
                 width: '100%',
                 height: '150px',
                 margin: '10px 0',
+                objectFit: 'contain',
               }}
             />
             <SmallButton

@@ -5,8 +5,6 @@ import MainPage from './pages/main';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { GamePage } from './pages/game';
 import styled from '@emotion/styled';
-import { RoundResultPage } from './pages/game/RoundResult';
-import { GameResultPage } from './pages/game/GameResult';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { RoomProvider } from './context/RoomContext';
 import { UIProvider } from './context/UIContext';
@@ -36,11 +34,6 @@ function App() {
                     <Routes>
                       <Route path="/" element={<MainPage />} />
                       <Route path="/game" element={<GamePage />} />
-                      <Route path="/game/result" element={<GameResultPage />} />
-                      <Route
-                        path="/game/round_result"
-                        element={<RoundResultPage />}
-                      />
 
                       <Route
                         path="*"

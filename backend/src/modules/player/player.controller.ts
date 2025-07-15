@@ -6,6 +6,7 @@ import {
   HttpException,
   Param,
   Post,
+  Put,
   Res,
 } from '@nestjs/common';
 import { PlayerService } from './player.service';
@@ -14,6 +15,7 @@ import { CommonResponseDto } from 'src/common/dtos/common-response.dto';
 import { Response } from 'express';
 import { CreatePlayerRequestDto } from './dtos/create-player-request.dto';
 import { Player } from 'src/config/redis/model';
+import { UpdatePlayerRequestDto } from './dtos/update-player-request.dto';
 
 export const PLAYER_COOKIE_NAME = 'malgreem_pid';
 
@@ -32,6 +34,30 @@ export class PlayerController {
     }
 
     return new CommonResponseDto(player);
+  }
+
+  @Put(':id')
+  @ApiOperation({ summary: '(비회원) 플레이어 정보 업데이트' })
+  async updatePlayer(
+    @Param('id') playerId: string,
+    @Body() updatePlayerRequestDto: UpdatePlayerRequestDto,
+  ) {
+    const { name } = updatePlayerRequestDto;
+
+    const player = await this.playerService.getPlayer(playerId);
+    if (!player) {
+      throw new HttpException('Player not found', 404);
+    }
+    if (player.is_member) {
+      throw new HttpException(
+        'Member player cannot update name. Please try update user',
+        400,
+      );
+    }
+
+    const updatedPlayer = await this.playerService.updatePlayer(playerId, name);
+
+    return new CommonResponseDto(updatedPlayer);
   }
 
   @Post()

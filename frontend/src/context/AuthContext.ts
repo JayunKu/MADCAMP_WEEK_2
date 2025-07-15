@@ -5,6 +5,8 @@ import { Player } from '../types/game';
 export interface AuthContextType {
   user: User | null;
   player: Player | null;
+  setUser: (user: User | null) => void;
+  setPlayer: (player: Player | null) => void;
   login: (user: User) => void;
   logout: () => void;
   isAuthenticated: boolean;

@@ -42,7 +42,7 @@ export interface Room {
   fakersPlayerIds: string[];
   responsePlayerIds: string[];
   responsePlayerInputs: string[];
-  responsePlayerFileIds: string[];
+  responsePlayerFileUrls: string[];
   turnPlayerIndex: number;
 }
 
@@ -58,7 +58,7 @@ export const parseRoom = (data: any): Room => {
     fakersPlayerIds: data.fakers_player_ids || [],
     responsePlayerIds: data.response_player_ids || [],
     responsePlayerInputs: data.response_player_inputs || [],
-    responsePlayerFileIds: data.response_player_file_ids || [],
+    responsePlayerFileUrls: data.response_player_file_urls || [],
     turnPlayerIndex: data.turn_player_index,
   };
 };

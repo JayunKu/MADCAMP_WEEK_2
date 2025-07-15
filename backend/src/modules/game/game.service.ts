@@ -9,7 +9,6 @@ const FAKER_MODE_ROUND_LIMIT = 3;
 @Injectable()
 export class GameService {
   constructor(
-    private readonly httpService: HttpService,
     private readonly roomRedisService: RoomRedisService,
     private readonly roomGateway: RoomGateway,
     private readonly configService: ConfigService,
@@ -28,7 +27,7 @@ export class GameService {
       round_winners: [],
       response_player_ids: randomizedPlayers.map((player) => player.id),
       response_player_inputs: [],
-      response_player_file_ids: [],
+      response_player_file_urls: [],
       turn_player_index: 0,
     });
 
@@ -83,37 +82,31 @@ export class GameService {
     roomId: string,
     playerId: string,
     input: string,
-    fileId: string,
+    file_url: string,
   ): Promise<void> {
     // Update the room with the submitted image
-    await this.roomRedisService.addResponse(roomId, playerId, input, fileId);
+    await this.roomRedisService.addResponse(roomId, playerId, input, file_url);
 
     const room = (await this.roomRedisService.getRoomById(roomId)) as Room;
 
     if (room.turn_player_index + 1 === room.response_player_ids.length) {
       if (room.game_mode === GameMode.FAKER) {
-        if (room.round_number + 1 === FAKER_MODE_ROUND_LIMIT) {
+        if (room.round_number === FAKER_MODE_ROUND_LIMIT) {
           // 페이커 모드: 모든 라운드 끝남
           const updatedRoom = await this.roomRedisService.updateRoom(roomId, {
             game_status: GameStatus.ENDED,
           });
-          this.roomGateway.server.to(roomId).emit('game_finished', {
-            room: updatedRoom,
-          });
+          this.roomGateway.server.to(roomId).emit('game_finished', updatedRoom);
         } else {
           // 페이커 모드: 현재 라운드 끝남
-          this.roomGateway.server.to(roomId).emit('round_finished', {
-            room,
-          });
+          this.roomGateway.server.to(roomId).emit('round_finished', room);
         }
       } else {
         // 기본 모드: 게임 종료
         const updatedRoom = await this.roomRedisService.updateRoom(roomId, {
           game_status: GameStatus.ENDED,
         });
-        this.roomGateway.server.to(roomId).emit('game_finished', {
-          room: updatedRoom,
-        });
+        this.roomGateway.server.to(roomId).emit('game_finished', updatedRoom);
       }
     } else {
       // 다음 플레이어로 턴 변경
@@ -122,5 +115,27 @@ export class GameService {
       });
       this.roomGateway.server.to(roomId).emit('turn_changed', updatedRoom);
     }
+  }
+
+  async nextRound(roomId: string): Promise<Room | null> {
+    const room = (await this.roomRedisService.getRoomById(roomId)) as Room;
+
+    // randomize room players
+    const randomizedPlayers = room.response_player_ids.sort(
+      () => Math.random() - 0.5,
+    );
+
+    // 페이커 모드: 라운드 증가
+    const updatedRoom = await this.roomRedisService.updateRoom(roomId, {
+      round_number: room.round_number + 1,
+      game_status: GameStatus.ANSWER_INPUT,
+      turn_player_index: 0,
+      response_player_ids: randomizedPlayers,
+      response_player_inputs: [],
+      response_player_file_urls: [],
+    });
+    this.roomGateway.server.to(roomId).emit('round_start_next', updatedRoom);
+
+    return updatedRoom;
   }
 }
