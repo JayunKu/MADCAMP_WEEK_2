@@ -40,7 +40,6 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
   });
 
   const [showRoundResult, setShowRoundResult] = useState(false);
-  const [showGameResult, setShowGameResult] = useState(false);
 
   const joinRoom = useCallback(
     (roomCode: string) => {
@@ -113,10 +112,15 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
       console.log('Round finished:', data);
       const roomData = parseRoom(data);
       console.log('Parsed room data:', roomData);
-      // setLoading(true);
       setRoom(roomData);
       setShowRoundResult(true);
-      // setLoading(false);
+    };
+
+    const handleRoundWinnerSubmitted = (data: any) => {
+      console.log('Round winner submitted:', data);
+      const roomData = parseRoom(data);
+      console.log('Parsed room data:', roomData);
+      setRoom(roomData);
     };
 
     const handleRoundStartNext = (data: any) => {
@@ -128,22 +132,6 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
       setShowRoundResult(false);
     };
 
-    const handleGameFinished = async (data: any) => {
-      console.log('Game finished:', data);
-      const roomData = parseRoom(data);
-      console.log('Parsed room data:', roomData);
-      setRoom(roomData);
-
-      if (roomData.gameMode === GameMode.BASIC) {
-        setShowRoundResult(true);
-      } else {
-        setShowGameResult(true);
-      }
-
-      leaveRoom();
-      await axiosInstance.delete(`/rooms/${roomData.id}/me`);
-    };
-
     // Register event listeners
     on('room_updated', handleRoomUpdated);
     on('player_joined', handlePlayerJoined);
@@ -151,8 +139,8 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
     on('game_started', handleGameStarted);
     on('turn_changed', handleTurnChanged);
     on('round_finished', handleRoundFinished);
+    on('round_winner_submitted', handleRoundWinnerSubmitted);
     on('round_start_next', handleRoundStartNext);
-    on('game_finished', handleGameFinished);
 
     // Cleanup
     return () => {
@@ -162,8 +150,8 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
       off('game_started', handleGameStarted);
       off('turn_changed', handleTurnChanged);
       off('round_finished', handleRoundFinished);
+      off('round_winner_submitted', handleRoundWinnerSubmitted);
       off('round_start_next', handleRoundStartNext);
-      off('game_finished', handleGameFinished);
     };
   }, [socket, on, off, player, setRoom, setRoomPlayers]);
 
@@ -175,8 +163,7 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
 
   return (
     <SocketContext.Provider value={value}>
-      <RoundResultPopup open={showRoundResult} />
-      <GameResultPopup open={showGameResult} />
+      <RoundResultPopup open={showRoundResult} setOpen={setShowRoundResult} />
       {children}
     </SocketContext.Provider>
   );

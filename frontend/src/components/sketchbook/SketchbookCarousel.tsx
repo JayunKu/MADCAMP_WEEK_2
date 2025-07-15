@@ -5,6 +5,7 @@ import { useTheme } from '@emotion/react';
 import { Spacer } from '../Spacer';
 import { useRoom } from '../../context/RoomContext';
 import { useUI } from '../../context/UIContext';
+import { Player } from '../../types/game';
 
 const KOREAN_ORDINALS = [
   '첫번째',
@@ -29,16 +30,15 @@ export const SketchbookCarousel = () => {
 
   if (!room || !roomPlayers) return <></>;
 
+  console.log('room players', roomPlayers);
   const total = room.responsePlayerIds.length;
 
   const gameResponses = room.responsePlayerIds.map((playerId, index) => {
-    const player = roomPlayers.find(p => p.id === playerId);
+    const player = roomPlayers.find(p => p.id === playerId) as Player;
     return {
-      id: playerId,
-      username: player?.name || '알 수 없음',
-      avatarId: player?.avatarId ?? 0,
-      input: room.responsePlayerInputs[index] || '',
-      file_url: room.responsePlayerFileUrls[index] || '',
+      name: player.name,
+      input: room.responsePlayerInputs[index],
+      file_url: room.responsePlayerFileUrls[index],
     };
   });
 
@@ -91,7 +91,7 @@ export const SketchbookCarousel = () => {
                   marginBottom: '10px',
                 }}
               >
-                {resp.username}이 그린 그림
+                {resp.name}이 그린 그림
               </p>
               <img
                 src={resp.file_url}

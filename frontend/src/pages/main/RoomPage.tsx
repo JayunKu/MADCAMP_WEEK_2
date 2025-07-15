@@ -209,13 +209,44 @@ export const RoomPage = ({ flipToPage, toggleSketchbook }: RoomPageProps) => {
             페이커 모드
           </GameModeButton>
         </div>
-        <p style={{ width: '100%', marginTop: '15px' }}>게임 옵션 선택</p>
       </GameSettings>
+
+      {room.gameMode === GameMode.FAKER && (
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+          }}
+        >
+          <p
+            style={{
+              marginBottom: '10px',
+              color: theme.colors.darkGray,
+              fontSize: '14px',
+            }}
+          >
+            {(() => {
+              const fakerCount = Math.floor(roomPlayers.length / 3);
+              if (roomPlayers.length < 3) {
+                return '최소 3명 이상의 플레이어가 필요해요';
+              } else {
+                return `페이커 ${fakerCount}명, 키퍼 ${
+                  roomPlayers.length - fakerCount
+                }명`;
+              }
+            })()}
+          </p>
+        </div>
+      )}
 
       <SmallButton
         backgroundColor={theme.colors.lightYellow}
         onClick={onGameStartButtonHandler}
-        disabled={!isRoomHost}
+        disabled={
+          !isRoomHost ||
+          (room.gameMode === GameMode.FAKER && roomPlayers.length < 3)
+        }
       >
         게임 시작
       </SmallButton>

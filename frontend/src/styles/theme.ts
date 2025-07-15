@@ -12,6 +12,7 @@ export const theme = {
     darkGray: '#666666',
     lightGray: '#F5F5F5',
     lightRed: '#FFD9CE',
+    lightGreen: '#A0C86D',
   },
   shadows: {
     default: '0 2px 2px rgba(0, 0, 0, 0.25)',

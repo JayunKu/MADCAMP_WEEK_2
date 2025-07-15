@@ -4,9 +4,10 @@ import {
   HttpException,
   Param,
   Post,
+  Put,
   UseGuards,
 } from '@nestjs/common';
-import { GameService } from './game.service';
+import { FAKER_MODE_ROUND_LIMIT, GameService } from './game.service';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CommonResponseDto } from 'src/common/dtos/common-response.dto';
 import { PlayerGuard } from '../auth/guards/player.guard';
@@ -16,6 +17,7 @@ import { SubmitInputRequestDto } from './dtos/submit-input-request.dto';
 import { SubmitImageRequestDto } from './dtos/submit-image-request.dto';
 import { RoomService } from '../room/room.service';
 import { SubmitAnswerRequestDto } from './dtos/submit-answer-request.dto';
+import { SubmitRoundWinnerRequestDto } from './dtos/submit-round-winner-request.dto';
 
 @ApiTags('games')
 @Controller('games')
@@ -36,7 +38,10 @@ export class GameController {
     if (!room) {
       throw new HttpException(`Room with ID ${roomId} does not exist.`, 404);
     }
-    if (room.game_status !== GameStatus.WAITING) {
+    if (
+      room.game_status !== GameStatus.WAITING &&
+      room.game_status !== GameStatus.FINISHED
+    ) {
       throw new HttpException('Game is already started or ended', 403);
     }
     if (room.host_player_id !== player.id) {
@@ -156,6 +161,38 @@ export class GameController {
     }
 
     await this.gameService.nextRound(roomId);
+
+    return new CommonResponseDto();
+  }
+
+  @Put(':id/rounds')
+  @UseGuards(PlayerGuard)
+  @ApiOperation({ summary: '(방장만 가능) 라운드 승리자 결정' })
+  async submitRoundWinner(
+    @Param('id') roomId: string,
+    @CurrentPlayer() player: Player,
+    @Body() submitRoundWinnerRequestDto: SubmitRoundWinnerRequestDto,
+  ) {
+    const { winner_type } = submitRoundWinnerRequestDto;
+
+    const room = await this.roomService.getRoomById(roomId);
+    if (!room) {
+      throw new HttpException(`Room with ID ${roomId} does not exist.`, 404);
+    }
+    if (room.game_status !== GameStatus.STARTED) {
+      throw new HttpException('Game is not running', 403);
+    }
+    if (room.host_player_id !== player.id) {
+      throw new HttpException('Only the host can submit round winners', 403);
+    }
+    if (room.round_winners.length !== room.round_number - 1) {
+      throw new HttpException(
+        'Invalid round winner submission. Ensure all previous rounds have winners.',
+        403,
+      );
+    }
+
+    await this.gameService.submitRoundWinner(roomId, winner_type);
 
     return new CommonResponseDto();
   }

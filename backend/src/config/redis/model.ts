@@ -7,7 +7,7 @@ export enum GameStatus {
   WAITING = 0,
   ANSWER_INPUT = 1,
   STARTED = 2,
-  ENDED = 3,
+  FINISHED = 3,
 }
 
 export enum FakerModeTeamType {

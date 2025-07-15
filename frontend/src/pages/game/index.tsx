@@ -104,7 +104,7 @@ export const GamePage = () => {
     return () => {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };
-  }, [isConnected, location.state, player, navigate]);
+  }, [isConnected, location.state, player]);
 
   // room이 바뀔 때마다 isMyTurn 업데이트
   useEffect(() => {
@@ -177,18 +177,25 @@ export const GamePage = () => {
     }
 
     setIsImageGenerating(true);
-    setImageGenRemain(prev => prev - 1);
 
-    const res = (
-      await axiosInstance.post(`/games/${room.id}/inputs`, {
-        input: userInput,
-      })
-    ).data;
+    try {
+      const res = (
+        await axiosInstance.post(`/games/${room.id}/inputs`, {
+          input: userInput,
+        })
+      ).data;
 
-    flipDownPage(() => {
-      setGeneratedImageUrl(res.file_url);
+      setImageGenRemain(prev => prev - 1);
+      flipDownPage(() => {
+        setGeneratedImageUrl(res.file_url);
+        setIsImageGenerating(false);
+      });
+    } catch (err) {
+      console.error('Failed to generate image:', err);
+      alert('이미지 생성에 실패했습니다. 다시 시도해주세요.');
       setIsImageGenerating(false);
-    });
+      return;
+    }
   };
 
   const onConfirmImageButtonHandler = async () => {
@@ -205,6 +212,7 @@ export const GamePage = () => {
       });
       setUserInput('');
       setGeneratedImageUrl(null);
+      setImageGenRemain(IMAGE_GEN_MAX_TRIES);
     } catch (err) {
       console.error('Failed to confirm image:', err);
       alert('오류가 발생하였습니다. 다시 시도해주세요.');

@@ -8,18 +8,20 @@ import { useRoom } from '../../context/RoomContext';
 import { useUI } from '../../context/UIContext';
 import { GameMode, FakerModeTeamType } from '../../types/game';
 import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useSocketContext } from '../../context/SocketContext';
+import { axiosInstance } from '../../hooks/useAxios';
 
 interface GameResultPageProps {
   open: boolean;
+  setOpen: (open: boolean) => void;
 }
 
-export const GameResultPopup = ({ open }: GameResultPageProps) => {
-  const { room, roomPlayers } = useRoom();
+export const GameResultPopup = ({ open, setOpen }: GameResultPageProps) => {
+  const navigate = useNavigate();
+  const { leaveRoom } = useSocketContext();
+  const { room, roomPlayers, setRoom, setRoomPlayers } = useRoom();
   const { setLoading } = useUI();
-
-  const onReplayButtonHandler = () => {};
-
-  const onHomeButtonHandler = () => {};
 
   useEffect(() => {
     setLoading(open && (!room || !roomPlayers));
@@ -138,16 +140,29 @@ export const GameResultPopup = ({ open }: GameResultPageProps) => {
 
               <SmallButton
                 backgroundColor={theme.colors.lightYellow}
-                onClick={onReplayButtonHandler}
+                onClick={async () => {
+                  setOpen(false);
+                  navigate('/', {
+                    state: { pageIdx: 2 },
+                  });
+                }}
               >
                 다시하기
               </SmallButton>
               <Spacer y={10} />
               <SmallButton
-                backgroundColor={theme.colors.lighterYellow}
-                onClick={onHomeButtonHandler}
+                backgroundColor={theme.colors.lightRed}
+                onClick={async () => {
+                  setOpen(false);
+                  setRoom(null);
+                  setRoomPlayers(null);
+                  navigate('/');
+
+                  leaveRoom();
+                  await axiosInstance.delete(`/rooms/${room.id}/me`);
+                }}
               >
-                처음으로
+                나가기
               </SmallButton>
             </Sketchbook>
           </div>

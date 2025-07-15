@@ -7,10 +7,16 @@ import { LobbyPage } from './LobbyPage';
 import { UserPage } from './UserPage';
 import { RoomPage } from './RoomPage';
 import { useUI } from '../../context/UIContext';
+import { useLocation } from 'react-router-dom';
+
+interface MainPageState {
+  pageIdx: number;
+}
 
 const MainPage = () => {
   const { player } = useAuth();
-  const { showFooter } = useUI();
+  const { showFooter, setLoading } = useUI();
+  const location = useLocation() as { state: MainPageState };
 
   const [showSketchbook, setShowSketchbook] = useState(true);
   const [pageIdx, setPageIdx] = useState(0);
@@ -23,6 +29,16 @@ const MainPage = () => {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };
   }, []);
+
+  useEffect(() => {
+    if (location.state && location.state.pageIdx !== undefined) {
+      flipToPage(location.state.pageIdx);
+    }
+  }, [location.state]);
+
+  useEffect(() => {
+    setLoading(!player);
+  }, [player]);
 
   const flipToPage = (targetIdx: number) => {
     setFlipping(true);
@@ -43,7 +59,9 @@ const MainPage = () => {
     }, 500);
   };
 
-  return !player ? null : (
+  if (!player) return <></>;
+
+  return (
     <>
       <Spacer y={40} />
       <Sketchbook

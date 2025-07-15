@@ -2,10 +2,15 @@ import { Injectable } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { RoomGateway } from '../room/room.gateway';
 import { RoomRedisService } from 'src/config/redis/room-redis.service';
-import { GameMode, GameStatus, Room } from 'src/config/redis/model';
+import {
+  FakerModeTeamType,
+  GameMode,
+  GameStatus,
+  Room,
+} from 'src/config/redis/model';
 import { ConfigService } from '@nestjs/config';
 
-const FAKER_MODE_ROUND_LIMIT = 3;
+export const FAKER_MODE_ROUND_LIMIT = 3;
 @Injectable()
 export class GameService {
   constructor(
@@ -91,22 +96,14 @@ export class GameService {
 
     if (room.turn_player_index + 1 === room.response_player_ids.length) {
       if (room.game_mode === GameMode.FAKER) {
-        if (room.round_number === FAKER_MODE_ROUND_LIMIT) {
-          // 페이커 모드: 모든 라운드 끝남
-          const updatedRoom = await this.roomRedisService.updateRoom(roomId, {
-            game_status: GameStatus.ENDED,
-          });
-          this.roomGateway.server.to(roomId).emit('game_finished', updatedRoom);
-        } else {
-          // 페이커 모드: 현재 라운드 끝남
-          this.roomGateway.server.to(roomId).emit('round_finished', room);
-        }
+        // 페이커 모드
+        this.roomGateway.server.to(roomId).emit('round_finished', room);
       } else {
-        // 기본 모드: 게임 종료
+        // 기본 모드
         const updatedRoom = await this.roomRedisService.updateRoom(roomId, {
-          game_status: GameStatus.ENDED,
+          game_status: GameStatus.FINISHED,
         });
-        this.roomGateway.server.to(roomId).emit('game_finished', updatedRoom);
+        this.roomGateway.server.to(roomId).emit('round_finished', updatedRoom);
       }
     } else {
       // 다음 플레이어로 턴 변경
@@ -137,5 +134,24 @@ export class GameService {
     this.roomGateway.server.to(roomId).emit('round_start_next', updatedRoom);
 
     return updatedRoom;
+  }
+
+  async submitRoundWinner(roomId: string, winner: FakerModeTeamType) {
+    // 라운드 승리자 추가
+    let room = (await this.roomRedisService.addRoundWinner(
+      roomId,
+      winner,
+    )) as Room;
+
+    if (room.round_number === FAKER_MODE_ROUND_LIMIT) {
+      // 마지막 라운드 승리자 제출 후 게임 종료
+      room = (await this.roomRedisService.updateRoom(roomId, {
+        game_status: GameStatus.FINISHED,
+      })) as Room;
+    }
+
+    this.roomGateway.server.to(roomId).emit('round_winner_submitted', room);
+
+    return room;
   }
 }
