@@ -2,8 +2,9 @@ import { useEffect, useCallback, useState } from 'react';
 import { useSocket } from './useSocket';
 import { useAuth } from '../context/AuthContext';
 import { parsePlayer, parseRoom, Player, Room } from '../types/game';
+import { useRoom } from '../context/RoomContext';
 
-interface UseGameSocketReturn {
+export interface GameSocket {
   isConnected: boolean;
   // Room related
   joinRoom: (roomCode: string) => void;
@@ -14,12 +15,9 @@ interface UseGameSocketReturn {
   submitImage: (imageId: string) => void;
 }
 
-export const useGameSocket = (
-  setRoom: (room: Room) => void,
-  setRoomPlayers: (players: Player[]) => void,
-  navigateToGame: () => void
-): UseGameSocketReturn => {
+export const useGameSocket = (navigateToGame: () => void): GameSocket => {
   const { player } = useAuth();
+  const { setRoom, setRoomPlayers } = useRoom();
   const { socket, isConnected, emit, on, off } = useSocket({
     url:
       `${process.env.REACT_APP_WEBSOCKET_URL}/rooms` ||
