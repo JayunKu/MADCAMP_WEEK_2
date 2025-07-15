@@ -24,7 +24,7 @@ export class RoomGateway {
     @MessageBody() payload: { roomCode: string },
     @ConnectedSocket() client: Socket,
   ) {
-    console.info(`Room Client ${client.id} joining room: ${payload.roomCode}`);
+    console.info(`Client ${client.id} joining room: ${payload.roomCode}`);
     client.join(payload.roomCode);
   }
 
@@ -33,7 +33,7 @@ export class RoomGateway {
     @MessageBody() payload: { roomCode: string },
     @ConnectedSocket() client: Socket,
   ) {
-    console.info(`Room Client ${client.id} leaving room: ${payload.roomCode}`);
+    console.info(`Client ${client.id} leaving room: ${payload.roomCode}`);
     client.leave(payload.roomCode);
   }
 }

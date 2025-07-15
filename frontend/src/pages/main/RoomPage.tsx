@@ -12,21 +12,15 @@ import { GameMode } from '../../types/game';
 import { useUI } from '../../context/UIContext';
 import { useNavigate } from 'react-router-dom';
 import { axiosInstance } from '../../hooks/useAxios';
-import { RoomSocket } from '../../hooks/useRoomSocket';
 
 const MAX_PLAYER_PER_ROOM = 8; // 최대 플레이어 수
 
 interface RoomPageProps {
   flipToPage: (page: number) => void;
   toggleSketchbook: (callback: () => void) => void;
-  roomSocket: RoomSocket;
 }
 
-export const RoomPage = ({
-  flipToPage,
-  toggleSketchbook,
-  roomSocket,
-}: RoomPageProps) => {
+export const RoomPage = ({ flipToPage, toggleSketchbook }: RoomPageProps) => {
   const navigate = useNavigate();
   const theme = useTheme();
   const { setLoading, setShowFooter } = useUI();

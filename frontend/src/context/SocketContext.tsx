@@ -1,19 +1,32 @@
-import { useEffect, useCallback, useState } from 'react';
-import { useSocket } from './useSocket';
-import { useAuth } from '../context/AuthContext';
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useCallback,
+} from 'react';
+import { useSocket } from '../hooks/useSocket';
+import { useAuth } from './AuthContext';
 import { parsePlayer, parseRoom, Player, Room } from '../types/game';
-import { useRoom } from '../context/RoomContext';
+import { useRoom } from './RoomContext';
+import { useUI } from './UIContext';
+import { useNavigate } from 'react-router-dom';
 
-export interface RoomSocket {
+interface SocketContextType {
   isConnected: boolean;
   joinRoom: (roomCode: string) => void;
 }
 
-export const useRoomSocket = (
-  navigateToGame: (roomId: string) => void
-): RoomSocket => {
+const SocketContext = createContext<SocketContextType | null>(null);
+
+interface SocketProviderProps {
+  children: React.ReactNode;
+}
+
+export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
+  const navigate = useNavigate();
   const { player } = useAuth();
   const { setRoom, setRoomPlayers } = useRoom();
+  const { setLoading } = useUI();
   const { socket, isConnected, emit, on, off } = useSocket({
     url:
       `${process.env.REACT_APP_WEBSOCKET_URL}/rooms` ||
@@ -27,10 +40,14 @@ export const useRoomSocket = (
         console.error('Player must be authenticated to join a room');
         return;
       }
+      if (!isConnected) {
+        console.error('Socket is not connected. Cannot join room.');
+        return;
+      }
       console.log('Joining room with code:', roomCode);
       emit('join_room', { roomCode });
     },
-    [emit, player]
+    [emit, player, isConnected]
   );
 
   // Socket event listeners
@@ -39,7 +56,6 @@ export const useRoomSocket = (
 
     const handleRoomUpdated = (data: any) => {
       console.log('Room updated:', data);
-
       const room = parseRoom(data);
       setRoom(room);
     };
@@ -58,7 +74,20 @@ export const useRoomSocket = (
 
     const handleGameStarted = (data: any) => {
       console.log('Game started: ', data);
-      navigateToGame(data.room_id);
+      setLoading(true);
+      navigate('/game', { state: { roomId: data.room_id } });
+      setLoading(false);
+    };
+
+    const handleTurnChanged = (data: any) => {
+      console.log('Turn changed event received:', data);
+      const roomData = parseRoom(data);
+      console.log('Parsed room data:', roomData);
+      setRoom(roomData);
+    };
+
+    const handleGameFinished = (data: any) => {
+      console.log('Game finished:', data);
     };
 
     // Register event listeners
@@ -66,6 +95,8 @@ export const useRoomSocket = (
     on('player_joined', handlePlayerJoined);
     on('player_left', handlePlayerLeft);
     on('game_started', handleGameStarted);
+    on('turn_changed', handleTurnChanged);
+    on('game_finished', handleGameFinished);
 
     // Cleanup
     return () => {
@@ -73,11 +104,25 @@ export const useRoomSocket = (
       off('player_joined', handlePlayerJoined);
       off('player_left', handlePlayerLeft);
       off('game_started', handleGameStarted);
+      off('turn_changed', handleTurnChanged);
+      off('game_finished', handleGameFinished);
     };
-  }, [socket, on, off, player]);
+  }, [socket, on, off, player, setRoom, setRoomPlayers]);
 
-  return {
+  const value: SocketContextType = {
     isConnected,
     joinRoom,
   };
+
+  return (
+    <SocketContext.Provider value={value}>{children}</SocketContext.Provider>
+  );
+};
+
+export const useSocketContext = (): SocketContextType => {
+  const ctx = useContext(SocketContext);
+  if (!ctx) {
+    throw new Error('useRoomSocket must be used within a RoomSocketProvider');
+  }
+  return ctx;
 };

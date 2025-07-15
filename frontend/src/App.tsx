@@ -10,6 +10,7 @@ import { GameResultPage } from './pages/game/GameResult';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { RoomProvider } from './context/RoomContext';
 import { UIProvider } from './context/UIContext';
+import { SocketProvider } from './context/SocketContext';
 
 function App() {
   const clientId = process.env.REACT_APP_GOOGLE_OAUTH_CLIENT_ID;
@@ -25,39 +26,43 @@ function App() {
 
   return (
     <AppThemeProvider>
-      <GoogleOAuthProvider clientId={clientId}>
-        <AuthProvider>
-          <RoomProvider>
-            <UIProvider>
+      <UIProvider>
+        <GoogleOAuthProvider clientId={clientId}>
+          <AuthProvider>
+            <RoomProvider>
               <BrowserRouter>
-                <MainContainer>
-                  <Routes>
-                    <Route path="/" element={<MainPage />} />
-                    <Route path="/game" element={<GamePage />} />
-                    <Route path="/game/result" element={<GameResultPage />} />
-                    <Route
-                      path="/game/round_result"
-                      element={<RoundResultPage />}
-                    />
+                <SocketProvider>
+                  <MainContainer>
+                    <Routes>
+                      <Route path="/" element={<MainPage />} />
+                      <Route path="/game" element={<GamePage />} />
+                      <Route path="/game/result" element={<GameResultPage />} />
+                      <Route
+                        path="/game/round_result"
+                        element={<RoundResultPage />}
+                      />
 
-                    <Route
-                      path="*"
-                      element={
-                        <div>
-                          <h1 style={{ textAlign: 'center' }}>404 Not Found</h1>
-                          <p style={{ textAlign: 'center' }}>
-                            페이지를 찾을 수 없습니다.
-                          </p>
-                        </div>
-                      }
-                    />
-                  </Routes>
-                </MainContainer>
+                      <Route
+                        path="*"
+                        element={
+                          <div>
+                            <h1 style={{ textAlign: 'center' }}>
+                              404 Not Found
+                            </h1>
+                            <p style={{ textAlign: 'center' }}>
+                              페이지를 찾을 수 없습니다.
+                            </p>
+                          </div>
+                        }
+                      />
+                    </Routes>
+                  </MainContainer>
+                </SocketProvider>
               </BrowserRouter>
-            </UIProvider>
-          </RoomProvider>
-        </AuthProvider>
-      </GoogleOAuthProvider>
+            </RoomProvider>
+          </AuthProvider>
+        </GoogleOAuthProvider>
+      </UIProvider>
     </AppThemeProvider>
   );
 }

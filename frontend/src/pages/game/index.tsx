@@ -13,7 +13,6 @@ import { UserInput } from '../../components/UserInput';
 import { GenerateButton } from '../../components/GenerateButton';
 import { SmallButton } from '../../components/Button';
 import spinnerImage from '../../assets/images/spinner.svg';
-import { useGameSocket } from '../../hooks/useGameSocket';
 import { axiosInstance } from '../../hooks/useAxios';
 import { useRoom } from '../../context/RoomContext';
 import { FullScreenPopup } from '../../components/FullScreenPopup';
@@ -21,6 +20,7 @@ import { AnswerInput } from './index.styles';
 import { useAuth } from '../../context/AuthContext';
 import { useUI } from '../../context/UIContext';
 import { BlackSketchbook } from '../../components/sketchbook/BlackSketchbook';
+import { useSocketContext } from '../../context/SocketContext';
 
 interface GamePageState {
   roomId: string;
@@ -49,7 +49,7 @@ export const GamePage = () => {
   const { setLoading } = useUI();
   const location = useLocation() as { state: GamePageState };
 
-  const { joinGame } = useGameSocket();
+  const { joinRoom, isConnected } = useSocketContext();
   const { room, setRoom, roomPlayers, setRoomPlayers } = useRoom();
   const { player } = useAuth();
 
@@ -74,9 +74,10 @@ export const GamePage = () => {
 
     const roomId = location.state.roomId;
     console.log('Game page loaded with roomId:', roomId);
-    console.log('joinGame function available:', typeof joinGame);
 
-    joinGame(roomId);
+    if (isConnected) {
+      joinRoom(roomId);
+    }
 
     const fetchRoomData = async () => {
       try {
@@ -101,7 +102,7 @@ export const GamePage = () => {
     return () => {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };
-  }, [location.state, player, navigate, joinGame]);
+  }, [isConnected, location.state, player, navigate]);
 
   // room이 바뀔 때마다 isMyTurn 업데이트
   useEffect(() => {
@@ -183,7 +184,7 @@ export const GamePage = () => {
     navigate('/game/round_result');
   };
 
-  if (!room || !roomPlayers || roomPlayers.length === 0) {
+  if (!isConnected || !room || !roomPlayers || roomPlayers.length === 0) {
     setLoading(true);
     return <></>;
   }
@@ -249,9 +250,19 @@ export const GamePage = () => {
             }
             setLoading(false);
             return (
-              <div>
-                <p>{currentPlayer.name}가 제시어를 입력하고 있어요</p>
-              </div>
+              <BlackSketchbook>
+                <div>
+                  <p
+                    style={{
+                      fontSize: '18px',
+                      color: theme.colors.darkGray,
+                      textAlign: 'center',
+                    }}
+                  >
+                    {currentPlayer.name}가 제시어를 입력하고 있어요
+                  </p>
+                </div>
+              </BlackSketchbook>
             );
           }
 
@@ -281,7 +292,6 @@ export const GamePage = () => {
               setLoading(true);
               return <></>;
             }
-
             setLoading(false);
             return (
               <BlackSketchbook>
@@ -308,7 +318,6 @@ export const GamePage = () => {
               setLoading(true);
               return <></>;
             }
-
             setLoading(false);
             return (
               <BlackSketchbook>

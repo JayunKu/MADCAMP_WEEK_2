@@ -2,9 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 import { RoomGateway } from '../room/room.gateway';
-import { GameGateway } from './game.gateway';
 import { RoomRedisService } from 'src/config/redis/room-redis.service';
-import { GameMode, GameStatus, Room } from 'src/config/redis/model';
+import { GameMode, GameStatus } from 'src/config/redis/model';
 
 @Injectable()
 export class GameService {
@@ -12,7 +11,6 @@ export class GameService {
     private readonly httpService: HttpService,
     private readonly roomRedisService: RoomRedisService,
     private readonly roomGateway: RoomGateway,
-    private readonly gameGateway: GameGateway,
   ) {}
 
   async startGame(roomId: string, gameMode: GameMode): Promise<void> {
@@ -55,7 +53,7 @@ export class GameService {
 
     console.log(`Answer submitted for room ${roomId}: ${answer}`);
     // Notify players in the room
-    this.gameGateway.server.to(roomId).emit('turn_changed', room);
+    this.roomGateway.server.to(roomId).emit('turn_changed', room);
     console.log(`Turn changed for room ${roomId}`);
   }
 
