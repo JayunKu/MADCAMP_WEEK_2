@@ -9,6 +9,8 @@ import { RoomModule } from './modules/room/room.module';
 import { CommonModule } from './modules/common/common.module';
 import { PlayerModule } from './modules/player/player.module';
 import { GameModule } from './modules/game/game.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 
 @Module({
   imports: [
@@ -19,7 +21,10 @@ import { GameModule } from './modules/game/game.module';
     PlayerModule,
     RoomModule,
     CommonModule,
-    GameModule
+    GameModule,
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'static'),
+    }),
   ],
   controllers: [UserController],
   providers: [UserService],

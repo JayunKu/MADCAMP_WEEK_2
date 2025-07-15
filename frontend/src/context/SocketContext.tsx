@@ -86,6 +86,13 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
       setRoom(roomData);
     };
 
+    const handleRoundFinished = (data: any) => {
+      console.log('Round finished:', data);
+      const roomData = parseRoom(data);
+      console.log('Parsed room data:', roomData);
+      setRoom(roomData);
+    };
+
     const handleGameFinished = (data: any) => {
       console.log('Game finished:', data);
     };
@@ -96,6 +103,7 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
     on('player_left', handlePlayerLeft);
     on('game_started', handleGameStarted);
     on('turn_changed', handleTurnChanged);
+    on('round_finished', handleRoundFinished);
     on('game_finished', handleGameFinished);
 
     // Cleanup
@@ -105,6 +113,7 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
       off('player_left', handlePlayerLeft);
       off('game_started', handleGameStarted);
       off('turn_changed', handleTurnChanged);
+      off('round_finished', handleRoundFinished);
       off('game_finished', handleGameFinished);
     };
   }, [socket, on, off, player, setRoom, setRoomPlayers]);

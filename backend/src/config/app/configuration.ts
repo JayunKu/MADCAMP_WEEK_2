@@ -10,4 +10,7 @@ export default () => ({
     url: process.env.SESSION_DB_URL,
     key: process.env.SESSION_KEY,
   },
+  image_gen_api: {
+    url: process.env.IMAGE_GEN_API_URL,
+  },
 });

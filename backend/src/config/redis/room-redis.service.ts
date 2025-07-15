@@ -21,7 +21,7 @@ export class RoomRedisService {
       game_mode: GameMode.BASIC,
       game_status: GameStatus.WAITING,
       round_number: 0,
-      round_answer: null,
+      round_answer: '',
       round_winners: [],
       keeper_player_ids: [],
       fakers_player_ids: [],
@@ -111,7 +111,7 @@ export class RoomRedisService {
       game_mode: parseInt(roomData.game_mode) as GameMode,
       game_status: parseInt(roomData.game_status) as GameStatus,
       round_number: parseInt(roomData.round_number),
-      round_answer: roomData.round_answer || null,
+      round_answer: roomData.round_answer,
       round_winners: round_winners.map(
         (winner) => parseInt(winner) as FakerModeTeamType,
       ),
@@ -133,7 +133,7 @@ export class RoomRedisService {
     if (!exists) return null;
 
     for (const [key, value] of Object.entries(updates)) {
-      if (value === undefined && value === null) continue;
+      if (value === undefined) continue;
 
       switch (key) {
         // string
@@ -271,7 +271,7 @@ export class RoomRedisService {
           game_mode: parseInt(roomData.game_mode) as GameMode,
           game_status: parseInt(roomData.game_status) as GameStatus,
           round_number: parseInt(roomData.round_number),
-          round_answer: roomData.round_answer || null,
+          round_answer: roomData.round_answer,
           round_winners: round_winners.map(
             (winner) => parseInt(winner) as FakerModeTeamType,
           ),
@@ -368,7 +368,7 @@ export class RoomRedisService {
   async addResponse(
     roomId: string,
     playerId: string,
-    input?: string,
+    input: string,
     fileId?: string,
   ): Promise<Room | null> {
     const roomKey = `rooms:${roomId}`;
@@ -376,7 +376,6 @@ export class RoomRedisService {
     if (!exists) return null;
 
     // 각 응답 요소를 해당 리스트에 추가
-    await this.redisService.rPush(`${roomKey}:response_player_ids`, playerId);
     await this.redisService.rPush(
       `${roomKey}:response_player_inputs`,
       input || '',

@@ -5,13 +5,19 @@ interface UserInputProps {
   disabled?: boolean;
   value: string;
   onChange: (input: string) => void;
+  onKeyDown?: (event: React.KeyboardEvent<HTMLInputElement>) => void;
 }
 
-export const UserInput = ({ value, onChange, disabled }: UserInputProps) => {
+export const UserInput = ({
+  value,
+  onChange,
+  disabled,
+  onKeyDown,
+}: UserInputProps) => {
   const theme = useTheme();
 
   return (
-    <UserInputContainer disabled={disabled}>
+    <UserInputContainer disabled={disabled} onKeyDown={onKeyDown}>
       <span
         style={{
           fontSize: '14px',

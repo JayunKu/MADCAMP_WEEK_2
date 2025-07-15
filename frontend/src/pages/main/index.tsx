@@ -6,13 +6,11 @@ import { useAuth } from '../../context/AuthContext';
 import { LobbyPage } from './LobbyPage';
 import { UserPage } from './UserPage';
 import { RoomPage } from './RoomPage';
-import { useNavigate } from 'react-router-dom';
 import { useUI } from '../../context/UIContext';
 
 const MainPage = () => {
-  const navigate = useNavigate();
   const { player } = useAuth();
-  const { showFooter, setShowFooter, setLoading } = useUI();
+  const { showFooter } = useUI();
 
   const [showSketchbook, setShowSketchbook] = useState(true);
   const [pageIdx, setPageIdx] = useState(0);

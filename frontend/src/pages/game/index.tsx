@@ -59,6 +59,9 @@ export const GamePage = () => {
 
   const [isImageGenerating, setIsImageGenerating] = useState(false);
   const [generatedImageId, setGeneratedImageId] = useState<string | null>(null);
+  const [generatedImageUrl, setGeneratedImageUrl] = useState<string | null>(
+    null
+  );
 
   const [userInput, setUserInput] = useState('');
   const [imageGenRemain, setImageGenRemain] = useState(IMAGE_GEN_MAX_TRIES);
@@ -162,26 +165,52 @@ export const GamePage = () => {
     }
   };
 
-  const generateImageButtonHandler = () => {
+  const generateImageButtonHandler = async () => {
+    if (!room) {
+      alert('오류가 발생하였습니다. 다시 시도해주세요.');
+      return;
+    }
     if (!isMyTurn || isImageGenerating || imageGenRemain <= 0) return;
+
+    if (userInput.trim() === '') {
+      alert('이미지 생성에 사용할 제시어를 입력해주세요.');
+      return;
+    }
 
     setIsImageGenerating(true);
     setImageGenRemain(prev => prev - 1);
 
-    // Simulate image generation
-    setTimeout(() => {
-      flipDownPage(() => {
-        setGeneratedImageId(EXAMPLE_GENERATED_IMAGE_ID);
-        setIsImageGenerating(false);
-      });
-    }, 2000); // Simulate a delay for image generation
+    const res = (
+      await axiosInstance.post(`/games/${room.id}/inputs`, {
+        input: userInput,
+      })
+    ).data;
+
+    flipDownPage(() => {
+      setGeneratedImageId(res.file_id);
+      setGeneratedImageUrl(res.file_url);
+      setIsImageGenerating(false);
+    });
   };
 
-  const onConfirmImageButtonHandler = () => {
-    if (!generatedImageId) return;
-    // Handle image confirmation logic here
+  const onConfirmImageButtonHandler = async () => {
+    if (!room) {
+      alert('오류가 발생하였습니다. 다시 시도해주세요.');
+      return;
+    }
+    if (!isMyTurn || !generatedImageId) return;
 
-    navigate('/game/round_result');
+    try {
+      await axiosInstance.post(`/games/${room.id}/images`, {
+        input: userInput,
+        file_id: generatedImageId,
+      });
+      setUserInput('');
+    } catch (err) {
+      console.error('Failed to confirm image:', err);
+      alert('오류가 발생하였습니다. 다시 시도해주세요.');
+      return;
+    }
   };
 
   if (!isConnected || !room || !roomPlayers || roomPlayers.length === 0) {
@@ -208,6 +237,11 @@ export const GamePage = () => {
           value={answerInput}
           onChange={e => {
             setAnswerInput(e.target.value);
+          }}
+          onKeyDown={e => {
+            if (e.key === 'Enter') {
+              submitAnswerButtonHandler();
+            }
           }}
         />
         <SmallButton
@@ -348,8 +382,12 @@ export const GamePage = () => {
         <UserInput
           value={userInput}
           onChange={value => {
-            console.log('User input changed:', value);
             setUserInput(value);
+          }}
+          onKeyDown={e => {
+            if (e.key === 'Enter') {
+              generateImageButtonHandler();
+            }
           }}
           disabled={!isMyTurn || isImageGenerating || imageGenRemain <= 0}
         />
@@ -388,7 +426,7 @@ export const GamePage = () => {
               }}
             />
           </BlackSketchbook>
-        ) : generatedImageId ? (
+        ) : generatedImageId && generatedImageUrl ? (
           <div
             style={{
               display: 'flex',
@@ -399,12 +437,11 @@ export const GamePage = () => {
           >
             <p>당신이 그린 그림</p>
             <img
-              src={generatedImageId}
+              src={generatedImageUrl}
               alt="Generated"
               style={{
                 width: '100%',
                 height: '150px',
-                background: 'red',
                 margin: '10px 0',
               }}
             />

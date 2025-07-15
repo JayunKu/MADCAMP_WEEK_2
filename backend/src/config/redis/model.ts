@@ -23,7 +23,7 @@ export interface Room {
   game_status: GameStatus;
 
   round_number: number;
-  round_answer: string | null;
+  round_answer: string;
   round_winners: FakerModeTeamType[];
 
   keeper_player_ids: string[];

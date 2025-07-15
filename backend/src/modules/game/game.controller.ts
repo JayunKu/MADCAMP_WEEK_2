@@ -73,36 +73,43 @@ export class GameController {
   }
 
   @Post(':id/inputs')
-  //@UseGuards(PlayerGuard)
+  @UseGuards(PlayerGuard)
   @ApiOperation({ summary: '플레이어가 프롬프트 입력' })
   async submitInput(
-    @Param('id') gameId: string,
+    @Param('id') roomId: string,
     @CurrentPlayer() player: Player,
     @Body() submitInputRequestDto: SubmitInputRequestDto,
   ) {
     const { input } = submitInputRequestDto;
-    console.log(input);
-    // console.log(
-    //   `Game ID: ${gameId}, Player ID: ${player.id}, Sending prompt to AI: ${input}`,
-    // );
 
-    // 1. AI 이미지 생성 요청
+    // AI 이미지 생성 요청
     const generatedImage = await this.gameService.generateImage(input);
 
-    return new CommonResponseDto(generatedImage);
+    return new CommonResponseDto({
+      file_id: generatedImage.id,
+      file_url: generatedImage.url,
+    });
   }
 
   @Post(':id/images')
+  @UseGuards(PlayerGuard)
   @ApiOperation({ summary: '플레이어가 생성된 이미지 결정' })
   async submitImage(
-    @Param('id') gameId: string,
+    @Param('id') roomId: string,
     @CurrentPlayer() player: Player,
     @Body() submitImageRequestDto: SubmitImageRequestDto,
   ) {
     const { input, file_id } = submitImageRequestDto;
-    console.log(input, file_id);
 
-    // await this.roomRedisService.addResponse(gameId, player.id, input, file_id);
+    const room = await this.roomService.getRoomById(roomId);
+    if (!room) {
+      throw new HttpException(`Room with ID ${roomId} does not exist.`, 404);
+    }
+    if (room.response_player_ids[room.turn_player_index] !== player.id) {
+      throw new HttpException('Not your turn', 403);
+    }
+
+    await this.gameService.submitImage(roomId, player.id, input, file_id);
 
     return new CommonResponseDto();
   }
