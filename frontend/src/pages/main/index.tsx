@@ -6,27 +6,29 @@ import { useAuth } from '../../context/AuthContext';
 import { LobbyPage } from './LobbyPage';
 import { UserPage } from './UserPage';
 import { RoomPage } from './RoomPage';
-import { useUI } from '../../context/UIContext';
-import { useGameSocket } from '../../hooks/useGameSocket';
 import { useNavigate } from 'react-router-dom';
+import { useRoomSocket } from '../../hooks/useRoomSocket';
+import { useUI } from '../../context/UIContext';
 
 const MainPage = () => {
   const navigate = useNavigate();
   const { player } = useAuth();
-  const { showFooter, setShowFooter } = useUI();
+  const { showFooter, setShowFooter, setLoading } = useUI();
 
   const [showSketchbook, setShowSketchbook] = useState(true);
   const [pageIdx, setPageIdx] = useState(0);
   const [flipping, setFlipping] = useState(false);
 
-  const navigateToGame = () => {
+  const navigateToGame = (roomId: string) => {
+    setLoading(true);
     setShowFooter(false);
     toggleSketchbook(() => {
-      navigate('/game', { state: { roomId: 'FDAS32D' } });
+      navigate('/game', { state: { roomId } });
+      setLoading(false);
     });
   };
 
-  const gameSocket = useGameSocket(navigateToGame);
+  const roomSocket = useRoomSocket(navigateToGame);
 
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -70,12 +72,12 @@ const MainPage = () => {
             // 0: 로비 페이지
             <LobbyPage flipToPage={flipToPage} />,
             // 1: 방 생성 및 입장 페이지
-            <UserPage flipToPage={flipToPage} gameSocket={gameSocket} />,
+            <UserPage flipToPage={flipToPage} roomSocket={roomSocket} />,
             // 2: 게임 준비 페이지
             <RoomPage
               flipToPage={flipToPage}
               toggleSketchbook={toggleSketchbook}
-              gameSocket={gameSocket}
+              roomSocket={roomSocket}
             />,
           ][pageIdx]
         }

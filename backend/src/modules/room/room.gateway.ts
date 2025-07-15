@@ -8,20 +8,13 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { PlayerGuard } from '../auth/guards/player.guard';
-import { Player } from 'src/config/redis/model';
-import { RoomRedisService } from 'src/config/redis/room-redis.service';
-import { PlayerRedisService } from 'src/config/redis/player-redis.service';
-import { CurrentPlayer } from 'src/common/decorators/current-player.decorator';
 
 @WebSocketGateway({
   cors: true,
   namespace: 'ws/rooms',
 })
 export class RoomGateway {
-  constructor(
-    private readonly roomRedisService: RoomRedisService,
-    private playerRedisService: PlayerRedisService,
-  ) {}
+  constructor() {}
 
   @WebSocketServer()
   server: Server;
@@ -31,6 +24,16 @@ export class RoomGateway {
     @MessageBody() payload: { roomCode: string },
     @ConnectedSocket() client: Socket,
   ) {
+    console.info(`Room Client ${client.id} joining room: ${payload.roomCode}`);
     client.join(payload.roomCode);
+  }
+
+  @SubscribeMessage('leave_room')
+  async handleLeaveRoom(
+    @MessageBody() payload: { roomCode: string },
+    @ConnectedSocket() client: Socket,
+  ) {
+    console.info(`Room Client ${client.id} leaving room: ${payload.roomCode}`);
+    client.leave(payload.roomCode);
   }
 }

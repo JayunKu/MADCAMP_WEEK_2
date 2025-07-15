@@ -20,14 +20,15 @@ export class RoomRedisService {
       host_player_id: hostPlayerId,
       game_mode: GameMode.BASIC,
       game_status: GameStatus.WAITING,
-      round_number: null,
+      round_number: 0,
+      round_answer: null,
       round_winners: [],
       keeper_player_ids: [],
       fakers_player_ids: [],
       response_player_ids: [],
       response_player_inputs: [],
       response_player_file_ids: [],
-      turn_player_id: null,
+      turn_player_index: 0,
     };
 
     const roomKey = `rooms:${roomId}`;
@@ -43,15 +44,23 @@ export class RoomRedisService {
       'game_status',
       GameStatus.WAITING.toString(),
     );
-    await this.redisService.hSet(roomKey, 'round_number', '');
-    await this.redisService.hSet(roomKey, 'turn_player_id', '');
-
+    await this.redisService.hSet(
+      roomKey,
+      'round_number',
+      room.round_number.toString(),
+    );
+    await this.redisService.hSet(roomKey, 'round_answer', '');
     await this.redisService.del(`${roomKey}:round_winners`);
     await this.redisService.del(`${roomKey}:keeper_player_ids`);
     await this.redisService.del(`${roomKey}:fakers_player_ids`);
     await this.redisService.del(`${roomKey}:response_player_ids`);
     await this.redisService.del(`${roomKey}:response_player_inputs`);
     await this.redisService.del(`${roomKey}:response_player_file_ids`);
+    await this.redisService.hSet(
+      roomKey,
+      'turn_player_index',
+      room.turn_player_index.toString(),
+    );
 
     await this.redisService.del(`${roomKey}:players`);
     return room;
@@ -101,9 +110,8 @@ export class RoomRedisService {
       host_player_id: roomData.host_player_id,
       game_mode: parseInt(roomData.game_mode) as GameMode,
       game_status: parseInt(roomData.game_status) as GameStatus,
-      round_number: roomData.round_number
-        ? parseInt(roomData.round_number)
-        : null,
+      round_number: parseInt(roomData.round_number),
+      round_answer: roomData.round_answer || null,
       round_winners: round_winners.map(
         (winner) => parseInt(winner) as FakerModeTeamType,
       ),
@@ -112,7 +120,7 @@ export class RoomRedisService {
       response_player_ids: response_player_ids,
       response_player_inputs: response_player_inputs,
       response_player_file_ids: response_player_file_ids,
-      turn_player_id: roomData.turn_player_id || null,
+      turn_player_index: parseInt(roomData.turn_player_index),
     };
   }
 
@@ -131,13 +139,13 @@ export class RoomRedisService {
         // string
         case 'host_player_id':
         case 'round_answer':
-        case 'turn_player_id':
           await this.redisService.hSet(roomKey, key, value as string);
           break;
         // number
         case 'game_mode':
         case 'round_number':
         case 'game_status':
+        case 'turn_player_index':
           await this.redisService.hSet(
             roomKey,
             key,
@@ -262,9 +270,8 @@ export class RoomRedisService {
           host_player_id: roomData.host_player_id,
           game_mode: parseInt(roomData.game_mode) as GameMode,
           game_status: parseInt(roomData.game_status) as GameStatus,
-          round_number: roomData.round_number
-            ? parseInt(roomData.round_number)
-            : null,
+          round_number: parseInt(roomData.round_number),
+          round_answer: roomData.round_answer || null,
           round_winners: round_winners.map(
             (winner) => parseInt(winner) as FakerModeTeamType,
           ),
@@ -273,7 +280,7 @@ export class RoomRedisService {
           response_player_ids: response_player_ids,
           response_player_inputs: response_player_inputs,
           response_player_file_ids: response_player_file_ids,
-          turn_player_id: roomData.turn_player_id || null,
+          turn_player_index: parseInt(roomData.turn_player_index),
         };
         rooms.push(room);
       }

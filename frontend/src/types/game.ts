@@ -22,8 +22,9 @@ export enum GameMode {
 
 export enum GameStatus {
   WAITING = 0,
-  PLAYING = 1,
-  FINISHED = 2,
+  ANSWER_INPUT = 1,
+  PLAYING = 2,
+  FINISHED = 3,
 }
 
 export enum FakerModeTeamType {
@@ -35,14 +36,14 @@ export interface Room {
   hostPlayerId: string;
   gameMode: GameMode;
   gameStatus: GameStatus;
-  roundNumber: number | null;
+  roundNumber: number;
   roundWinners: FakerModeTeamType[];
   keeperPlayerIds: string[];
   fakersPlayerIds: string[];
   responsePlayerIds: string[];
   responsePlayerInputs: string[];
   responsePlayerFileIds: string[];
-  turnPlayerId: string | null;
+  turnPlayerIndex: number;
 }
 
 export const parseRoom = (data: any): Room => {
@@ -58,6 +59,6 @@ export const parseRoom = (data: any): Room => {
     responsePlayerIds: data.response_player_ids || [],
     responsePlayerInputs: data.response_player_inputs || [],
     responsePlayerFileIds: data.response_player_file_ids || [],
-    turnPlayerId: data.turn_player_id || null,
+    turnPlayerIndex: data.turn_player_index,
   };
 };

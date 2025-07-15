@@ -11,29 +11,27 @@ import { useEffect, useState } from 'react';
 import { GameMode } from '../../types/game';
 import { useUI } from '../../context/UIContext';
 import { useNavigate } from 'react-router-dom';
-import { GameSocket, useGameSocket } from '../../hooks/useGameSocket';
 import { axiosInstance } from '../../hooks/useAxios';
+import { RoomSocket } from '../../hooks/useRoomSocket';
 
 const MAX_PLAYER_PER_ROOM = 8; // 최대 플레이어 수
 
 interface RoomPageProps {
   flipToPage: (page: number) => void;
   toggleSketchbook: (callback: () => void) => void;
-  gameSocket: GameSocket;
+  roomSocket: RoomSocket;
 }
 
 export const RoomPage = ({
   flipToPage,
   toggleSketchbook,
-  gameSocket,
+  roomSocket,
 }: RoomPageProps) => {
   const navigate = useNavigate();
   const theme = useTheme();
   const { setLoading, setShowFooter } = useUI();
   const { player } = useAuth();
   const { room, roomPlayers, setRoomPlayers, setRoom } = useRoom();
-
-  const { leaveRoom } = gameSocket;
 
   const [isRoomHost, setIsRoomHost] = useState(false);
   const [selectedGameMode, setSelectedGameMode] = useState(GameMode.BASIC);
@@ -94,16 +92,23 @@ export const RoomPage = ({
     }
   };
 
-  const onGameStartButtonHandler = () => {
+  const onGameStartButtonHandler = async () => {
+    if (!room) {
+      alert('오류가 발생하였습니다. 다시 시도해주세요.');
+      return;
+    }
+
     if (!isRoomHost) {
       alert('방장만 게임을 시작할 수 있습니다.');
       return;
     }
 
-    setShowFooter(false);
-    toggleSketchbook(() => {
-      navigate('/game', { state: { roomId: 'FDAS32D' } });
-    });
+    try {
+      await axiosInstance.post(`/games/${room.id}/`);
+    } catch (err) {
+      console.error('Failed to start game:', err);
+      alert('오류가 발생하였습니다. 다시 시도해주세요.');
+    }
   };
 
   const onExitRoomButtonHandler = async () => {
@@ -112,21 +117,22 @@ export const RoomPage = ({
     setLoading(true);
     if (!player || !player.roomId) {
       alert('오류가 발생하였습니다. 다시 시도해주세요.');
+      setLoading(false);
       return;
     }
 
     try {
       await axiosInstance.delete(`/rooms/${player.roomId}/me`);
       console.log('Left room:', player.roomId);
+      setRoom(null);
+      setRoomPlayers(null);
+      setLoading(false);
+      flipToPage(0);
     } catch (err) {
       console.error('Failed to leave room:', err);
       alert('오류가 발생하였습니다. 다시 시도해주세요.');
+      setLoading(false);
     }
-    leaveRoom();
-    setRoom(null);
-    setRoomPlayers(null);
-    setLoading(false);
-    flipToPage(0);
   };
 
   return !room || !roomPlayers || !player ? (
@@ -209,6 +215,7 @@ export const RoomPage = ({
       <SmallButton
         backgroundColor={theme.colors.lightYellow}
         onClick={onGameStartButtonHandler}
+        disabled={!isRoomHost}
       >
         게임 시작
       </SmallButton>

@@ -5,8 +5,9 @@ export enum GameMode {
 
 export enum GameStatus {
   WAITING = 0,
-  STARTED = 1,
-  ENDED = 2,
+  ANSWER_INPUT = 1,
+  STARTED = 2,
+  ENDED = 3,
 }
 
 export enum FakerModeTeamType {
@@ -21,7 +22,8 @@ export interface Room {
   game_mode: GameMode;
   game_status: GameStatus;
 
-  round_number: number | null;
+  round_number: number;
+  round_answer: string | null;
   round_winners: FakerModeTeamType[];
 
   keeper_player_ids: string[];
@@ -31,7 +33,7 @@ export interface Room {
   response_player_inputs: string[];
   response_player_file_ids: string[];
 
-  turn_player_id: string | null;
+  turn_player_index: number;
 }
 
 export interface Player {

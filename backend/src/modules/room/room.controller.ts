@@ -45,7 +45,12 @@ export class RoomController {
       throw new HttpException(`Room with ID ${roomId} does not exist.`, 404);
     }
 
-    return new CommonResponseDto(new CommonRoomResponseDto(room));
+    const roomPlayers = await this.roomService.getRoomPlayers(room.id);
+
+    return new CommonResponseDto({
+      room: new CommonRoomResponseDto(room),
+      players: roomPlayers.map((player) => new CommonPlayerResponseDto(player)),
+    });
   }
 
   @Post()

@@ -17,20 +17,20 @@ import { FullScreenPopup } from '../../components/FullScreenPopup';
 import { RoomCodeStatus } from './index.types';
 import { useRoom } from '../../context/RoomContext';
 import { useUI } from '../../context/UIContext';
-import { GameSocket } from '../../hooks/useGameSocket';
+import { RoomSocket } from '../../hooks/useRoomSocket';
 
 interface UserPageProps {
   flipToPage: (page: number) => void;
-  gameSocket: GameSocket;
+  roomSocket: RoomSocket;
 }
 
-export const UserPage = ({ flipToPage, gameSocket }: UserPageProps) => {
+export const UserPage = ({ flipToPage, roomSocket }: UserPageProps) => {
   const theme = useTheme();
   const { login, logout, user, player, isAuthenticated } = useAuth();
   const { setRoomPlayers, setRoom } = useRoom();
   const { setLoading } = useUI();
 
-  const { joinRoom } = gameSocket;
+  const { joinRoom } = roomSocket;
 
   const [username, setUsername] = useState('');
   const [selectedAvatar, setSelectedAvatar] = useState(AvatarType.AVATAR_GRAY);

@@ -3,7 +3,6 @@ import { AvatarFrame } from './AvatarFrame';
 import { AvatarType } from '../types/avatar';
 import { useTheme } from '@emotion/react';
 import hostIcon from '../assets/images/host.svg';
-import trashIcon from '../assets/images/trash.svg';
 
 interface UserProfileProps {
   isEmpty?: boolean;
@@ -84,7 +83,7 @@ export const PlayerProfile = ({
             cursor: 'pointer',
           }}
           onClick={() => {
-            if (window.confirm('호스트로 지정하시겠습니까?')) {
+            if (window.confirm('방장으로 만들까요?')) {
               // Call the function to make this player the host
               onMakeHost();
             }

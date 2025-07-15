@@ -89,6 +89,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           localStorage.setItem(PLAYER_ID_KEY, parsedPlayer.id);
         } catch (err) {
           localStorage.removeItem(USER_ID_KEY);
+          localStorage.removeItem(PLAYER_ID_KEY);
           console.error('Failed to parse saved user data:', err);
           alert('Failed to connect API server. Please try again later.');
         }
@@ -108,15 +109,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           console.error('Failed to parse saved player data:', err);
           alert('Failed to connect API server. Please try again later.');
         }
-      }
-
-      if (!restoredPlayer) {
+      } else {
         // playerId가 없으면 새로 생성
-        const newPlayer = parsePlayer(
-          (await axiosInstance.post('/players')).data
-        );
+        try {
+          const newPlayer = parsePlayer(
+            (await axiosInstance.post('/players')).data
+          );
 
-        localStorage.setItem(PLAYER_ID_KEY, newPlayer.id);
+          console.log('Created new player:', newPlayer);
+
+          localStorage.setItem(PLAYER_ID_KEY, newPlayer.id);
+          restoredPlayer = newPlayer;
+        } catch (err) {
+          localStorage.removeItem(PLAYER_ID_KEY);
+
+          console.error('Failed to create new player:', err);
+          alert('Failed to connect API server. Please try again later.');
+        }
       }
 
       setPlayer(restoredPlayer);

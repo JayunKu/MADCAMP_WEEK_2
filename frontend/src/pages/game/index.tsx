@@ -1,14 +1,26 @@
 import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Sketchbook } from '../../components/sketchbook/Sketchbook';
-import { Spacer } from '../../components/Spacer';
-import { GameMode, GameStatus } from '../../types/game';
+import {
+  GameMode,
+  GameStatus,
+  parsePlayer,
+  parseRoom,
+  Player,
+} from '../../types/game';
 import { useTheme } from '@emotion/react';
 import { UserInput } from '../../components/UserInput';
 import { GenerateButton } from '../../components/GenerateButton';
 import { SmallButton } from '../../components/Button';
 import spinnerImage from '../../assets/images/spinner.svg';
-import { EXAMPLE_GAME_DATA, EXAMPLE_PLAYER_INFOS } from '../../types/mockData';
+import { useGameSocket } from '../../hooks/useGameSocket';
+import { axiosInstance } from '../../hooks/useAxios';
+import { useRoom } from '../../context/RoomContext';
+import { FullScreenPopup } from '../../components/FullScreenPopup';
+import { AnswerInput } from './index.styles';
+import { useAuth } from '../../context/AuthContext';
+import { useUI } from '../../context/UIContext';
+import { BlackSketchbook } from '../../components/sketchbook/BlackSketchbook';
 
 interface GamePageState {
   roomId: string;
@@ -34,9 +46,17 @@ const getGameModeName = (mode: number): string => {
 export const GamePage = () => {
   const navigate = useNavigate();
   const theme = useTheme();
+  const { setLoading } = useUI();
   const location = useLocation() as { state: GamePageState };
 
+  const { joinGame } = useGameSocket();
+  const { room, setRoom, roomPlayers, setRoomPlayers } = useRoom();
+  const { player } = useAuth();
+
   const [isMyTurn, setIsMyTurn] = useState(true);
+
+  const [answerInput, setAnswerInput] = useState('');
+
   const [isImageGenerating, setIsImageGenerating] = useState(false);
   const [generatedImageId, setGeneratedImageId] = useState<string | null>(null);
 
@@ -44,14 +64,61 @@ export const GamePage = () => {
   const [imageGenRemain, setImageGenRemain] = useState(IMAGE_GEN_MAX_TRIES);
 
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
   useEffect(() => {
+    if (!location.state || !location.state.roomId || !player) {
+      alert('잘못된 접근입니다.');
+      navigate('/');
+      return;
+    }
+
+    const roomId = location.state.roomId;
+    console.log('Game page loaded with roomId:', roomId);
+    console.log('joinGame function available:', typeof joinGame);
+
+    joinGame(roomId);
+
+    const fetchRoomData = async () => {
+      try {
+        const res = (await axiosInstance.get(`/rooms/${roomId}`)).data;
+        const roomData = parseRoom(res.room);
+        const roomPlayersData = res.players.map((p: any) => parsePlayer(p));
+
+        setRoom(roomData);
+        setRoomPlayers(roomPlayersData);
+
+        console.log('Room data:', roomData);
+        console.log('Room players:', roomPlayersData);
+      } catch (err) {
+        console.error('Failed to fetch room data:', err);
+        alert('방 정보를 불러오는데 실패했습니다.');
+        navigate('/');
+      }
+    };
+
+    fetchRoomData();
+
     return () => {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };
-  }, []);
+  }, [location.state, player, navigate, joinGame]);
+
+  // room이 바뀔 때마다 isMyTurn 업데이트
+  useEffect(() => {
+    if (room && player) {
+      setIsMyTurn(room.responsePlayerIds[room.turnPlayerIndex] === player.id);
+      console.log(
+        'Turn updated - isMyTurn:',
+        room.responsePlayerIds[room.turnPlayerIndex] === player.id,
+        'turnPlayerId:',
+        room.responsePlayerIds[room.turnPlayerIndex]
+      );
+    }
+  }, [room, player]);
 
   const [upFlipping, setUpFlipping] = useState(false);
   const [downFlipping, setDownFlipping] = useState(false);
+
   const flipUpPage = (callback?: () => void) => {
     setUpFlipping(true);
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
@@ -69,16 +136,30 @@ export const GamePage = () => {
     }, 500);
   };
 
-  useEffect(() => {
-    if (!location.state || !location.state.roomId) {
-      alert('잘못된 접근입니다.');
-      navigate('/');
+  const submitAnswerButtonHandler = async () => {
+    if (!room) {
+      alert('오류가 발생하였습니다. 다시 시도해주세요.');
+      return;
     }
-  }, [location, navigate]);
+    if (!isMyTurn) {
+      alert('당신의 차례가 아닙니다.');
+      return;
+    }
+    if (answerInput.trim() === '') {
+      alert('제시어를 입력해주세요.');
+      return;
+    }
 
-  console.log('GamePage mounted with roomId:', location.state?.roomId);
-
-  const game_data = EXAMPLE_GAME_DATA; // Replace with actual data fetching logic
+    try {
+      await axiosInstance.post(`/games/${room.id}/answer`, {
+        answer: answerInput,
+      });
+    } catch (err) {
+      console.error('Failed to submit answer:', err);
+      alert('오류가 발생하였습니다. 다시 시도해주세요.');
+      return;
+    }
+  };
 
   const generateImageButtonHandler = () => {
     if (!isMyTurn || isImageGenerating || imageGenRemain <= 0) return;
@@ -102,13 +183,44 @@ export const GamePage = () => {
     navigate('/game/round_result');
   };
 
+  if (!room || !roomPlayers || roomPlayers.length === 0) {
+    setLoading(true);
+    return <></>;
+  }
+
+  setLoading(false);
   return (
     <>
+      <FullScreenPopup
+        open={room.gameStatus === GameStatus.ANSWER_INPUT && isMyTurn}
+      >
+        <p
+          style={{
+            fontSize: '20px',
+            margin: '10px',
+            textAlign: 'center',
+          }}
+        >
+          첫 제시어를 입력해 주세요!
+        </p>
+        <AnswerInput
+          value={answerInput}
+          onChange={e => {
+            setAnswerInput(e.target.value);
+          }}
+        />
+        <SmallButton
+          backgroundColor={theme.colors.lighterYellow}
+          onClick={submitAnswerButtonHandler}
+        >
+          제출하기
+        </SmallButton>
+      </FullScreenPopup>
       <p style={{ fontSize: '23px', margin: '15px' }}>
-        {getGameModeName(game_data.game_mode)}
-        {game_data.game_mode === GameMode.FAKER && (
+        {getGameModeName(room.gameMode)}
+        {room.gameMode === GameMode.FAKER && (
           <span style={{ fontSize: '19px' }}>
-            &nbsp;({game_data.round_number}라운드)
+            &nbsp;({room.roundNumber}라운드)
           </span>
         )}
       </p>
@@ -120,29 +232,62 @@ export const GamePage = () => {
         width="380px"
         ringCount={11}
       >
-        {isMyTurn ? (
-          (() => {
-            const previousResponse =
-              game_data.responses[game_data.round_turn_player_id - 1];
-            const previousPlayer = EXAMPLE_PLAYER_INFOS.find(
-              player => player.id === game_data.round_turn_player_id
+        {(() => {
+          if (!room.responsePlayerIds || !roomPlayers) {
+            setLoading(true);
+            return <></>;
+          }
+          setLoading(false);
+          if (room.gameStatus === GameStatus.ANSWER_INPUT) {
+            const currentPlayer = roomPlayers.find(
+              player =>
+                player.id === room.responsePlayerIds[room.turnPlayerIndex]
+            );
+            if (!currentPlayer) {
+              setLoading(true);
+              return <></>;
+            }
+            setLoading(false);
+            return (
+              <div>
+                <p>{currentPlayer.name}가 제시어를 입력하고 있어요</p>
+              </div>
+            );
+          }
+
+          if (isMyTurn) {
+            if (room.turnPlayerIndex === 0) {
+              return (
+                <BlackSketchbook>
+                  <p
+                    style={{
+                      fontSize: '18px',
+                      color: theme.colors.darkGray,
+                      textAlign: 'center',
+                    }}
+                  >
+                    아직 아무도 그림을 그리지 않았네요
+                  </p>
+                </BlackSketchbook>
+              );
+            }
+
+            const previousIndex = room.turnPlayerIndex - 1;
+            const previousPlayer = roomPlayers.find(
+              player => player.id === room.responsePlayerIds[previousIndex]
             );
 
+            if (!previousPlayer || !room.responsePlayerFileIds[previousIndex]) {
+              setLoading(true);
+              return <></>;
+            }
+
+            setLoading(false);
             return (
-              <div
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  padding: '10px',
-                }}
-              >
-                <p>{previousPlayer?.username}이 그린 그림</p>
+              <BlackSketchbook>
+                <p>{previousPlayer.name}이 그린 그림</p>
                 <img
-                  src={
-                    game_data.responses[game_data.round_turn_player_id - 1]
-                      .file_id || ''
-                  }
+                  src={room.responsePlayerFileIds[previousIndex]}
                   alt="Previous Generated Image"
                   style={{
                     width: '100%',
@@ -151,34 +296,36 @@ export const GamePage = () => {
                     margin: '10px 0',
                   }}
                 />
-              </div>
+              </BlackSketchbook>
             );
-          })()
-        ) : (
-          <div
-            style={{
-              width: '100%',
-              height: '100%',
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'center',
-              alignItems: 'center',
-              backgroundColor: '#D5D5D5',
-              gap: '30px',
-            }}
-          >
-            <p style={{ fontSize: '17px', color: theme.colors.darkGray }}>
-              애벌레 1이 그림을 그리고 있습니다
-            </p>
-            <p style={{ fontSize: '17px', color: theme.colors.black }}>
-              {
-                LOADING_QUOTES[
-                  Math.floor(Math.random() * LOADING_QUOTES.length)
-                ]
-              }
-            </p>
-          </div>
-        )}
+          } else {
+            const currentPlayer = roomPlayers.find(
+              player =>
+                player.id === room.responsePlayerIds[room.turnPlayerIndex]
+            );
+
+            if (!currentPlayer) {
+              setLoading(true);
+              return <></>;
+            }
+
+            setLoading(false);
+            return (
+              <BlackSketchbook>
+                <p style={{ fontSize: '17px', color: theme.colors.darkGray }}>
+                  {currentPlayer.name}이 그림을 그리고 있어요
+                </p>
+                <p style={{ fontSize: '17px', color: theme.colors.black }}>
+                  {
+                    LOADING_QUOTES[
+                      Math.floor(Math.random() * LOADING_QUOTES.length)
+                    ]
+                  }
+                </p>
+              </BlackSketchbook>
+            );
+          }
+        })()}
       </Sketchbook>
 
       <div
@@ -213,17 +360,7 @@ export const GamePage = () => {
         ringCount={11}
       >
         {isImageGenerating ? (
-          <div
-            style={{
-              width: '100%',
-              height: '100%',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              backgroundColor: '#D5D5D5',
-            }}
-          >
+          <BlackSketchbook>
             <p
               style={{
                 fontSize: '18px',
@@ -241,7 +378,7 @@ export const GamePage = () => {
                 height: '50px',
               }}
             />
-          </div>
+          </BlackSketchbook>
         ) : generatedImageId ? (
           <div
             style={{
@@ -270,17 +407,7 @@ export const GamePage = () => {
             </SmallButton>
           </div>
         ) : (
-          <div
-            style={{
-              width: '100%',
-              height: '100%',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              backgroundColor: '#D5D5D5',
-            }}
-          >
+          <BlackSketchbook>
             <p
               style={{
                 fontSize: '18px',
@@ -293,7 +420,7 @@ export const GamePage = () => {
               <br />
               "생성"을 눌러 이미지를 만들어 보세요.
             </p>
-          </div>
+          </BlackSketchbook>
         )}
       </Sketchbook>
     </>

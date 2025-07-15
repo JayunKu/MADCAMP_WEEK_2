@@ -1,23 +1,76 @@
-import { Body, Controller, Param, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  HttpException,
+  Param,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { GameService } from './game.service';
-import { PlayerRedisService } from '../../config/redis/player-redis.service';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CommonResponseDto } from 'src/common/dtos/common-response.dto';
-import { RoomRedisService } from '../../config/redis/room-redis.service';
 import { PlayerGuard } from '../auth/guards/player.guard';
 import { CurrentPlayer } from 'src/common/decorators/current-player.decorator';
-import { Player } from 'src/config/redis/model';
+import { GameStatus, Player } from 'src/config/redis/model';
 import { SubmitInputRequestDto } from './dtos/submit-input-request.dto';
 import { SubmitImageRequestDto } from './dtos/submit-image-request.dto';
+import { RoomService } from '../room/room.service';
+import { SubmitAnswerRequestDto } from './dtos/submit-answer-request.dto';
 
 @ApiTags('games')
 @Controller('games')
 export class GameController {
   constructor(
     private readonly gameService: GameService,
-    private readonly playerRedisService: PlayerRedisService,
-    private readonly roomRedisService: RoomRedisService,
+    private readonly roomService: RoomService,
   ) {}
+
+  @Post(':id')
+  @UseGuards(PlayerGuard)
+  @ApiOperation({ summary: '게임 시작' })
+  async startGame(
+    @Param('id') roomId: string,
+    @CurrentPlayer() player: Player,
+  ) {
+    const room = await this.roomService.getRoomById(roomId);
+    if (!room) {
+      throw new HttpException(`Room with ID ${roomId} does not exist.`, 404);
+    }
+
+    await this.gameService.startGame(room.id, room.game_mode);
+
+    return new CommonResponseDto();
+  }
+
+  @Post(':id/answer')
+  @UseGuards(PlayerGuard)
+  @ApiOperation({ summary: '첫 제시어 입력' })
+  async submitAnswer(
+    @Param('id') roomId: string,
+    @CurrentPlayer() player: Player,
+    @Body() submitAnswerRequestDto: SubmitAnswerRequestDto,
+  ) {
+    const { answer } = submitAnswerRequestDto;
+
+    // Check if the player is in the room
+    const room = await this.roomService.getRoomById(roomId);
+    if (!room) {
+      throw new HttpException(`Room with ID ${roomId} does not exist.`, 404);
+    }
+    if (!room.response_player_ids.includes(player.id)) {
+      throw new HttpException('Player not in room', 403);
+    }
+    if (room.response_player_ids[0] !== player.id) {
+      throw new HttpException('Not your turn', 403);
+    }
+    if (room.game_status !== GameStatus.ANSWER_INPUT) {
+      throw new HttpException('Game is not in answer input status', 403);
+    }
+
+    await this.gameService.submitAnswer(roomId, answer);
+
+    return new CommonResponseDto();
+  }
 
   @Post(':id/inputs')
   //@UseGuards(PlayerGuard)
@@ -28,7 +81,7 @@ export class GameController {
     @Body() submitInputRequestDto: SubmitInputRequestDto,
   ) {
     const { input } = submitInputRequestDto;
-    console.log(input)
+    console.log(input);
     // console.log(
     //   `Game ID: ${gameId}, Player ID: ${player.id}, Sending prompt to AI: ${input}`,
     // );
@@ -47,11 +100,10 @@ export class GameController {
     @Body() submitImageRequestDto: SubmitImageRequestDto,
   ) {
     const { input, file_id } = submitImageRequestDto;
-    console.log(input, file_id)
+    console.log(input, file_id);
 
-    await this.roomRedisService.addResponse(gameId, player.id, input, file_id);
+    // await this.roomRedisService.addResponse(gameId, player.id, input, file_id);
 
     return new CommonResponseDto();
   }
-
 }
