@@ -9,7 +9,7 @@ import os
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "../madcamp-malgreem-fd2ecdff2f9c.json"
 
 # ✨ 변경 포인트: 테스트할 모델 이름만 이 변수에서 바꾸면 됨!
-MODEL_NAME = "nitrosocke/mo-di-diffusion"  # 👈 이 줄만 수정하면 됨
+MODEL_NAME = "ducnapa/childrens_stories_v1_semireal"  # 👈 이 줄만 수정하면 됨
 
 # GCS 설정
 GCS_BUCKET_NAME = "madcamp-malgreem-image"  # 👈 실제 GCS 버킷 이름으로 교체
@@ -18,7 +18,8 @@ IMAGE_DIR = "./generated_images"
 # 파이프라인 로드 (서버 시작 시 한 번만 실행). AI 모델 불러와 pipe에 저장하고 GPU 메모리로 이동.
 pipe = StableDiffusionPipeline.from_pretrained(
     MODEL_NAME,
-    torch_dtype=torch.float16
+    torch_dtype=torch.float16,
+    weights_only=False
 ).to("cuda")
 
 def translate_prompt(prompt: str) -> str:
@@ -34,6 +35,7 @@ def generate_image_and_upload_to_gcs(prompt: str) -> str:
     default_prompt = "minimalistic, childlike cartoon style, on a pure white background, smiling face, no background elements"
     translated_prompt = translate_prompt(prompt)
     full_prompt = f"{translated_prompt}, {default_prompt}"
+    print(prompt)
 
     # 1. 이미지 생성
     with torch.autocast("cuda"):
