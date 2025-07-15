@@ -27,15 +27,12 @@ export const SketchbookCarousel = () => {
     setLoading(!room || !roomPlayers);
   }, [room, roomPlayers]);
 
-  if (!room || !roomPlayers) {
-    return <></>;
-  }
+  if (!room || !roomPlayers) return <></>;
 
   const total = room.responsePlayerIds.length;
-  const getIdx = (offset: number) => (centerIdx + offset + total) % total; // 캐러셀 인덱스 계산 (순환)
 
   const gameResponses = room.responsePlayerIds.map((playerId, index) => {
-    const player = roomPlayers?.find(p => p.id === playerId);
+    const player = roomPlayers.find(p => p.id === playerId);
     return {
       id: playerId,
       username: player?.name || '알 수 없음',
@@ -45,22 +42,26 @@ export const SketchbookCarousel = () => {
     };
   });
 
-  // 3개 미만인 경우 렌더링할 오프셋 계산
-  const getVisibleOffsets = () => {
-    if (total === 1) return [0];
-    if (total === 2) return [-1, 1];
-    return [-1, 0, 1];
+  const getVisibleIndices = () => {
+    return [
+      centerIdx - 1 >= 0 ? centerIdx - 1 : null,
+      centerIdx,
+      centerIdx + 1 < total ? centerIdx + 1 : null,
+    ];
   };
 
-  const visibleOffsets = getVisibleOffsets();
+  const visibleIndices = getVisibleIndices();
 
   return (
     <SketchbookList>
-      {visibleOffsets.map(offset => {
-        const idx = getIdx(offset);
+      {visibleIndices.map((idx, i) => {
+        if (idx === null) {
+          return <SketchbookItem key={`empty-${i}`} $center={false} />;
+        }
+
         const resp = gameResponses[idx];
-        const isCenter =
-          offset === 0 || total === 1 || (total === 2 && offset === -1);
+        const isCenter = idx === centerIdx;
+
         return (
           <SketchbookItem
             key={idx}
@@ -94,7 +95,7 @@ export const SketchbookCarousel = () => {
               </p>
               <img
                 src={resp.file_url}
-                alt="Player Images"
+                alt="Player Image"
                 style={{
                   width: '100%',
                   height: '180px',
@@ -120,11 +121,15 @@ export const SketchbookCarousel = () => {
 
 const SketchbookList = styled.div`
   display: flex;
+  justify-content: center;
+  align-items: flex-start;
 `;
 
 const SketchbookItem = styled.div<{ $center: boolean }>`
-  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), z-index 0.2s;
+  width: 230px;
+  height: 330px;
+  transition: transform 0.4s ease, z-index 0.2s;
   transform: scale(${({ $center }) => ($center ? 1.15 : 0.8)});
   z-index: ${({ $center }) => ($center ? 2 : 1)};
-  margin: 0 3px;
+  margin: 0 6px;
 `;
