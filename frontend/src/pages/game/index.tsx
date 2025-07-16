@@ -28,20 +28,7 @@ interface GamePageState {
 
 const LOADING_QUOTES = ['사막에 커피 한 잔만 가져갈 수 있다면?'];
 
-const EXAMPLE_GENERATED_IMAGE_ID = 'example-image-id-12345';
-
 const IMAGE_GEN_MAX_TRIES = 3;
-
-const getGameModeName = (mode: number): string => {
-  switch (mode) {
-    case 0:
-      return '기본 모드';
-    case 1:
-      return '페이커 모드';
-    default:
-      return '알 수 없는 모드';
-  }
-};
 
 export const GamePage = () => {
   const navigate = useNavigate();
@@ -54,6 +41,8 @@ export const GamePage = () => {
   const { player } = useAuth();
 
   const [isMyTurn, setIsMyTurn] = useState(true);
+
+  const [showFakerModeType, setShowFakerModeType] = useState(true);
 
   const [answerInput, setAnswerInput] = useState('');
 
@@ -221,10 +210,12 @@ export const GamePage = () => {
   };
 
   useEffect(() => {
-    setLoading(!room || !roomPlayers);
-  }, [room, roomPlayers]);
+    setLoading(
+      !room || !roomPlayers || !player || room.fakersPlayerIds.length === 0
+    );
+  }, [room, roomPlayers, player]);
 
-  if (!isConnected || !room || !roomPlayers || roomPlayers.length === 0) {
+  if (!room || !player || !roomPlayers || roomPlayers.length === 0) {
     return <></>;
   }
   return (
@@ -259,8 +250,58 @@ export const GamePage = () => {
           제출하기
         </SmallButton>
       </FullScreenPopup>
+
+      <FullScreenPopup
+        open={room.gameMode === GameMode.FAKER && showFakerModeType}
+        onClose={() => setShowFakerModeType(false)}
+      >
+        <div onClick={() => setShowFakerModeType(false)}>
+          <p style={{ fontSize: '20px', margin: '10px', textAlign: 'center' }}>
+            당신은
+            {room.fakersPlayerIds.includes(player.id) ? (
+              <span style={{ color: 'red' }}> 페이커</span>
+            ) : (
+              <span style={{ color: 'green' }}> 키퍼</span>
+            )}
+            입니다
+          </p>
+          <p style={{ fontSize: '16px', margin: '10px', textAlign: 'center' }}>
+            {room.fakersPlayerIds.includes(player.id)
+              ? '상대가 맞추지 못하도록 그림을 망치세요!'
+              : '상대가 그린 그림을 보고 제시어를 맞춰보세요!'}
+          </p>
+          <p
+            style={{
+              fontSize: '14px',
+              margin: '10px',
+              textAlign: 'center',
+              color: theme.colors.darkGray,
+            }}
+          >
+            (눌러서 계속하세요)
+          </p>
+        </div>
+      </FullScreenPopup>
       <p style={{ fontSize: '23px', margin: '15px' }}>
-        {getGameModeName(room.gameMode)}
+        {(() => {
+          if (room.gameMode === GameMode.BASIC) {
+            return '기본 모드';
+          } else {
+            if (room.fakersPlayerIds.includes(player.id)) {
+              return (
+                <>
+                  <span style={{ color: 'red' }}>페이커</span> 모드
+                </>
+              );
+            } else {
+              return (
+                <>
+                  <span style={{ color: 'green' }}>페이커</span> 모드
+                </>
+              );
+            }
+          }
+        })()}
         {room.gameMode === GameMode.FAKER && (
           <span style={{ fontSize: '19px' }}>
             &nbsp;({room.roundNumber}라운드)

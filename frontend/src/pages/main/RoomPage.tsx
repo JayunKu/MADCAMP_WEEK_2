@@ -245,7 +245,7 @@ export const RoomPage = ({ flipToPage, toggleSketchbook }: RoomPageProps) => {
         onClick={onGameStartButtonHandler}
         disabled={
           !isRoomHost ||
-          (room.gameMode === GameMode.FAKER && roomPlayers.length < 3)
+          (room.gameMode === GameMode.FAKER && roomPlayers.length < 1)
         }
       >
         게임 시작

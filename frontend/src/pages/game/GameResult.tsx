@@ -52,13 +52,21 @@ export const GameResultPopup = ({ open, setOpen }: GameResultPageProps) => {
         return {
           winnerIds: room.fakersPlayerIds,
           winnerType: FakerModeTeamType.FAKER,
-          message: 'Faker 승리!',
+          message: (
+            <p>
+              <span style={{ color: 'red' }}>페이커</span> 승리!
+            </p>
+          ),
         };
       } else {
         return {
           winnerIds: room.keeperPlayerIds,
           winnerType: FakerModeTeamType.KEEPER,
-          message: 'Keeper 승리!',
+          message: (
+            <p>
+              <span style={{ color: 'green' }}>키퍼</span> 승리!
+            </p>
+          ),
         };
       }
     }
