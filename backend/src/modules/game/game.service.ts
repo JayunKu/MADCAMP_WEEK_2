@@ -17,6 +17,7 @@ export class GameService {
     private readonly roomRedisService: RoomRedisService,
     private readonly roomGateway: RoomGateway,
     private readonly configService: ConfigService,
+    private readonly httpService: HttpService,
   ) {}
 
   async startGame(roomId: string, gameMode: GameMode): Promise<void> {
@@ -79,23 +80,27 @@ export class GameService {
 
     console.log('Image Generation API URL:', imageGenApiUrl);
 
-    return {
-      id: 'test',
-      url: 'http://localhost:8000/test_gen_image.png',
-    };
-    // try {
-    //   const data = (
-    //     await this.httpService.axiosRef.post(imageGenApiUrl, {
-    //       prompt: prompt,
-    //     })
-    //   ).data;
+    // return {
+    //   id: 'test',
+    //   url: 'http://localhost:8000/test_gen_image.png',
+    // };
+    try {
+      const data = (
+        await this.httpService.axiosRef.post(imageGenApiUrl, {
+          prompt: prompt,
+        })
+      ).data;
 
-    //   console.log('AI Image Server Response:', data);
-    //   return data;
-    // } catch (error) {
-    //   console.error('Error calling AI Image Server:', error);
-    //   throw new Error('Failed to generate image');
-    // }
+      console.log('AI Image Server Response:', data);
+
+      return {
+        id: data.image_id,
+        url: `https://storage.googleapis.com/madcamp-malgreem-image/${data.image_id}`,
+      };
+    } catch (error) {
+      console.error('Error calling AI Image Server:', error);
+      throw new Error('Failed to generate image');
+    }
   }
 
   async submitImage(

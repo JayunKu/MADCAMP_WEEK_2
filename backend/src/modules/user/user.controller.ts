@@ -30,6 +30,16 @@ export class UserController {
     private readonly commonService: CommonService,
   ) {}
 
+  @Get('rankings')
+  @ApiOperation({ summary: '리더보드 조회' })
+  async getRankings() {
+    const rankings = await this.userService.getRankings();
+
+    return new CommonResponseDto({
+      rankings: rankings.map((user) => new CommonUserResponseDto(user)),
+    });
+  }
+
   @Get(':id')
   @ApiOperation({ summary: '회원 정보 조회' })
   async getUser(@Param('id', ParseIntPipe) id: number) {
