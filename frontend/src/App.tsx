@@ -1,3 +1,4 @@
+import React, { useEffect, useRef } from 'react';
 import './App.css';
 import { AuthProvider } from './context/AuthProvider';
 import { AppThemeProvider } from './styles/ThemeProvider';
@@ -9,9 +10,26 @@ import { GoogleOAuthProvider } from '@react-oauth/google';
 import { RoomProvider } from './context/RoomContext';
 import { UIProvider } from './context/UIContext';
 import { SocketProvider } from './context/SocketContext';
+import lastNight from './assets/audio/last-night.mp3';
+import smoothMoves from './assets/audio/smooth-moves.mp3';
+import nightAndDay from './assets/audio/night-and-day.mp3';
+
+const playlist = [lastNight, smoothMoves, nightAndDay];
 
 function App() {
+  const audioRef = useRef<HTMLAudioElement>(null);
+  const [currentTrack, setCurrentTrack] = React.useState(0);
   const clientId = process.env.REACT_APP_GOOGLE_OAUTH_CLIENT_ID;
+
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.play();
+    }
+  }, [currentTrack]);
+
+  const handleEnded = () => {
+    setCurrentTrack((prevTrack) => (prevTrack + 1) % playlist.length);
+  };
 
   console.log('Google OAuth Client ID:', clientId);
 
@@ -31,6 +49,12 @@ function App() {
               <BrowserRouter>
                 <SocketProvider>
                   <MainContainer>
+                    <audio
+                      ref={audioRef}
+                      src={playlist[currentTrack]}
+                      onEnded={handleEnded}
+                      autoPlay
+                    />
                     <Routes>
                       <Route path="/" element={<MainPage />} />
                       <Route path="/game" element={<GamePage />} />
