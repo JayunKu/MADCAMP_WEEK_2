@@ -23,7 +23,7 @@ async function bootstrap() {
 
   // CORS
   app.enableCors({
-    origin: ['http://localhost:3000'],
+    origin: ['http://localhost:3000', 'http://malgreem.minsung.kr'],
     credentials: true,
   });
 
