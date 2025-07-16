@@ -25,6 +25,13 @@ export class GameService {
     // randomize room players
     const randomizedPlayers = roomPlayers.sort(() => Math.random() - 0.5);
 
+    const fakerCounnt = Math.floor(roomPlayers.length / 3);
+    const reRandomizedPlayers = randomizedPlayers.sort(
+      () => Math.random() - 0.5,
+    );
+    const fakerPlayers = reRandomizedPlayers.slice(0, fakerCounnt);
+    const keeperPlayers = reRandomizedPlayers.slice(fakerCounnt);
+
     this.roomRedisService.updateRoom(roomId, {
       game_mode: gameMode,
       round_number: 1,
@@ -33,6 +40,14 @@ export class GameService {
       response_player_ids: randomizedPlayers.map((player) => player.id),
       response_player_inputs: [],
       response_player_file_urls: [],
+      keeper_player_ids:
+        gameMode === GameMode.FAKER
+          ? keeperPlayers.map((player) => player.id)
+          : [],
+      fakers_player_ids:
+        gameMode === GameMode.FAKER
+          ? fakerPlayers.map((player) => player.id)
+          : [],
       turn_player_index: 0,
     });
 

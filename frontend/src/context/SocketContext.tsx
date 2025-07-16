@@ -12,8 +12,6 @@ import { useRoom } from './RoomContext';
 import { useUI } from './UIContext';
 import { useNavigate } from 'react-router-dom';
 import { RoundResultPopup } from '../pages/game/RoundResult';
-import { GameResultPopup } from '../pages/game/GameResult';
-import { axiosInstance } from '../hooks/useAxios';
 
 interface SocketContextType {
   isConnected: boolean;
