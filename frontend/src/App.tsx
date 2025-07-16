@@ -22,13 +22,18 @@ function App() {
   const clientId = process.env.REACT_APP_GOOGLE_OAUTH_CLIENT_ID;
 
   useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.play();
-    }
-  }, [currentTrack]);
+    const handleUserGesture = () => {
+      if (audioRef.current) {
+        audioRef.current.play();
+      }
+      window.removeEventListener('click', handleUserGesture);
+    };
+    window.addEventListener('click', handleUserGesture);
+    return () => window.removeEventListener('click', handleUserGesture);
+  }, []);
 
   const handleEnded = () => {
-    setCurrentTrack((prevTrack) => (prevTrack + 1) % playlist.length);
+    setCurrentTrack(prevTrack => (prevTrack + 1) % playlist.length);
   };
 
   console.log('Google OAuth Client ID:', clientId);

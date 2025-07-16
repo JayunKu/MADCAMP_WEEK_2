@@ -26,12 +26,18 @@ export class GameService {
     // randomize room players
     const randomizedPlayers = roomPlayers.sort(() => Math.random() - 0.5);
 
-    const fakerCounnt = Math.floor(roomPlayers.length / 3);
-    const reRandomizedPlayers = randomizedPlayers.sort(
+    // 첫 번째 플레이어를 제외한 배열 생성
+    const playersExcludingFirst = randomizedPlayers.slice(1);
+
+    const fakerCount = Math.round(playersExcludingFirst.length / 3);
+    const reRandomizedPlayers = playersExcludingFirst.sort(
       () => Math.random() - 0.5,
     );
-    const fakerPlayers = reRandomizedPlayers.slice(0, fakerCounnt);
-    const keeperPlayers = reRandomizedPlayers.slice(fakerCounnt);
+    const fakerPlayers = reRandomizedPlayers.slice(0, fakerCount);
+    const keeperPlayers = reRandomizedPlayers.slice(fakerCount);
+
+    // 첫 번째 플레이어를 keeperPlayers에 추가
+    keeperPlayers.push(randomizedPlayers[0]);
 
     this.roomRedisService.updateRoom(roomId, {
       game_mode: gameMode,

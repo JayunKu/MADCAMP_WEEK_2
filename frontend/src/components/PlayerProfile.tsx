@@ -20,8 +20,6 @@ export const PlayerProfile = ({
   isMember,
   username,
   avatarType = AvatarType.AVATAR_GRAY,
-  totalGames,
-  totalWins,
   onMakeHost,
   showTools = false,
 }: UserProfileProps) => {
@@ -66,9 +64,7 @@ export const PlayerProfile = ({
                 marginTop: '3px',
               }}
             >
-              승률(
-              {totalWins ? ((totalWins / totalGames!) * 100).toFixed(1) : 0}
-              %) {totalGames}전 {totalWins}승
+              회원
             </p>
           )}
         </div>

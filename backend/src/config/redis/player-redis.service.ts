@@ -25,7 +25,7 @@ export class PlayerRedisService {
     await this.redisService.hSet(playerKey, 'id', playerId);
     await this.redisService.hSet(playerKey, 'name', name);
     await this.redisService.hSet(playerKey, 'avatar_id', avatarId.toString());
-    await this.redisService.hSet(playerKey, 'is_member', isMember.toString());
+    await this.redisService.hSet(playerKey, 'is_member', isMember ? '1' : '0');
     await this.redisService.hSet(playerKey, 'room_id', '');
 
     return player;
@@ -43,7 +43,7 @@ export class PlayerRedisService {
       id: playerData.id,
       name: playerData.name,
       avatar_id: playerData.avatar_id ? Number(playerData.avatar_id) : 0,
-      is_member: playerData.is_member === '1' ? 1 : 0,
+      is_member: playerData.is_member ? Number(playerData.is_member) : 0,
       room_id: playerData.room_id || null,
     };
   }
@@ -65,14 +65,8 @@ export class PlayerRedisService {
         case 'name':
           await this.redisService.hSet(playerKey, key, value as string);
           break;
-        case 'is_member':
-          await this.redisService.hSet(
-            playerKey,
-            key,
-            (value as number) ? '1' : '0',
-          );
-          break;
         case 'avatar_id':
+        case 'is_member':
           await this.redisService.hSet(
             playerKey,
             key,

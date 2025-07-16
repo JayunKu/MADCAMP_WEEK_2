@@ -16,17 +16,12 @@ import { CommonResponseDto } from 'src/common/dtos/common-response.dto';
 import { CommonRoomResponseDto } from '../../common/dtos/common-room-response.dto';
 import { PlayerGuard } from '../auth/guards/player.guard';
 import { CurrentPlayer } from 'src/common/decorators/current-player.decorator';
-import { PlayerRedisService } from '../../config/redis/player-redis.service';
 import { CommonPlayerResponseDto } from 'src/common/dtos/common-player-response.dto';
-import { CommonUserResponseDto } from 'src/common/dtos/common-user-response.dto';
 
 @ApiTags('rooms')
 @Controller('rooms')
 export class RoomController {
-  constructor(
-    private readonly roomService: RoomService,
-    private readonly playerRedisService: PlayerRedisService,
-  ) {}
+  constructor(private readonly roomService: RoomService) {}
 
   @Get()
   @ApiOperation({ summary: '모든 파티 조회' })
@@ -51,21 +46,6 @@ export class RoomController {
     return new CommonResponseDto({
       room: new CommonRoomResponseDto(room),
       players: roomPlayers.map((player) => new CommonPlayerResponseDto(player)),
-    });
-  }
-
-  @Get(':id/members')
-  @ApiOperation({ summary: '파티의 회원 정보 조회' })
-  async getRoomMembers(@Param('id') roomId: string) {
-    const room = await this.roomService.getRoomById(roomId);
-    if (!room) {
-      throw new HttpException(`Room with ID ${roomId} does not exist.`, 404);
-    }
-
-    const members = await this.roomService.getRoomMembers(room.id);
-
-    return new CommonResponseDto({
-      members: members.map((member) => new CommonUserResponseDto(member)),
     });
   }
 

@@ -71,21 +71,4 @@ export class RoomService {
 
     return players;
   }
-
-  async getRoomMembers(roomId: string): Promise<User[]> {
-    const players = ((await this.getRoomPlayers(roomId)) as Player[]).filter(
-      (player) => player.is_member,
-    );
-
-    console.log('getRoomMembers players:', players);
-    const members = (await Promise.all(
-      players.map(async (player) => {
-        const user = await this.prismaService.user.findUnique({
-          where: { player_id: player.id },
-        });
-        return user;
-      }),
-    )) as User[];
-    return members;
-  }
 }

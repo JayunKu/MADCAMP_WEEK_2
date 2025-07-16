@@ -294,6 +294,7 @@ export class RoomRedisService {
     const playerHashKey = `${roomKey}:players`;
     const playerHash = await this.redisService.hGetAll(playerHashKey);
     const players: Player[] = [];
+    console.log(playerHash);
 
     for (const [playerId, playerJson] of Object.entries(playerHash)) {
       try {
@@ -302,7 +303,7 @@ export class RoomRedisService {
           id: playerData.id,
           name: playerData.name,
           avatar_id: playerData.avatar_id ? Number(playerData.avatar_id) : 0,
-          is_member: playerData.is_member === '1' ? 1 : 0,
+          is_member: playerData.is_member ? Number(playerData.is_member) : 0,
           room_id: playerData.room_id || null,
         });
       } catch (e) {
@@ -334,7 +335,7 @@ export class RoomRedisService {
         id: playerData.id,
         name: playerData.name,
         avatar_id: playerData.avatar_id ? Number(playerData.avatar_id) : 0,
-        is_member: true,
+        is_member: playerData.is_member ? Number(playerData.is_member) : 0,
         room_id: roomId,
       }),
     );
