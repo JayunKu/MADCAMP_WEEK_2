@@ -13,15 +13,15 @@ import { useUI } from '../../context/UIContext';
 import { useNavigate } from 'react-router-dom';
 import { axiosInstance } from '../../hooks/useAxios';
 import { useSocketContext } from '../../context/SocketContext';
+import { User } from '../../types/user';
 
 const MAX_PLAYER_PER_ROOM = 8; // 최대 플레이어 수
 
 interface RoomPageProps {
   flipToPage: (page: number) => void;
-  toggleSketchbook: (callback: () => void) => void;
 }
 
-export const RoomPage = ({ flipToPage, toggleSketchbook }: RoomPageProps) => {
+export const RoomPage = ({ flipToPage }: RoomPageProps) => {
   const theme = useTheme();
   const { setLoading } = useUI();
   const { leaveRoom } = useSocketContext();
@@ -109,10 +109,8 @@ export const RoomPage = ({ flipToPage, toggleSketchbook }: RoomPageProps) => {
   const onExitRoomButtonHandler = async () => {
     if (!window.confirm('정말로 방을 나갈까요?')) return;
 
-    setLoading(true);
     if (!player || !player.roomId) {
       alert('오류가 발생하였습니다. 다시 시도해주세요.');
-      setLoading(false);
       return;
     }
 
@@ -123,7 +121,7 @@ export const RoomPage = ({ flipToPage, toggleSketchbook }: RoomPageProps) => {
       setRoomPlayers(null);
       leaveRoom();
       setLoading(false);
-      flipToPage(0);
+      flipToPage(1);
     } catch (err) {
       console.error('Failed to leave room:', err);
       alert('오류가 발생하였습니다. 다시 시도해주세요.');
@@ -156,8 +154,6 @@ export const RoomPage = ({ flipToPage, toggleSketchbook }: RoomPageProps) => {
                 isMember={roomPlayer.isMember}
                 username={roomPlayer.name}
                 avatarType={getAvatarTypeFromId(roomPlayer.avatarId)}
-                totalGames={10} // 임시 데이터
-                totalWins={5} // 임시 데이터
                 onMakeHost={() => {
                   onMakeHostButtonHandler(roomPlayer.id);
                 }}
@@ -227,7 +223,7 @@ export const RoomPage = ({ flipToPage, toggleSketchbook }: RoomPageProps) => {
             }}
           >
             {(() => {
-              const fakerCount = Math.floor(roomPlayers.length / 3);
+              const fakerCount = Math.round(roomPlayers.length / 3);
               if (roomPlayers.length < 3) {
                 return '최소 3명 이상의 플레이어가 필요해요';
               } else {

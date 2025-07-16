@@ -4,6 +4,7 @@ import { RoomRedisService } from '../../config/redis/room-redis.service';
 import { Room, GameMode, Player } from 'src/config/redis/model';
 import { PlayerRedisService } from '../../config/redis/player-redis.service';
 import { RoomGateway } from './room.gateway';
+import { User } from '@prisma/client';
 
 @Injectable()
 export class RoomService {

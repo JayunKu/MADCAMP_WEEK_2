@@ -16,16 +16,12 @@ import { CommonResponseDto } from 'src/common/dtos/common-response.dto';
 import { CommonRoomResponseDto } from '../../common/dtos/common-room-response.dto';
 import { PlayerGuard } from '../auth/guards/player.guard';
 import { CurrentPlayer } from 'src/common/decorators/current-player.decorator';
-import { PlayerRedisService } from '../../config/redis/player-redis.service';
 import { CommonPlayerResponseDto } from 'src/common/dtos/common-player-response.dto';
 
 @ApiTags('rooms')
 @Controller('rooms')
 export class RoomController {
-  constructor(
-    private readonly roomService: RoomService,
-    private readonly playerRedisService: PlayerRedisService,
-  ) {}
+  constructor(private readonly roomService: RoomService) {}
 
   @Get()
   @ApiOperation({ summary: '모든 파티 조회' })

@@ -38,4 +38,4 @@ def generate_image():
 # 이 파일(app.py)이 직접 실행될 때만 서버를 실행하도록 설정
 if __name__ == "__main__":
     # 0.0.0.0은 외부에서 이 서버에 접근 가능하게 함, 포트는 5000번 사용
-    app.run(host="0.0.0.0", port=8001)
+    app.run(host="0.0.0.0", port=80)

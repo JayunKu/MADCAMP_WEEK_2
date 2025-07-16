@@ -32,7 +32,7 @@ def translate_prompt(prompt: str) -> str:
 def generate_image_and_upload_to_gcs(prompt: str) -> str:
 
     negative_prompt = "creepy, dark, weird, ugly, monster"
-    default_prompt = "minimalistic, crayon drawing made by a child, on a pure white background, smiling face, no background elements"
+    default_prompt = "minimalistic, naively drawn, crayon drawing, on a pure white background, smiling face, no background elements"
     translated_prompt = translate_prompt(prompt)
     full_prompt = f"{translated_prompt}, {default_prompt}"
     print(prompt)

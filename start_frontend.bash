@@ -8,4 +8,4 @@ export REACT_APP_WEBSOCKET_URL=http://api.malgreem.minsung.kr/ws
 
 # PM2로 앱 실행
 cd frontend
-pm2 start npm --name "frontend" -- run start
+pm2 restart npm --name "frontend" -- run start

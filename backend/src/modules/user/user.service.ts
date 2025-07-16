@@ -54,4 +54,13 @@ export class UserService {
 
     return user;
   }
+
+  async getRankings(): Promise<User[]> {
+    return await this.prismaService.user.findMany({
+      orderBy: {
+        total_wins: 'desc',
+      },
+      take: 10,
+    });
+  }
 }

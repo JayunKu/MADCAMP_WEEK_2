@@ -11,4 +11,4 @@ export SESSION_KEY="secret_key"
 
 # PM2로 앱 실행
 cd backend
-pm2 start npm --name "backend" -- run start
+pm2 restart npm --name "backend" -- run start

@@ -17,6 +17,7 @@ export class GameService {
     private readonly roomRedisService: RoomRedisService,
     private readonly roomGateway: RoomGateway,
     private readonly configService: ConfigService,
+    private readonly httpService: HttpService,
   ) {}
 
   async startGame(roomId: string, gameMode: GameMode): Promise<void> {
@@ -25,12 +26,18 @@ export class GameService {
     // randomize room players
     const randomizedPlayers = roomPlayers.sort(() => Math.random() - 0.5);
 
-    const fakerCounnt = Math.floor(roomPlayers.length / 3);
-    const reRandomizedPlayers = randomizedPlayers.sort(
+    // 첫 번째 플레이어를 제외한 배열 생성
+    const playersExcludingFirst = randomizedPlayers.slice(1);
+
+    const fakerCount = Math.round(playersExcludingFirst.length / 3);
+    const reRandomizedPlayers = playersExcludingFirst.sort(
       () => Math.random() - 0.5,
     );
-    const fakerPlayers = reRandomizedPlayers.slice(0, fakerCounnt);
-    const keeperPlayers = reRandomizedPlayers.slice(fakerCounnt);
+    const fakerPlayers = reRandomizedPlayers.slice(0, fakerCount);
+    const keeperPlayers = reRandomizedPlayers.slice(fakerCount);
+
+    // 첫 번째 플레이어를 keeperPlayers에 추가
+    keeperPlayers.push(randomizedPlayers[0]);
 
     this.roomRedisService.updateRoom(roomId, {
       game_mode: gameMode,
@@ -79,23 +86,27 @@ export class GameService {
 
     console.log('Image Generation API URL:', imageGenApiUrl);
 
-    return {
-      id: 'test',
-      url: 'http://localhost:8000/test_gen_image.png',
-    };
-    // try {
-    //   const data = (
-    //     await this.httpService.axiosRef.post(imageGenApiUrl, {
-    //       prompt: prompt,
-    //     })
-    //   ).data;
+    // return {
+    //   id: 'test',
+    //   url: 'http://localhost:8000/test_gen_image.png',
+    // };
+    try {
+      const data = (
+        await this.httpService.axiosRef.post(imageGenApiUrl, {
+          prompt: prompt,
+        })
+      ).data;
 
-    //   console.log('AI Image Server Response:', data);
-    //   return data;
-    // } catch (error) {
-    //   console.error('Error calling AI Image Server:', error);
-    //   throw new Error('Failed to generate image');
-    // }
+      console.log('AI Image Server Response:', data);
+
+      return {
+        id: data.image_id,
+        url: `https://storage.googleapis.com/madcamp-malgreem-image/${data.image_id}`,
+      };
+    } catch (error) {
+      console.error('Error calling AI Image Server:', error);
+      throw new Error('Failed to generate image');
+    }
   }
 
   async submitImage(

@@ -18,6 +18,8 @@ import { RoomCodeStatus } from './index.types';
 import { useRoom } from '../../context/RoomContext';
 import { useUI } from '../../context/UIContext';
 import { useSocketContext } from '../../context/SocketContext';
+import { LeaderBoard } from '../../components/LeaderBoard';
+import { ModeInfoPopup } from '../../components/ModeInfoPopup';
 
 interface UserPageProps {
   flipToPage: (page: number) => void;
@@ -38,6 +40,9 @@ export const UserPage = ({ flipToPage }: UserPageProps) => {
   const [roomCode, setRoomCode] = useState('');
   const [roomCodeStatus, setRoomCodeStatus] = useState(RoomCodeStatus.EMPTY);
   const [showRoomCodePopup, setShowRoomCodePopup] = useState(false);
+
+  const [showRankingPopup, setShowRankingPopup] = useState(false);
+  const [showModeInfoPopup, setShowModeInfoPopup] = useState(false);
 
   // 로그인된 사용자 정보가 있으면 username 자동 설정
   useEffect(() => {
@@ -66,7 +71,7 @@ export const UserPage = ({ flipToPage }: UserPageProps) => {
 
     // 서버에 사용자 정보 저장
     try {
-      await axiosInstance.put('/users/me', {
+      const res = await axiosInstance.put('/users/me', {
         name: updatedUser.name,
         avatar_id: updatedUser.avatarId,
       });
@@ -162,6 +167,8 @@ export const UserPage = ({ flipToPage }: UserPageProps) => {
 
   return (
     <>
+      <LeaderBoard open={showRankingPopup} setOpen={setShowRankingPopup} />
+      <ModeInfoPopup open={showModeInfoPopup} setOpen={setShowModeInfoPopup} />
       <FullScreenPopup
         open={showRoomCodePopup}
         onClose={() => setShowRoomCodePopup(false)}
@@ -199,14 +206,7 @@ export const UserPage = ({ flipToPage }: UserPageProps) => {
         </SmallButton>
       </FullScreenPopup>
 
-      {/* <img
-                    src={modeAbstract}
-                    alt="Mode Abstract"
-                    style={{
-                      width: '100%',
-                      //   marginBottom: '30px',
-                    }}
-                  /> */}
+      <Spacer y={30} />
 
       <AvatarCarousel
         value={selectedAvatar}
@@ -246,6 +246,33 @@ export const UserPage = ({ flipToPage }: UserPageProps) => {
       >
         방 들어가기
       </LargeButton>
+
+      <Spacer y={20} />
+      <p
+        style={{
+          color: theme.colors.darkGray,
+          fontSize: '16px',
+          textDecoration: 'underline',
+          textUnderlineOffset: '6px',
+          cursor: 'pointer',
+          marginBottom: '10px',
+        }}
+        onClick={() => setShowRankingPopup(true)}
+      >
+        리더 보드
+      </p>
+      <p
+        style={{
+          color: theme.colors.darkGray,
+          fontSize: '16px',
+          textDecoration: 'underline',
+          textUnderlineOffset: '6px',
+          cursor: 'pointer',
+        }}
+        onClick={() => setShowModeInfoPopup(true)}
+      >
+        모드 소개
+      </p>
     </>
   );
 };

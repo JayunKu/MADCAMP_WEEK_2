@@ -78,10 +78,7 @@ const MainPage = () => {
             // 1: 방 생성 및 입장 페이지
             <UserPage flipToPage={flipToPage} />,
             // 2: 게임 준비 페이지
-            <RoomPage
-              flipToPage={flipToPage}
-              toggleSketchbook={toggleSketchbook}
-            />,
+            <RoomPage flipToPage={flipToPage} />,
           ][pageIdx]
         }
       </Sketchbook>
