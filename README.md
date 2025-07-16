@@ -56,7 +56,7 @@
 
 ### Prerequisites
 
-- Node.js (v16 or higher)
+- Node.js (v22 or higher)
 - Python (v3.8 or higher)
 - MySQL
 - Redis
