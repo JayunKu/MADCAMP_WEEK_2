@@ -4,6 +4,7 @@ import { RoomRedisService } from '../../config/redis/room-redis.service';
 import { Room, GameMode, Player } from 'src/config/redis/model';
 import { PlayerRedisService } from '../../config/redis/player-redis.service';
 import { RoomGateway } from './room.gateway';
+import { User } from '@prisma/client';
 
 @Injectable()
 export class RoomService {
@@ -69,5 +70,22 @@ export class RoomService {
     this.roomGateway.server.to(roomId).emit('player_left', players);
 
     return players;
+  }
+
+  async getRoomMembers(roomId: string): Promise<User[]> {
+    const players = ((await this.getRoomPlayers(roomId)) as Player[]).filter(
+      (player) => player.is_member,
+    );
+
+    console.log('getRoomMembers players:', players);
+    const members = (await Promise.all(
+      players.map(async (player) => {
+        const user = await this.prismaService.user.findUnique({
+          where: { player_id: player.id },
+        });
+        return user;
+      }),
+    )) as User[];
+    return members;
   }
 }

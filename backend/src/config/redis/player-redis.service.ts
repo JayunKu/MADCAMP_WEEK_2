@@ -17,7 +17,7 @@ export class PlayerRedisService {
       id: playerId,
       name,
       avatar_id: avatarId,
-      is_member: isMember,
+      is_member: isMember ? 1 : 0,
       room_id: null,
     };
 
@@ -43,7 +43,7 @@ export class PlayerRedisService {
       id: playerData.id,
       name: playerData.name,
       avatar_id: playerData.avatar_id ? Number(playerData.avatar_id) : 0,
-      is_member: playerData.is_member === 'true',
+      is_member: playerData.is_member === '1' ? 1 : 0,
       room_id: playerData.room_id || null,
     };
   }
@@ -60,13 +60,17 @@ export class PlayerRedisService {
       if (value === undefined || value === null) continue;
 
       switch (key) {
-        case 'is_member':
-          await this.redisService.hSet(playerKey, key, value.toString());
-          break;
         case 'id':
         case 'room_id':
         case 'name':
           await this.redisService.hSet(playerKey, key, value as string);
+          break;
+        case 'is_member':
+          await this.redisService.hSet(
+            playerKey,
+            key,
+            (value as number) ? '1' : '0',
+          );
           break;
         case 'avatar_id':
           await this.redisService.hSet(
@@ -98,7 +102,7 @@ export class PlayerRedisService {
           id: playerData.id,
           name: playerData.name,
           avatar_id: playerData.avatar_id ? Number(playerData.avatar_id) : 0,
-          is_member: playerData.is_member === 'true',
+          is_member: playerData.is_member === '1' ? 1 : 0,
           room_id: playerData.room_id || null,
         };
         players.push(player);

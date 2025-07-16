@@ -11,7 +11,7 @@ export class CommonPlayerResponseDto {
     this.id = player.id;
     this.name = player.name;
     this.avatar_id = player.avatar_id;
-    this.is_member = player.is_member;
+    this.is_member = player.is_member === 1;
     this.room_id = player.room_id;
   }
 }

@@ -13,6 +13,7 @@ import { useUI } from '../../context/UIContext';
 import { useNavigate } from 'react-router-dom';
 import { axiosInstance } from '../../hooks/useAxios';
 import { useSocketContext } from '../../context/SocketContext';
+import { User } from '../../types/user';
 
 const MAX_PLAYER_PER_ROOM = 8; // 최대 플레이어 수
 
@@ -31,12 +32,26 @@ export const RoomPage = ({ flipToPage, toggleSketchbook }: RoomPageProps) => {
   const [isRoomHost, setIsRoomHost] = useState(false);
   const [selectedGameMode, setSelectedGameMode] = useState(GameMode.BASIC);
 
+  const [membersInfo, setMembersInfo] = useState<User[]>([]);
+
   useEffect(() => {
     if (!room || !player) return;
     console.log('Room updated:', room);
 
     setIsRoomHost(room.hostPlayerId === player.id);
     setSelectedGameMode(room.gameMode);
+
+    const fetchMembersInfo = async () => {
+      try {
+        const res = (await axiosInstance.get(`/rooms/${room.id}/members`)).data;
+        console.log('Members info fetched:', res);
+        setMembersInfo(res.members);
+      } catch (err) {
+        console.error('Failed to fetch members info:', err);
+        alert('방 멤버 정보를 불러오는 데 실패했습니다. 다시 시도해주세요.');
+      }
+    };
+    fetchMembersInfo();
   }, [room]);
 
   const onGameModeChangeHandler = async (mode: GameMode) => {
@@ -132,10 +147,10 @@ export const RoomPage = ({ flipToPage, toggleSketchbook }: RoomPageProps) => {
   };
 
   useEffect(() => {
-    setLoading(!room || !roomPlayers || !player);
-  }, [room, roomPlayers, player]);
+    setLoading(!room || !roomPlayers || !player || !membersInfo);
+  }, [room, roomPlayers, player, membersInfo]);
 
-  if (!room || !roomPlayers || !player) return <></>;
+  if (!room || !roomPlayers || !player || !membersInfo) return <></>;
 
   return (
     <>
@@ -156,8 +171,18 @@ export const RoomPage = ({ flipToPage, toggleSketchbook }: RoomPageProps) => {
                 isMember={roomPlayer.isMember}
                 username={roomPlayer.name}
                 avatarType={getAvatarTypeFromId(roomPlayer.avatarId)}
-                totalGames={10} // 임시 데이터
-                totalWins={5} // 임시 데이터
+                totalGames={
+                  roomPlayer.isMember
+                    ? membersInfo.find(user => user.playerId === roomPlayer.id)
+                        ?.totalGames || undefined
+                    : undefined
+                }
+                totalWins={
+                  roomPlayer.isMember
+                    ? membersInfo.find(user => user.playerId === roomPlayer.id)
+                        ?.totalWins || undefined
+                    : undefined
+                }
                 onMakeHost={() => {
                   onMakeHostButtonHandler(roomPlayer.id);
                 }}

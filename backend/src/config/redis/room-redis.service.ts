@@ -302,8 +302,7 @@ export class RoomRedisService {
           id: playerData.id,
           name: playerData.name,
           avatar_id: playerData.avatar_id ? Number(playerData.avatar_id) : 0,
-          is_member:
-            playerData.is_member === true || playerData.is_member === 'true',
+          is_member: playerData.is_member === '1' ? 1 : 0,
           room_id: playerData.room_id || null,
         });
       } catch (e) {

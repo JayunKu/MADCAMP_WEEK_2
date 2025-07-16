@@ -40,6 +40,6 @@ export interface Player {
   id: string;
   name: string;
   avatar_id: number;
-  is_member: boolean;
+  is_member: number;
   room_id: string | null;
 }
