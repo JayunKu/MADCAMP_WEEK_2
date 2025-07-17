@@ -10,10 +10,8 @@ import { Spacer } from '../../components/Spacer';
 import { useEffect, useState } from 'react';
 import { GameMode } from '../../types/game';
 import { useUI } from '../../context/UIContext';
-import { useNavigate } from 'react-router-dom';
 import { axiosInstance } from '../../hooks/useAxios';
 import { useSocketContext } from '../../context/SocketContext';
-import { User } from '../../types/user';
 
 const MAX_PLAYER_PER_ROOM = 8; // 최대 플레이어 수
 

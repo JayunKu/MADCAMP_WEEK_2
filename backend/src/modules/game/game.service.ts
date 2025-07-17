@@ -23,21 +23,21 @@ export class GameService {
   async startGame(roomId: string, gameMode: GameMode): Promise<void> {
     const roomPlayers = await this.roomRedisService.getRoomPlayers(roomId);
 
-    // randomize room players
-    const randomizedPlayers = roomPlayers.sort(() => Math.random() - 0.5);
+    // 최초 전체 셔플 (응답 순서용)
+    const randomizedPlayers = [...roomPlayers].sort(() => Math.random() - 0.5);
+    const firstPlayer = randomizedPlayers[0];
 
-    // 첫 번째 플레이어를 제외한 배열 생성
-    const playersExcludingFirst = randomizedPlayers.slice(1);
+    const fakerCount = Math.round(randomizedPlayers.length / 3);
 
-    const fakerCount = Math.round(playersExcludingFirst.length / 3);
-    const reRandomizedPlayers = playersExcludingFirst.sort(
-      () => Math.random() - 0.5,
-    );
-    const fakerPlayers = reRandomizedPlayers.slice(0, fakerCount);
+    let reRandomizedPlayers: typeof roomPlayers;
+    let fakerPlayers: typeof roomPlayers = [];
+
+    do {
+      reRandomizedPlayers = [...roomPlayers].sort(() => Math.random() - 0.5);
+      fakerPlayers = reRandomizedPlayers.slice(0, fakerCount);
+    } while (fakerPlayers.find((p) => p.id === firstPlayer.id)); // ✅ 첫번째 플레이어가 faker면 다시 섞음
+
     const keeperPlayers = reRandomizedPlayers.slice(fakerCount);
-
-    // 첫 번째 플레이어를 keeperPlayers에 추가
-    keeperPlayers.push(randomizedPlayers[0]);
 
     this.roomRedisService.updateRoom(roomId, {
       game_mode: gameMode,

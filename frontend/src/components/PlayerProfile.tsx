@@ -56,7 +56,7 @@ export const PlayerProfile = ({
         <AvatarFrame avatarType={avatarType} size="small" />
         <div>
           <p style={{ fontSize: '15px' }}>{username}</p>
-          {isMember && (
+          {isMember ? (
             <p
               style={{
                 fontSize: '9px',
@@ -66,7 +66,7 @@ export const PlayerProfile = ({
             >
               회원
             </p>
-          )}
+          ) : null}
         </div>
       </PlayerProfileContainer>
       {showTools && (
